@@ -1,0 +1,222 @@
+{
+  "question": "Explain price elasticity of demand. Illustrate your answer with an example.",
+  "rubric": [
+    {
+      "name": "Definition",
+      "description": "States PED as the percentage change in quantity demanded divided by the percentage change in price (percentage/proportionate method).",
+      "maxMarks": 2
+    },
+    {
+      "name": "Application",
+      "description": "Applies the concept correctly with numbers or a concrete example, distinguishing elastic (>1) from inelastic (<1) demand.",
+      "maxMarks": 2
+    },
+    {
+      "name": "Interpretation",
+      "description": "Explains what elasticity implies: responsiveness, its determinants (substitutes, necessity), or a pricing/revenue implication.",
+      "maxMarks": 2
+    }
+  ],
+  "responses": [
+    {
+      "id": "R01",
+      "text": "Price elasticity of demand measures the percentage change in quantity demanded divided by the percentage change in price. If a 10% price rise cuts demand for movie tickets by 20%, PED = 2, which is elastic. Necessities like salt are inelastic since demand barely changes."
+    },
+    {
+      "id": "R02",
+      "text": "PED is the percentage change in quantity demanded divided by percentage change in price."
+    },
+    {
+      "id": "R03",
+      "text": "If price increases by Rs 10 and demand falls by 50 units, then elasticity is 50 units."
+    },
+    {
+      "id": "R04",
+      "text": "PED = %change in Qd / %change in P. It shows how responsive buyers are to price. Luxury goods like branded shoes are elastic (PED above 1) because people can postpone or switch; medicines are inelastic since patients must buy anyway."
+    },
+    {
+      "id": "R05",
+      "text": "When Maggi price increased people shifted to Yippee, showing demand is elastic for such products."
+    },
+    {
+      "id": "R06",
+      "text": "It is the responsiveness of quantity demanded to a change in price, measured in percentage terms. Example: if petrol price rises 10% and demand falls only 2%, elasticity is 0.2, inelastic, because there are few substitutes."
+    },
+    {
+      "id": "R07",
+      "text": "Price elasticity of demand is the law that when price increases demand decreases and when price decreases demand increases."
+    },
+    {
+      "id": "R08",
+      "text": "Elasticity of demand means how much demand changes when price changes, calculated in percentage terms."
+    },
+    {
+      "id": "R09",
+      "text": "Elasticity of demand = percentage change in demand / percentage change in price. A value above 1 means elastic, e.g. restaurant meals, where a small price hike makes many customers cook at home. Below 1 is inelastic, like electricity."
+    },
+    {
+      "id": "R10",
+      "text": "Elasticity is simply the change in quantity: when the price of a pen rose by 2 rupees, demand fell by 30 pens, so PED = 30."
+    },
+    {
+      "id": "R11",
+      "text": "PED tells us by what percent demand changes when price changes by one percent. Cold drinks: a 5% price rise and 15% demand fall gives PED 3, highly elastic because Pepsi can replace Coke easily."
+    },
+    {
+      "id": "R12",
+      "text": "It is %ΔQd / %ΔP. Elastic goods have elasticity more than 1."
+    },
+    {
+      "id": "R13",
+      "text": "For salt, even if price rises we buy the same amount. For an AC, if price rises a lot fewer people buy. This difference between goods is elasticity."
+    },
+    {
+      "id": "R14",
+      "text": "Defined as percentage change in quantity demanded over percentage change in price. Salt is the classic inelastic example: even if price doubles, families buy nearly the same amount, so revenue rises when price rises."
+    },
+    {
+      "id": "R15",
+      "text": "Elasticity is the slope of the demand curve; a steeper demand curve always means more elastic demand."
+    },
+    {
+      "id": "R16",
+      "text": "It measures sensitivity of demand to price in percentage terms. Elastic (above 1): demand changes more than price, like air travel for tourists. Inelastic (below 1): less than price, like insulin. Firms use it to set prices."
+    },
+    {
+      "id": "R17",
+      "text": "Price elasticity = proportionate change in demand over proportionate change in price. Example: luxury goods."
+    },
+    {
+      "id": "R18",
+      "text": "%ΔQ / %ΔP. Suppose a phone brand raises price 8% and sales drop 16%: PED = 2, elastic, so the price rise reduces revenue. That is why competitive goods rarely raise prices."
+    },
+    {
+      "id": "R19",
+      "text": "PED = fall in demand divided by rise in price = 40 units / Rs 5 = 8."
+    },
+    {
+      "id": "R20",
+      "text": "Formula is percentage change in demand upon percentage change in price. I don't remember the interpretation part."
+    },
+    {
+      "id": "R21",
+      "text": "Price elasticity of demand is how much quantity demanded responds to price changes, in percentages. Example: a 20% discount raising ice-cream sales by 60% gives PED of 3; substitutes and non-necessity make it elastic."
+    },
+    {
+      "id": "R22",
+      "text": "Elasticity means demand and price move in opposite directions. Example: price up, demand down. That is what elasticity states."
+    },
+    {
+      "id": "R23",
+      "text": "PED measures responsiveness of demand to price. Formula: %change in Q divided by %change in P."
+    },
+    {
+      "id": "R24",
+      "text": "The ratio of proportionate change in quantity demanded to proportionate change in price. Textbook example: wheat is inelastic as it is a staple; designer bags are elastic because buyers can delay purchase."
+    },
+    {
+      "id": "R25",
+      "text": "If a 10% fee hike makes many students leave a coaching class, its demand is elastic. Didn't write the formula."
+    },
+    {
+      "id": "R26",
+      "text": "PED = percentage fall in demand / percentage rise in price. If bus fare rises 10% and ridership falls 5%, PED is 0.5, inelastic since commuters have few options. So the transport company earns more."
+    },
+    {
+      "id": "R27",
+      "text": "Elasticity means how many units of demand change per rupee change in price, like 15 units per rupee."
+    },
+    {
+      "id": "R28",
+      "text": "It is the ratio of % change in quantity demanded to % change in price of the good."
+    },
+    {
+      "id": "R29",
+      "text": "It quantifies buyer responsiveness: %change in Qd divided by %change in P. Cinema tickets in a city with many OTT options are elastic; life-saving drugs are inelastic. This interpretation guides pricing power."
+    },
+    {
+      "id": "R30",
+      "text": "Petrol demand doesn't fall much when price rises because we need it daily. That means inelastic demand."
+    },
+    {
+      "id": "R31",
+      "text": "Measures percentage change in quantity demanded per percentage change in price. Elastic demand (above 1) means total revenue falls when price rises; inelastic (below 1) means revenue rises. Raising milk price slightly won't cut sales much."
+    },
+    {
+      "id": "R32",
+      "text": "A flatter line has less elasticity because slope is small; elasticity and slope are basically the same thing."
+    },
+    {
+      "id": "R33",
+      "text": "Elasticity shows sensitivity of consumers to price, found by dividing percent change in demand by percent change in price."
+    },
+    {
+      "id": "R34",
+      "text": "PED shows the strength of the law of demand in percentage terms: how strongly quantity reacts. Gold jewellery is elastic since purchases are postponable, matchboxes are inelastic being a cheap necessity with a tiny share of income."
+    },
+    {
+      "id": "R35",
+      "text": "Elasticity of demand tells how flexible demand is with respect to price. Higher elasticity means demand is more flexible."
+    },
+    {
+      "id": "R36",
+      "text": "The bigger the drop in units sold, the bigger the elasticity. If sales drop 500 units it is highly elastic no matter the price."
+    },
+    {
+      "id": "R37",
+      "text": "Percentage method: PED = (%ΔQd)/(%ΔP). A 10% rise in coaching fees reducing enrolments by 25% gives 2.5, elastic, because students can switch institutes. Institutes with unique results face lower elasticity."
+    },
+    {
+      "id": "R38",
+      "text": "It indicates whether demand is sensitive or not sensitive to price. Sensitive means elastic and not sensitive means inelastic."
+    },
+    {
+      "id": "R39",
+      "text": "PED is percentage change in price divided by percentage change in quantity demanded, so if price changes 10% and quantity 20%, elasticity is 0.5."
+    },
+    {
+      "id": "R40",
+      "text": "It's the degree of responsiveness of demand to a price change, measured by comparing percentage changes. E.g. a 4% price rise with a 2% demand fall gives 0.5, inelastic; happens for necessities with no close substitutes."
+    },
+    {
+      "id": "R41",
+      "text": "Demand responsiveness to price change is called elasticity; it depends on substitutes and the nature of the good."
+    },
+    {
+      "id": "R42",
+      "text": "PED = %ΔQ/%ΔP. If price changes 5% and quantity changes 10%, PED = 2."
+    },
+    {
+      "id": "R43",
+      "text": "Elasticity = %change in demand ÷ %change in price; sign ignored. Above 1 elastic, exactly 1 unitary, below 1 inelastic. Example: onions are surprisingly inelastic in India since meals need them regardless."
+    },
+    {
+      "id": "R44",
+      "text": "PED explains the inverse relationship between price and quantity demanded as per the demand curve."
+    },
+    {
+      "id": "R45",
+      "text": "%change in quantity / %change in price. Eg 20%/10% = 2."
+    },
+    {
+      "id": "R46",
+      "text": "PED tells the degree to which price affects the demand of a commodity in the market."
+    },
+    {
+      "id": "R47",
+      "text": "Elasticity = (ΔQ/Q) ÷ (ΔP/P). For 100 to 90 units when price goes 50 to 55, it is (-10%) ÷ (10%) = -1, take absolute value 1, unitary."
+    },
+    {
+      "id": "R48",
+      "text": "PED compares the % change in units demanded to the % change in price. Example: OTT subscription price up 15%, subscribers down 30%, PED = 2, elastic due to many rival platforms; the firm should reconsider the hike."
+    },
+    {
+      "id": "R49",
+      "text": "Using the percentage method: quantity falls 8% when price rises 4%, so elasticity is 2 for this good."
+    },
+    {
+      "id": "R50",
+      "text": "It measures how the quantity demanded of a good responds to a change in its price, expressed as the ratio of percentage changes. Example: a 10% rise in taxi fares cutting rides 18% gives PED 1.8; riders switch to the metro, so demand is elastic."
+    }
+  ]
+}

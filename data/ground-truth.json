@@ -1,0 +1,202 @@
+{
+  "R01": {
+    "label": "correct",
+    "note": ""
+  },
+  "R02": {
+    "label": "partial",
+    "note": "Definition only"
+  },
+  "R03": {
+    "label": "misconception",
+    "note": "Absolute change instead of percentage"
+  },
+  "R04": {
+    "label": "correct",
+    "note": ""
+  },
+  "R05": {
+    "label": "partial",
+    "note": "Example only, no formula"
+  },
+  "R06": {
+    "label": "correct",
+    "note": ""
+  },
+  "R07": {
+    "label": "misconception",
+    "note": "Confuses elasticity with the law of demand"
+  },
+  "R08": {
+    "label": "partial",
+    "note": "Loose definition only"
+  },
+  "R09": {
+    "label": "correct",
+    "note": ""
+  },
+  "R10": {
+    "label": "misconception",
+    "note": "Absolute change instead of percentage"
+  },
+  "R11": {
+    "label": "correct",
+    "note": ""
+  },
+  "R12": {
+    "label": "partial",
+    "note": "Definition plus threshold, no application or interpretation"
+  },
+  "R13": {
+    "label": "partial",
+    "note": "Example only"
+  },
+  "R14": {
+    "label": "correct",
+    "note": ""
+  },
+  "R15": {
+    "label": "misconception",
+    "note": "Slope confusion"
+  },
+  "R16": {
+    "label": "correct",
+    "note": ""
+  },
+  "R17": {
+    "label": "partial",
+    "note": "Definition, example only named"
+  },
+  "R18": {
+    "label": "correct",
+    "note": ""
+  },
+  "R19": {
+    "label": "misconception",
+    "note": "Units-based, absolute change"
+  },
+  "R20": {
+    "label": "partial",
+    "note": "Definition only, admits gap"
+  },
+  "R21": {
+    "label": "correct",
+    "note": ""
+  },
+  "R22": {
+    "label": "misconception",
+    "note": "Confuses elasticity with the law of demand"
+  },
+  "R23": {
+    "label": "partial",
+    "note": "Definition only"
+  },
+  "R24": {
+    "label": "correct",
+    "note": ""
+  },
+  "R25": {
+    "label": "partial",
+    "note": "Example only"
+  },
+  "R26": {
+    "label": "correct",
+    "note": ""
+  },
+  "R27": {
+    "label": "misconception",
+    "note": "Absolute change instead of percentage"
+  },
+  "R28": {
+    "label": "partial",
+    "note": "Definition only"
+  },
+  "R29": {
+    "label": "correct",
+    "note": ""
+  },
+  "R30": {
+    "label": "partial",
+    "note": "Example only, no formula"
+  },
+  "R31": {
+    "label": "correct",
+    "note": ""
+  },
+  "R32": {
+    "label": "misconception",
+    "note": "Slope confusion"
+  },
+  "R33": {
+    "label": "partial",
+    "note": "Definition only"
+  },
+  "R34": {
+    "label": "partial",
+    "note": "Good examples and interpretation, but no explicit percentage formula"
+  },
+  "R35": {
+    "label": "partial",
+    "note": "Vague responsiveness only"
+  },
+  "R36": {
+    "label": "misconception",
+    "note": "Absolute change instead of percentage"
+  },
+  "R37": {
+    "label": "correct",
+    "note": ""
+  },
+  "R38": {
+    "label": "partial",
+    "note": "Vague, no formula or example"
+  },
+  "R39": {
+    "label": "misconception",
+    "note": "Inverted formula"
+  },
+  "R40": {
+    "label": "correct",
+    "note": ""
+  },
+  "R41": {
+    "label": "partial",
+    "note": "Vague definition, determinants named"
+  },
+  "R42": {
+    "label": "partial",
+    "note": "Calculation without interpretation"
+  },
+  "R43": {
+    "label": "correct",
+    "note": ""
+  },
+  "R44": {
+    "label": "misconception",
+    "note": "Confuses elasticity with the law of demand"
+  },
+  "R45": {
+    "label": "partial",
+    "note": "Bare calculation"
+  },
+  "R46": {
+    "label": "partial",
+    "note": "Vague definition only"
+  },
+  "R47": {
+    "label": "partial",
+    "note": "Correct calc, no interpretation of meaning"
+  },
+  "R48": {
+    "label": "correct",
+    "note": ""
+  },
+  "R49": {
+    "label": "partial",
+    "note": "Calculation without definition or interpretation"
+  },
+  "R50": {
+    "label": "correct",
+    "note": ""
+  }
+}

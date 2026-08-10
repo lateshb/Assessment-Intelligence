@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/*
+ * This app is a fixed light-theme design (white cards, navy text on a light
+ * lavender canvas). The base tokens below match that design so no element can
+ * inherit a broken colour. We intentionally opt OUT of OS dark-mode inversion:
+ * `color-scheme: light` keeps form controls (inputs, scrollbars) light, and we
+ * do not override the tokens under `prefers-color-scheme: dark`.
+ */
+:root {
+  --background: #f4f6fc;
+  --foreground: #1d2140;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}

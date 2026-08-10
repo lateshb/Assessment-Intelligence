@@ -1,0 +1,809 @@
+{
+  "perResponse": [
+    {
+      "id": "R01",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "Price elasticity of demand measures the percentage change in quantity demanded divided by the percentage",
+      "confidence": 0.93,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R02",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "PED is the percentage change in quantity demanded divided by percentage change in price.",
+      "confidence": 0.72,
+      "criterionScores": [
+        1,
+        0,
+        0
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R03",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Confuses elasticity with absolute change in quantity",
+      "evidence": "If price increases by Rs 10 and demand falls by 50 units, then elasticity is 50 units.",
+      "confidence": 0.84,
+      "criterionScores": [
+        0,
+        0,
+        0
+      ],
+      "draftMark": 0
+    },
+    {
+      "id": "R04",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "PED = %change in Qd / %change in P. It shows how responsive buyers are to price. Luxury goods like branded",
+      "confidence": 0.94,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R05",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "When Maggi price increased people shifted to Yippee, showing demand is elastic for such products.",
+      "confidence": 0.73,
+      "criterionScores": [
+        0,
+        0.5,
+        0.5
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R06",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "It is the responsiveness of quantity demanded to a change in price, measured in percentage terms. Example: if",
+      "confidence": 0.88,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R07",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Confuses elasticity with the law of demand",
+      "evidence": "Price elasticity of demand is the law that when price increases demand decreases and when price decreases",
+      "confidence": 0.92,
+      "criterionScores": [
+        0,
+        0,
+        0
+      ],
+      "draftMark": 0
+    },
+    {
+      "id": "R08",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "Elasticity of demand means how much demand changes when price changes, calculated in percentage terms.",
+      "confidence": 0.74,
+      "criterionScores": [
+        1,
+        0,
+        0
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R09",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "Elasticity of demand = percentage change in demand / percentage change in price. A value above 1 means",
+      "confidence": 0.89,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R10",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Confuses elasticity with absolute change in quantity",
+      "evidence": "Elasticity is simply the change in quantity: when the price of a pen rose by 2 rupees, demand fell by 30",
+      "confidence": 0.83,
+      "criterionScores": [
+        0,
+        0,
+        0
+      ],
+      "draftMark": 0
+    },
+    {
+      "id": "R11",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "PED tells us by what percent demand changes when price changes by one percent. Cold drinks: a 5% price rise",
+      "confidence": 0.93,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R12",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "It is %ΔQd / %ΔP. Elastic goods have elasticity more than 1.",
+      "confidence": 0.72,
+      "criterionScores": [
+        1,
+        0,
+        0
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R13",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "For salt, even if price rises we buy the same amount. For an AC, if price rises a lot fewer people buy. This",
+      "confidence": 0.69,
+      "criterionScores": [
+        0,
+        0.5,
+        0.5
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R14",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "Defined as percentage change in quantity demanded over percentage change in price. Salt is the classic",
+      "confidence": 0.94,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R15",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Confuses elasticity with the slope of the demand curve",
+      "evidence": "Elasticity is the slope of the demand curve; a steeper demand curve always means more elastic demand.",
+      "confidence": 0.88,
+      "criterionScores": [
+        0.5,
+        0,
+        0
+      ],
+      "draftMark": 1
+    },
+    {
+      "id": "R16",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "It measures sensitivity of demand to price in percentage terms. Elastic (above 1): demand changes more than",
+      "confidence": 0.88,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R17",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "Price elasticity = proportionate change in demand over proportionate change in price. Example: luxury goods.",
+      "confidence": 0.77,
+      "criterionScores": [
+        0,
+        0.5,
+        0.5
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R18",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "%ΔQ / %ΔP. Suppose a phone brand raises price 8% and sales drop 16%: PED = 2, elastic, so the price rise",
+      "confidence": 0.92,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R19",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Confuses elasticity with absolute change in quantity",
+      "evidence": "PED = fall in demand divided by rise in price = 40 units / Rs 5 = 8.",
+      "confidence": 0.86,
+      "criterionScores": [
+        0,
+        0,
+        0
+      ],
+      "draftMark": 0
+    },
+    {
+      "id": "R20",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "Formula is percentage change in demand upon percentage change in price. I don't remember the interpretation",
+      "confidence": 0.68,
+      "criterionScores": [
+        1,
+        0,
+        0
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R21",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "Price elasticity of demand is how much quantity demanded responds to price changes, in percentages. Example:",
+      "confidence": 0.93,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R22",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Confuses elasticity with the law of demand",
+      "evidence": "Elasticity means demand and price move in opposite directions. Example: price up, demand down. That is what",
+      "confidence": 0.87,
+      "criterionScores": [
+        0,
+        0,
+        0
+      ],
+      "draftMark": 0
+    },
+    {
+      "id": "R23",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "PED measures responsiveness of demand to price. Formula: %change in Q divided by %change in P.",
+      "confidence": 0.69,
+      "criterionScores": [
+        1,
+        0,
+        0
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R24",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "The ratio of proportionate change in quantity demanded to proportionate change in price. Textbook example:",
+      "confidence": 0.94,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R25",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "If a 10% fee hike makes many students leave a coaching class, its demand is elastic. Didn't write the formula.",
+      "confidence": 0.73,
+      "criterionScores": [
+        0,
+        0.5,
+        0.5
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R26",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "PED = percentage fall in demand / percentage rise in price. If bus fare rises 10% and ridership falls 5%, PED",
+      "confidence": 0.88,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R27",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Confuses elasticity with absolute change in quantity",
+      "evidence": "Elasticity means how many units of demand change per rupee change in price, like 15 units per rupee.",
+      "confidence": 0.92,
+      "criterionScores": [
+        0,
+        0,
+        0
+      ],
+      "draftMark": 0
+    },
+    {
+      "id": "R28",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "It is the ratio of % change in quantity demanded to % change in price of the good.",
+      "confidence": 0.74,
+      "criterionScores": [
+        1,
+        0,
+        0
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R29",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "It quantifies buyer responsiveness: %change in Qd divided by %change in P. Cinema tickets in a city with many",
+      "confidence": 0.89,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R30",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "Petrol demand doesn't fall much when price rises because we need it daily. That means inelastic demand.",
+      "confidence": 0.68,
+      "criterionScores": [
+        0,
+        0.5,
+        0.5
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R31",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "Measures percentage change in quantity demanded per percentage change in price. Elastic demand (above 1)",
+      "confidence": 0.93,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R32",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Confuses elasticity with the slope of the demand curve",
+      "evidence": "A flatter line has less elasticity because slope is small; elasticity and slope are basically the same thing.",
+      "confidence": 0.87,
+      "criterionScores": [
+        0.5,
+        0,
+        0
+      ],
+      "draftMark": 1
+    },
+    {
+      "id": "R33",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "Elasticity shows sensitivity of consumers to price, found by dividing percent change in demand by percent",
+      "confidence": 0.69,
+      "criterionScores": [
+        1,
+        0,
+        0
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R34",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "PED shows the strength of the law of demand in percentage terms: how strongly quantity reacts. Gold jewellery",
+      "confidence": 0.76,
+      "criterionScores": [
+        0.5,
+        1,
+        1
+      ],
+      "draftMark": 5
+    },
+    {
+      "id": "R35",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "Elasticity of demand tells how flexible demand is with respect to price. Higher elasticity means demand is",
+      "confidence": 0.73,
+      "criterionScores": [
+        0.5,
+        0,
+        0
+      ],
+      "draftMark": 1
+    },
+    {
+      "id": "R36",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Confuses elasticity with absolute change in quantity",
+      "evidence": "The bigger the drop in units sold, the bigger the elasticity. If sales drop 500 units it is highly elastic no",
+      "confidence": 0.85,
+      "criterionScores": [
+        0,
+        0,
+        0
+      ],
+      "draftMark": 0
+    },
+    {
+      "id": "R37",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "Percentage method: PED = (%ΔQd)/(%ΔP). A 10% rise in coaching fees reducing enrolments by 25% gives 2.5,",
+      "confidence": 0.95,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R38",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "It indicates whether demand is sensitive or not sensitive to price. Sensitive means elastic and not sensitive",
+      "confidence": 0.74,
+      "criterionScores": [
+        0.5,
+        0,
+        0
+      ],
+      "draftMark": 1
+    },
+    {
+      "id": "R39",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Inverts the elasticity formula",
+      "evidence": "PED is percentage change in price divided by percentage change in quantity demanded, so if price changes 10%",
+      "confidence": 0.86,
+      "criterionScores": [
+        0.5,
+        0.5,
+        0
+      ],
+      "draftMark": 2
+    },
+    {
+      "id": "R40",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "It's the degree of responsiveness of demand to a price change, measured by comparing percentage changes. E.g.",
+      "confidence": 0.86,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R41",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "Demand responsiveness to price change is called elasticity; it depends on substitutes and the nature of the",
+      "confidence": 0.75,
+      "criterionScores": [
+        0.5,
+        0,
+        0
+      ],
+      "draftMark": 1
+    },
+    {
+      "id": "R42",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "PED = %ΔQ/%ΔP. If price changes 5% and quantity changes 10%, PED = 2.",
+      "confidence": 0.72,
+      "criterionScores": [
+        1,
+        1,
+        0
+      ],
+      "draftMark": 4
+    },
+    {
+      "id": "R43",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "Elasticity = %change in demand ÷ %change in price; sign ignored. Above 1 elastic, exactly 1 unitary, below 1",
+      "confidence": 0.87,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R44",
+      "category": "misconception",
+      "modelCategory": "misconception",
+      "misconception": "Confuses elasticity with the law of demand",
+      "evidence": "PED explains the inverse relationship between price and quantity demanded as per the demand curve.",
+      "confidence": 0.91,
+      "criterionScores": [
+        0,
+        0,
+        0
+      ],
+      "draftMark": 0
+    },
+    {
+      "id": "R45",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "%change in quantity / %change in price. Eg 20%/10% = 2.",
+      "confidence": 0.73,
+      "criterionScores": [
+        1,
+        1,
+        0
+      ],
+      "draftMark": 4
+    },
+    {
+      "id": "R46",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "PED tells the degree to which price affects the demand of a commodity in the market.",
+      "confidence": 0.7,
+      "criterionScores": [
+        0.5,
+        0,
+        0
+      ],
+      "draftMark": 1
+    },
+    {
+      "id": "R47",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "Elasticity = (ΔQ/Q) ÷ (ΔP/P). For 100 to 90 units when price goes 50 to 55, it is (-10%) ÷ (10%) = -1, take",
+      "confidence": 0.77,
+      "criterionScores": [
+        1,
+        1,
+        0
+      ],
+      "draftMark": 4
+    },
+    {
+      "id": "R48",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "PED compares the % change in units demanded to the % change in price. Example: OTT subscription price up 15%,",
+      "confidence": 0.92,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    },
+    {
+      "id": "R49",
+      "category": "partial",
+      "modelCategory": "partial",
+      "misconception": null,
+      "evidence": "Using the percentage method: quantity falls 8% when price rises 4%, so elasticity is 2 for this good.",
+      "confidence": 0.71,
+      "criterionScores": [
+        1,
+        1,
+        0
+      ],
+      "draftMark": 4
+    },
+    {
+      "id": "R50",
+      "category": "correct",
+      "modelCategory": "correct",
+      "misconception": null,
+      "evidence": "It measures how the quantity demanded of a good responds to a change in its price, expressed as the ratio of",
+      "confidence": 0.86,
+      "criterionScores": [
+        1,
+        1,
+        1
+      ],
+      "draftMark": 6
+    }
+  ],
+  "clusters": [
+    {
+      "label": "Confuses elasticity with absolute change in quantity",
+      "explanation": "These students compute elasticity using raw units or rupees (e.g. “demand fell by 50 units, so elasticity is 50”). They have missed that elasticity compares PERCENTAGE changes, which is what makes it comparable across goods and prices.",
+      "responseIds": [
+        "R03",
+        "R10",
+        "R19",
+        "R27",
+        "R36"
+      ],
+      "avgConfidence": 0.86
+    },
+    {
+      "label": "Confuses elasticity with the law of demand",
+      "explanation": "These students restate that price and quantity move in opposite directions. That is the law of demand (direction). Elasticity measures HOW MUCH quantity responds, in percentage terms, not merely which way it moves.",
+      "responseIds": [
+        "R07",
+        "R22",
+        "R44"
+      ],
+      "avgConfidence": 0.9
+    },
+    {
+      "label": "Confuses elasticity with the slope of the demand curve",
+      "explanation": "These students treat the steepness of the demand curve as elasticity itself. Slope depends on units and stays constant on a straight line, while elasticity uses percentage changes and varies along the curve.",
+      "responseIds": [
+        "R15",
+        "R32"
+      ],
+      "avgConfidence": 0.88
+    },
+    {
+      "label": "Inverts the elasticity formula",
+      "explanation": "This answer divides the percentage change in price by the percentage change in quantity, upside down. The inverted ratio flips elastic and inelastic classifications, so every pricing conclusion drawn from it reverses.",
+      "responseIds": [
+        "R39"
+      ],
+      "avgConfidence": 0.86
+    }
+  ],
+  "gapMap": [
+    {
+      "criterion": "Definition",
+      "masteryPct": 66,
+      "level": "warning"
+    },
+    {
+      "criterion": "Application",
+      "masteryPct": 52,
+      "level": "warning"
+    },
+    {
+      "criterion": "Interpretation",
+      "masteryPct": 43,
+      "level": "critical"
+    }
+  ],
+  "recommendation": {
+    "type": "Targeted revision session: interpreting elasticity",
+    "durationMin": 15,
+    "targetDescription": "The 32 students with partial understanding or an active misconception, prioritising the 5 who confuse elasticity with absolute change",
+    "targetIds": [
+      "R02",
+      "R03",
+      "R05",
+      "R07",
+      "R08",
+      "R10",
+      "R12",
+      "R13",
+      "R15",
+      "R17",
+      "R19",
+      "R20",
+      "R22",
+      "R23",
+      "R25",
+      "R27",
+      "R28",
+      "R30",
+      "R32",
+      "R33",
+      "R34",
+      "R35",
+      "R36",
+      "R38",
+      "R39",
+      "R41",
+      "R42",
+      "R44",
+      "R45",
+      "R46",
+      "R47",
+      "R49"
+    ],
+    "rationale": "Interpretation is the weakest rubric criterion at 43% class mastery, and the dominant misconception (“Confuses elasticity with absolute change in quantity”, 5 students) directly attacks it. A short focused session on percentage-based interpretation with one worked contrast (units vs percentages) addresses both at once.",
+    "followUp": "5-question diagnostic on interpretation within 3 days; re-run this analysis on the results."
+  },
+  "meta": {
+    "model": "cached-demo (generated from curated ground truth)",
+    "latencyMs": 0,
+    "disclaimer": "AI-generated analysis. All marks are drafts. A teacher reviews every decision.",
+    "source": "cached"
+  }
+}
