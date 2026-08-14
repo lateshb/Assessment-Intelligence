@@ -36,3 +36,65 @@
 **Files changed:** 0 source files modified; 16 documentation files created/updated
 
 ---
+
+## T-001: Test framework + baseline regression coverage (2026-08-14)
+
+**Objective:** Establish automated testing infrastructure and baseline coverage for existing business logic.
+
+**What was created:**
+- `vitest.config.ts` — Vitest configuration with jsdom, path aliases, and setup file
+- `src/test/setup.ts` — Test setup (jest-dom matcher registration)
+- `src/lib/__tests__/aggregate.test.ts` — 36 tests covering:
+  - Category preservation (correct, partial, misconception)
+  - Confidence routing (below threshold → needs_review, clamping, non-finite defaults)
+  - Criterion score quantization and draft mark recomputation
+  - Gap map computation and level assignment (critical < 50, warning 50–74, good ≥ 75)
+  - Cluster membership rebuild (deterministic, not trusted from model)
+  - Cluster sorting, average confidence, fallback explanations
+  - Missing model responses → needs_review entries
+  - Hallucinated response IDs filtered out
+  - Response ordering preserved
+  - Recommendation targetId sanitization and fallback defaults
+  - durationMin clamping to 10–25
+  - Meta passthrough
+  - Malformed input handling (empty arrays, non-string IDs, null input)
+- `src/lib/__tests__/prompt.test.ts` — 15 tests covering:
+  - Question, rubric criteria/marks, response IDs/texts included in prompt
+  - Required classification categories present
+  - Low-confidence instruction included
+  - JSON output requirement present
+  - Misconception clustering and recommendation instructions
+  - Evidence/verbatim quoting instruction
+  - Identity inference guardrail
+- `src/components/__tests__/ui.test.ts` — 3 tests for CATEGORY_META labels and CSS classes
+- `src/components/__tests__/Results.test.tsx` — 9 component tests covering:
+  - Total response count displayed
+  - Category counts in summary strip
+  - Gap map criteria names and mastery percentages
+  - Critical gap badges
+  - Misconception cluster cards with evidence quotes
+  - Response detail table toggle interaction
+  - Draft mark labeling
+  - 60% confidence threshold note
+
+**What was installed (devDependencies only):**
+- vitest ^4.1.10
+- @testing-library/react ^16
+- @testing-library/jest-dom ^7
+- @testing-library/user-event ^14
+- @vitejs/plugin-react ^6
+- jsdom ^29
+
+**What was verified:**
+- `npm test` — 63 tests pass across 4 suites
+- `npx tsc --noEmit` — clean, no type errors
+- `npm run build` — compiles successfully, same routes as before
+- No production source files modified
+- No Supabase costs incurred
+
+**Known issues discovered:**
+- `aggregate()` crashes on null raw input (casts null to object). Documented as a future hardening item for T-015. Test documents current behaviour.
+
+**Files changed:** 0 production source files modified; 6 test infrastructure files created; package.json updated with test scripts and devDependencies
+
+---

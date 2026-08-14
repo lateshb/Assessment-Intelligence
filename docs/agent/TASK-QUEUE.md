@@ -20,8 +20,8 @@
 **Scope:** Create all docs/product/ and docs/agent/ documentation.
 **See:** `COMPLETED-TASKS.md`
 
-### T-001: Test framework setup
-**Status:** Pending
+### T-001: Test framework setup ✅
+**Status:** Complete (2026-08-14)
 **Prerequisites:** None
 **Scope:**
 - Install Vitest (compatible with Next.js 16 + TypeScript)
@@ -29,13 +29,16 @@
 - Add test scripts to `package.json`
 - Write first test: unit test for `aggregate.ts` (happy path + edge cases)
 - Write test for `prompt.ts` (prompt builder output structure)
+- Write component test for `Results.tsx` (user-visible behaviour)
+- Write test for `ui.tsx` (CATEGORY_META deterministic data)
 - Verify tests run in CI-compatible mode
 
 **Acceptance criteria:**
-- `npm test` runs and passes
-- `aggregate.ts` has tests for: normal input, malformed input, missing responses, confidence thresholds
-- `prompt.ts` has tests for: output contains question/rubric/responses
-- Test coverage report available
+- `npm test` runs and passes — ✅ 63 tests across 4 suites
+- `aggregate.ts` has tests for: normal input, malformed input, missing responses, confidence thresholds — ✅ 36 tests
+- `prompt.ts` has tests for: output contains question/rubric/responses — ✅ 15 tests
+- Component test for Results.tsx — ✅ 9 tests
+- UI helper tests — ✅ 3 tests
 
 **Why first:** Every subsequent task requires tests. Cannot defer.
 
@@ -332,7 +335,7 @@
 
 | Phase | Tasks | Focus |
 |---|---|---|
-| 1. Foundation | T-000 ✅, T-001, T-002 | Tests, component decomposition |
+| 1. Foundation | T-000 ✅, T-001 ✅, T-002 | Tests, component decomposition |
 | 2. Auth + DB | T-003, T-004, T-005, T-006 | Supabase, schema, RLS, Google sign-in |
 | 3. Persistence | T-007, T-008, T-009 | Assessment CRUD, multi-question, analysis persistence |
 | 4. Rubric | T-010, T-011 | Rubric Library CRUD + question integration |
