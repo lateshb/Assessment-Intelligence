@@ -167,3 +167,48 @@
 **Files changed:** 4 new source files created, 1 refactored (AppFlow.tsx), 2 test files created
 
 ---
+
+## MVP Rubric Library (2026-08-14)
+
+**Objective:** Build a reusable rubric library with CRUD, Apply Rubric to question (snapshot copy), and dedicated /rubric-library page.
+
+**Architecture created:**
+- `src/lib/rubric-library-types.ts` — LibraryRubric entity type, RubricLibraryAction union
+- `src/lib/use-rubric-library.tsx` — Reducer, context provider, validation, sample rubrics
+- `src/components/RubricEditor.tsx` — Reusable criteria editor (shared between library and question)
+- `src/components/RubricPicker.tsx` — Modal with search, course filter, preview, "Use this rubric"
+- `src/components/RubricLibraryPage.tsx` — Full CRUD page (list, create, edit, delete, duplicate)
+- `src/app/rubric-library/page.tsx` — Route page
+
+**Features implemented:**
+- Create / edit / delete / duplicate library rubrics
+- Rubric name, course, description, 2–5 criteria with marks
+- Search by name/course, filter by course
+- My Rubrics / Institution Rubrics tabs (institution is UI placeholder)
+- "Apply Rubric" button in QuestionCard opens RubricPicker
+- Snapshot mechanism: criteria are deep-copied into the question
+- Editing library rubric does NOT alter question's copied rubric
+- Teacher can continue editing the applied rubric inline
+- Reusable RubricEditor extracted from QuestionCard inline editor
+- Navigation link added to header
+- 3 sample rubrics seeded for demo
+
+**Tests created:**
+- `src/lib/__tests__/rubric-library.test.ts` — 20 tests covering:
+  - CREATE_RUBRIC (new id, timestamps, preserves existing)
+  - UPDATE_RUBRIC (name/course, criteria, timestamp, unknown id)
+  - DELETE_RUBRIC (removes, no-op for unknown)
+  - DUPLICATE_RUBRIC (copy suffix, new id, independent criteria, unknown id)
+  - Snapshot isolation (library edit ≠ question change, question edit ≠ library change)
+  - Validation (name, course, criteria count 2–5, criterion name, maxMarks ≥ 1)
+
+**What was verified:**
+- `npm test` — 143 tests pass across 7 suites (20 new + 123 existing)
+- `npx tsc --noEmit` — clean
+- `npm run build` — success, new /rubric-library route appears
+- No existing tests broken
+- No Supabase costs incurred
+
+**Files changed:** 6 new files created, 3 modified (layout.tsx, QuestionCard.tsx, AssessmentWorkspace.test.tsx)
+
+---

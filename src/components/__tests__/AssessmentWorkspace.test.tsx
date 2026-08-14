@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import AssessmentWorkspace from "../AssessmentWorkspace";
+import { RubricLibraryProvider } from "@/lib/use-rubric-library";
+import type { ReactNode } from "react";
+
+function Wrapper({ children }: { children: ReactNode }) {
+  return <RubricLibraryProvider>{children}</RubricLibraryProvider>;
+}
 
 // Mock fetch for demo data
 const mockDemoData = {
@@ -71,25 +77,25 @@ beforeEach(() => {
 
 describe("AssessmentWorkspace", () => {
   it("renders with one empty question initially", () => {
-    render(<AssessmentWorkspace />);
+    render(<AssessmentWorkspace />, { wrapper: Wrapper });
     expect(screen.getByText("Question 1")).toBeInTheDocument();
     expect(screen.getByText("1 question")).toBeInTheDocument();
   });
 
   it("has an assessment name input", () => {
-    render(<AssessmentWorkspace />);
+    render(<AssessmentWorkspace />, { wrapper: Wrapper });
     expect(screen.getByPlaceholderText("Assessment name (optional)")).toBeInTheDocument();
   });
 
   it("has Add Question and Analyze All buttons", () => {
-    render(<AssessmentWorkspace />);
+    render(<AssessmentWorkspace />, { wrapper: Wrapper });
     expect(screen.getByText("+ Add Question")).toBeInTheDocument();
     expect(screen.getByText("Analyze All")).toBeInTheDocument();
   });
 
   it("adds a question when + Add Question is clicked", async () => {
     const user = userEvent.setup();
-    render(<AssessmentWorkspace />);
+    render(<AssessmentWorkspace />, { wrapper: Wrapper });
     await user.click(screen.getByText("+ Add Question"));
     expect(screen.getByText("Question 2")).toBeInTheDocument();
     expect(screen.getByText("2 questions")).toBeInTheDocument();
@@ -97,7 +103,7 @@ describe("AssessmentWorkspace", () => {
 
   it("loads demo data into first question", async () => {
     const user = userEvent.setup();
-    render(<AssessmentWorkspace />);
+    render(<AssessmentWorkspace />, { wrapper: Wrapper });
     await user.click(screen.getByText(/Load demo data/));
 
     // Wait for fetch and state update
@@ -106,7 +112,7 @@ describe("AssessmentWorkspace", () => {
   });
 
   it("shows the hero section", () => {
-    render(<AssessmentWorkspace />);
+    render(<AssessmentWorkspace />, { wrapper: Wrapper });
     expect(
       screen.getByText(/Turn a pile of graded answers into one specific teaching decision/)
     ).toBeInTheDocument();
@@ -116,7 +122,7 @@ describe("AssessmentWorkspace", () => {
 describe("AssessmentWorkspace — question actions", () => {
   it("deletes a question when there are multiple", async () => {
     const user = userEvent.setup();
-    render(<AssessmentWorkspace />);
+    render(<AssessmentWorkspace />, { wrapper: Wrapper });
 
     // Add a second question
     await user.click(screen.getByText("+ Add Question"));
@@ -137,7 +143,7 @@ describe("AssessmentWorkspace — question actions", () => {
 
   it("cannot delete the final question", async () => {
     const user = userEvent.setup();
-    render(<AssessmentWorkspace />);
+    render(<AssessmentWorkspace />, { wrapper: Wrapper });
 
     // Only one question — open action menu
     const actionButton = screen.getByText("⋯");

@@ -1,6 +1,6 @@
 # Current State — Assessment Intelligence
 
-> Last updated: 2026-08-14 (MVP Multi-Question complete)
+> Last updated: 2026-08-14 (MVP Rubric Library complete)
 
 ## 1. What exists today
 
@@ -89,10 +89,10 @@ scripts/
 - [ ] Authentication (no sign-in, no user identity)
 - [ ] Database (no Supabase, no persistence beyond localStorage)
 - [x] Multi-question assessments (local state, no persistence yet)
-- [ ] Rubric Library (rubric is inline per question)
+- [x] Rubric Library (local state, CRUD, Apply Rubric snapshot, /rubric-library page)
 - [ ] Analysis History (no persistence of past analyses)
 - [ ] Sharing (no multi-tenancy)
-- [x] Automated tests — Vitest + RTL, 63 tests across 4 suites
+- [x] Automated tests — Vitest + RTL, 143 tests across 7 suites
 - [ ] RLS policies (no database yet)
 - [ ] Save Draft (no persistence)
 
