@@ -1,15 +1,28 @@
 # Current State — Assessment Intelligence
 
-> Last updated: 2026-08-14 (T-001 complete)
+> Last updated: 2026-08-14 (MVP Multi-Question complete)
 
 ## 1. What exists today
 
-### 1.1 Working prototype (single-question analysis)
+### 1.1 Multi-question assessment workspace
 
-The application is a fully functional single-question analysis engine deployed at https://assessment-intelligence.vercel.app.
+The application now supports multi-question assessments with per-question analysis. Deployed at https://assessment-intelligence.vercel.app.
 
 **Working features:**
-- Question + rubric + responses input form
+- Multi-question assessments with add/delete/duplicate/reset
+- Optional assessment name
+- Accordion-style collapsible question cards
+- Per-question status: draft → ready → analyzing → analyzed → needs_reanalysis / failed
+- Question + rubric + responses input form per question
+- Clear rubric / clear responses independently (preserves the other)
+- Confirmation dialogs for destructive actions
+- Cannot delete the last question
+- Duplicate copies inputs but NOT analysis
+- Staleness detection: editing after analysis → needs_reanalysis with warning banner
+- Per-question "Analyze" using existing `/api/analyze` flow
+- "Analyze All" processes ready questions independently (Promise.allSettled)
+- One failed question does not fail others
+- Inline results and recommendation per question
 - Load demo data (50 curated economics responses)
 - Paste and CSV response input
 - One batched Gemini LLM call via `POST /api/analyze`
@@ -40,15 +53,19 @@ src/
     layout.tsx                ← App shell (header, nav, footer)
     page.tsx                  ← Entry point (renders AppFlow)
   components/
-    AppFlow.tsx               ← Main flow orchestrator (381 lines)
+    AppFlow.tsx               ← Thin wrapper → AssessmentWorkspace
+    AssessmentWorkspace.tsx    ← Assessment orchestrator (question list, Analyze All)
+    QuestionCard.tsx           ← Per-question editing, actions, inline results
     Results.tsx               ← Analysis dashboard (191 lines)
     Recommendation.tsx        ← Recommendation + decisions (210 lines)
     ui.tsx                    ← Shared UI primitives (48 lines)
   lib/
     aggregate.ts              ← Deterministic server-side math (200 lines)
+    assessment-types.ts       ← QuestionState, AssessmentState, action types
     constants.ts              ← MODEL_ID, thresholds, disclaimer (14 lines)
     prompt.ts                 ← LLM prompt builder (51 lines)
     types.ts                  ← Shared TypeScript types (64 lines)
+    use-assessment.ts         ← Assessment state reducer + hook
 public/
   demo-data.json              ← 50 curated synthetic responses
   demo-results.json           ← Hand-checked cached analysis
@@ -71,7 +88,7 @@ scripts/
 
 - [ ] Authentication (no sign-in, no user identity)
 - [ ] Database (no Supabase, no persistence beyond localStorage)
-- [ ] Multi-question assessments (single question only)
+- [x] Multi-question assessments (local state, no persistence yet)
 - [ ] Rubric Library (rubric is inline per question)
 - [ ] Analysis History (no persistence of past analyses)
 - [ ] Sharing (no multi-tenancy)
@@ -83,7 +100,7 @@ scripts/
 
 | Item | Description | Priority |
 |---|---|---|
-| Monolithic AppFlow | AppFlow.tsx (381 lines) handles setup form + results + loading — should decompose | High (before multi-question) |
+| ~~Monolithic AppFlow~~ | ~~AppFlow.tsx decomposed into AssessmentWorkspace + QuestionCard + useAssessment~~ | ~~Done~~ |
 | localStorage-only decisions | Decision log in localStorage will be lost across devices | Medium (addressed by persistence task) |
 | No error boundary | React errors crash the whole page | Medium |
 | aggregate.ts null guard | `aggregate()` crashes on null raw input instead of returning all needs_review | Low (fix in T-015) |

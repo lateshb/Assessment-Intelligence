@@ -98,3 +98,72 @@
 **Files changed:** 0 production source files modified; 6 test infrastructure files created; package.json updated with test scripts and devDependencies
 
 ---
+
+## MVP Multi-Question Assessment UI (2026-08-14)
+
+**Objective:** Build the multi-question assessment frontend with per-question analysis, refactoring AppFlow into modular components.
+
+**Architecture created:**
+- `src/lib/assessment-types.ts` — QuestionState, AssessmentState, QuestionStatus, AssessmentAction types
+- `src/lib/use-assessment.ts` — Assessment state reducer + hook (createEmptyQuestion, computeStatus, computeInputHash, getResponses, parsePasteText, analyzeQuestion, analyzeAll)
+- `src/components/AssessmentWorkspace.tsx` — Assessment orchestrator (name, question list, Add Question, Analyze All, demo data)
+- `src/components/QuestionCard.tsx` — Per-question component (collapsed/expanded views, rubric editor, response input, action menu, inline results)
+- `src/components/AppFlow.tsx` — Thin wrapper delegating to AssessmentWorkspace (backward compatible)
+
+**Features implemented:**
+- Assessment name (optional)
+- Add/delete/duplicate/reset questions
+- Clear rubric / clear responses independently
+- Accordion-style collapse/expand
+- Per-question status: draft, ready, analyzing, analyzed, needs_reanalysis, failed
+- Input staleness detection via content hashing
+- Per-question "Analyze" using existing `/api/analyze` flow
+- "Analyze All" processes ready questions independently (Promise.allSettled)
+- One failed question does not fail others
+- Confirmation dialogs for destructive actions
+- Cannot delete the last question
+- Duplicate copies inputs but NOT analysis
+- Inline results and recommendation per question
+- Stale analysis de-emphasized with warning banner
+
+**Tests created:**
+- `src/lib/__tests__/use-assessment.test.ts` — 52 tests covering:
+  - generateId uniqueness
+  - parsePasteText (newlines, ---, empty lines, empty input)
+  - computeStatus (draft, ready, analyzing, analyzed, needs_reanalysis, failed)
+  - getResponses (paste and CSV modes)
+  - ADD_QUESTION (adds, expands new, collapses others, multiple)
+  - DELETE_QUESTION (removes, blocks last, ignores nonexistent)
+  - DUPLICATE_QUESTION (copies inputs, no analysis, new ID, position)
+  - RESET_QUESTION (clears all, preserves ID)
+  - CLEAR_RUBRIC (resets rubric, preserves responses and question text)
+  - CLEAR_RESPONSES (clears data, preserves rubric and question text)
+  - Staleness detection (edit question/rubric/responses after analysis → needs_reanalysis)
+  - Accordion behavior (TOGGLE_EXPANDED, EXPAND_QUESTION, COLLAPSE_ALL)
+  - Analysis lifecycle (START/COMPLETE/FAIL_ANALYSIS, independence between questions)
+  - SET_ANALYZE_ALL flag
+  - LOAD_DEMO
+  - SET_NAME
+  - computeInputHash consistency and change detection
+  - Full lifecycle integration test
+- `src/components/__tests__/AssessmentWorkspace.test.tsx` — 8 tests covering:
+  - Initial render with one question
+  - Assessment name input
+  - Add Question / Analyze All buttons
+  - Adding a question
+  - Demo data loading
+  - Hero section rendering
+  - Deleting a question (with confirmation)
+  - Cannot delete last question (disabled)
+
+**What was verified:**
+- `npm test` — 123 tests pass across 6 suites (63 existing + 60 new)
+- `npx tsc --noEmit` — clean, no type errors
+- `npm run build` — compiles successfully, same routes
+- No HTML nesting violations
+- No existing tests broken
+- No Supabase costs incurred
+
+**Files changed:** 4 new source files created, 1 refactored (AppFlow.tsx), 2 test files created
+
+---
