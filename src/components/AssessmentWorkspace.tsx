@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import type { Rubric, StudentResponse } from "@/lib/types";
 import { useAssessment } from "@/lib/use-assessment";
+import { useHistory } from "@/lib/use-history";
 import QuestionCard from "./QuestionCard";
 
 /**
@@ -13,6 +14,25 @@ import QuestionCard from "./QuestionCard";
  */
 export default function AssessmentWorkspace() {
   const { state, dispatch, analyzeQuestion, analyzeAll } = useAssessment();
+  const { saveAssessment } = useHistory();
+
+  // Track previous state to detect when analysis completes
+  const prevStateRef = useRef(state);
+
+  // Save to history when analysis completes
+  useEffect(() => {
+    const prev = prevStateRef.current;
+    prevStateRef.current = state;
+
+    // Check if any question just got analysis (reference changed)
+    const newlyAnalyzed = state.questions.some((q, i) => 
+      q.analysis && (!prev.questions[i] || prev.questions[i].analysis !== q.analysis)
+    );
+
+    if (newlyAnalyzed) {
+      saveAssessment(state);
+    }
+  }, [state, saveAssessment]);
 
   const readyCount = state.questions.filter(
     (q) => q.status === "ready" || q.status === "needs_reanalysis" || q.status === "failed"

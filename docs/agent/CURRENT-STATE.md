@@ -1,6 +1,6 @@
 # Current State — Assessment Intelligence
 
-> Last updated: 2026-08-14 (MVP Multi-Question complete)
+> Last updated: 2026-08-14 (MVP features complete: Multi-Question, Rubric Library, Analysis History)
 
 ## 1. What exists today
 
@@ -54,8 +54,12 @@ src/
     page.tsx                  ← Entry point (renders AppFlow)
   components/
     AppFlow.tsx               ← Thin wrapper → AssessmentWorkspace
-    AssessmentWorkspace.tsx    ← Assessment orchestrator (question list, Analyze All)
-    QuestionCard.tsx           ← Per-question editing, actions, inline results
+    AssessmentWorkspace.tsx    ← Assessment orchestrator (question list, Analyze All, history save)
+    QuestionCard.tsx           ← Per-question editing, actions, inline results, Apply Rubric
+    HistoryPage.tsx            ← Analysis history (list, detail, Active/Trash)
+    RubricEditor.tsx           ← Reusable rubric criteria editor
+    RubricPicker.tsx           ← Modal to pick/apply library rubric
+    RubricLibraryPage.tsx      ← Rubric Library CRUD page
     Results.tsx               ← Analysis dashboard (191 lines)
     Recommendation.tsx        ← Recommendation + decisions (210 lines)
     ui.tsx                    ← Shared UI primitives (48 lines)
@@ -66,6 +70,10 @@ src/
     prompt.ts                 ← LLM prompt builder (51 lines)
     types.ts                  ← Shared TypeScript types (64 lines)
     use-assessment.ts         ← Assessment state reducer + hook
+    use-history.tsx           ← History state reducer + context provider
+    use-rubric-library.tsx    ← Rubric Library state reducer + context provider
+    history-types.ts          ← HistoryEntry, HistoryQuestion, HistoryAction
+    rubric-library-types.ts   ← LibraryRubric, RubricLibraryAction
 public/
   demo-data.json              ← 50 curated synthetic responses
   demo-results.json           ← Hand-checked cached analysis
@@ -89,10 +97,10 @@ scripts/
 - [ ] Authentication (no sign-in, no user identity)
 - [ ] Database (no Supabase, no persistence beyond localStorage)
 - [x] Multi-question assessments (local state, no persistence yet)
-- [ ] Rubric Library (rubric is inline per question)
-- [ ] Analysis History (no persistence of past analyses)
+- [x] Rubric Library (local state, CRUD, Apply Rubric snapshot, /rubric-library page)
+- [x] Analysis History (local state — list, detail, Active/Trash, read-only)
 - [ ] Sharing (no multi-tenancy)
-- [x] Automated tests — Vitest + RTL, 63 tests across 4 suites
+- [x] Automated tests — Vitest + RTL, 170 tests across 9 suites
 - [ ] RLS policies (no database yet)
 - [ ] Save Draft (no persistence)
 

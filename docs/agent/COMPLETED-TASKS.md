@@ -167,3 +167,98 @@
 **Files changed:** 4 new source files created, 1 refactored (AppFlow.tsx), 2 test files created
 
 ---
+
+## MVP Rubric Library (2026-08-14)
+
+**Objective:** Build a reusable rubric library with CRUD, Apply Rubric to question (snapshot copy), and dedicated /rubric-library page.
+
+**Architecture created:**
+- `src/lib/rubric-library-types.ts` — LibraryRubric entity type, RubricLibraryAction union
+- `src/lib/use-rubric-library.tsx` — Reducer, context provider, validation, sample rubrics
+- `src/components/RubricEditor.tsx` — Reusable criteria editor (shared between library and question)
+- `src/components/RubricPicker.tsx` — Modal with search, course filter, preview, "Use this rubric"
+- `src/components/RubricLibraryPage.tsx` — Full CRUD page (list, create, edit, delete, duplicate)
+- `src/app/rubric-library/page.tsx` — Route page
+
+**Features implemented:**
+- Create / edit / delete / duplicate library rubrics
+- Rubric name, course, description, 2–5 criteria with marks
+- Search by name/course, filter by course
+- My Rubrics / Institution Rubrics tabs (institution is UI placeholder)
+- "Apply Rubric" button in QuestionCard opens RubricPicker
+- Snapshot mechanism: criteria are deep-copied into the question
+- Editing library rubric does NOT alter question's copied rubric
+- Teacher can continue editing the applied rubric inline
+- Reusable RubricEditor extracted from QuestionCard inline editor
+- Navigation link added to header
+- 3 sample rubrics seeded for demo
+
+**Tests created:**
+- `src/lib/__tests__/rubric-library.test.ts` — 20 tests covering:
+  - CREATE_RUBRIC (new id, timestamps, preserves existing)
+  - UPDATE_RUBRIC (name/course, criteria, timestamp, unknown id)
+  - DELETE_RUBRIC (removes, no-op for unknown)
+  - DUPLICATE_RUBRIC (copy suffix, new id, independent criteria, unknown id)
+  - Snapshot isolation (library edit ≠ question change, question edit ≠ library change)
+  - Validation (name, course, criteria count 2–5, criterion name, maxMarks ≥ 1)
+
+**What was verified:**
+- `npm test` — 143 tests pass across 7 suites (20 new + 123 existing)
+- `npx tsc --noEmit` — clean
+- `npm run build` — success, new /rubric-library route appears
+- No existing tests broken
+- No Supabase costs incurred
+
+**Files changed:** 6 new files created, 3 modified (layout.tsx, QuestionCard.tsx, AssessmentWorkspace.test.tsx)
+
+---
+
+## MVP: Analysis History (2026-08-14)
+
+**Objective:** Build a working frontend version of Analysis History using local state.
+
+**What was created:**
+- `src/lib/history-types.ts` — `HistoryEntry`, `HistoryQuestion`, `HistoryAction` types
+- `src/lib/use-history.tsx` — `historyReducer`, `HistoryProvider`, `useHistory`, `buildHistoryEntry`, snapshot builder
+- `src/lib/__tests__/history.test.ts` — 10 reducer/hook tests (SAVE/DELETE/RESTORE/PERMANENT_DELETE/CLEAR_TRASH, buildHistoryEntry, snapshot isolation, assessment-first structure)
+- `src/components/HistoryPage.tsx` — Full history page with:
+  - Active/Trash tabs
+  - Assessment list (name, question count, analyzed count, date, status badge)
+  - View → read-only detail view (assessment + all questions + inline results)
+  - Delete → Trash (soft delete)
+  - Restore → Active
+  - Permanently Delete with confirmation
+  - Back to History navigation
+  - Empty states
+- `src/components/__tests__/HistoryPage.test.tsx` — 17 component tests covering:
+  - Empty states (Active/Trash)
+  - Analyzed assessment appears in history
+  - Multiple questions belong to one assessment
+  - View opens correct assessment (detail shows question text, rubric, analysis)
+  - Delete moves to Trash
+  - Restore returns to Active
+  - Permanent delete with confirmation/cancel
+  - Assessment-first structure preserved
+- `src/app/history/page.tsx` — Route
+- Wired `HistoryProvider` into `src/app/layout.tsx` (wraps app)
+- Added "History" nav link in layout header
+- Wired `saveAssessment` into `src/components/AssessmentWorkspace.tsx`:
+  - Uses `useEffect` to detect when analysis completes (reference change on `question.analysis`)
+  - Calls `saveAssessment(state)` deterministically on completion
+  - Replaces previous setTimeout hack with effect-based approach
+
+**What was modified:**
+- `src/components/__tests__/AssessmentWorkspace.test.tsx` — Added `HistoryProvider` to test `Wrapper` (AssessmentWorkspace now uses `useHistory()`)
+
+**What was verified:**
+- `npm test` — 170 tests pass across 9 suites (27 new: 10 reducer + 17 component)
+- `npx tsc --noEmit` — clean
+- `npm run build` — success, new /history route appears
+- All existing tests pass (including AssessmentWorkspace with HistoryProvider)
+- No Supabase costs incurred
+
+**Files changed:** 7 new files created, 3 modified (layout.tsx, AssessmentWorkspace.tsx, AssessmentWorkspace.test.tsx)
+
+**State:** Local React state via `HistoryProvider`. Persistence (Supabase) is a future task.
+
+---

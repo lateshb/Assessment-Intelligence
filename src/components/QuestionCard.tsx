@@ -4,8 +4,11 @@ import { useState } from "react";
 import type { QuestionState, QuestionStatus, AssessmentAction } from "@/lib/assessment-types";
 import type { Rubric, StudentResponse } from "@/lib/types";
 import { getResponses } from "@/lib/use-assessment";
+import { useRubricLibrary } from "@/lib/use-rubric-library";
 import Results from "./Results";
 import Recommendation from "./Recommendation";
+import RubricPicker from "./RubricPicker";
+import RubricEditor from "./RubricEditor";
 import { SectionTitle } from "./ui";
 
 // ─── Status badge ──────────────────────────────────────────────────────────
@@ -382,75 +385,22 @@ export default function QuestionCard({
             id={`question-text-${question.id}`}
           />
 
-          <div className="mt-4 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-wide text-[#565C82]">
-              Rubric criteria ({question.rubric.length})
-            </p>
-            {question.rubric.map((r, i) => (
-              <div key={i} className="rounded-xl border border-[#EDEFF6] bg-[#F4F6FC] p-3">
-                <div className="flex gap-2">
-                  <input
-                    value={r.name}
-                    onChange={(e) => {
-                      const newRubric = question.rubric.map((x, j) =>
-                        j === i ? { ...x, name: e.target.value } : x
-                      );
-                      dispatch({ type: "SET_RUBRIC", questionId: question.id, rubric: newRubric });
-                    }}
-                    placeholder={`Criterion ${i + 1} name`}
-                    className="w-full rounded-lg border border-[#D5DAEC] px-3 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none"
-                  />
-                  <input
-                    type="number"
-                    min={1}
-                    max={10}
-                    value={r.maxMarks}
-                    onChange={(e) => {
-                      const newRubric = question.rubric.map((x, j) =>
-                        j === i ? { ...x, maxMarks: Number(e.target.value) || 1 } : x
-                      );
-                      dispatch({ type: "SET_RUBRIC", questionId: question.id, rubric: newRubric });
-                    }}
-                    title="Max marks"
-                    className="w-20 rounded-lg border border-[#D5DAEC] px-2 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none"
-                  />
-                  {question.rubric.length > 2 && (
-                    <button
-                      onClick={() => {
-                        const newRubric = question.rubric.filter((_, j) => j !== i);
-                        dispatch({ type: "SET_RUBRIC", questionId: question.id, rubric: newRubric });
-                      }}
-                      className="rounded-lg px-2 text-[#B23A1B] hover:bg-[#FBE9E3]"
-                      title="Remove criterion"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-                <input
-                  value={r.description}
-                  onChange={(e) => {
-                    const newRubric = question.rubric.map((x, j) =>
-                      j === i ? { ...x, description: e.target.value } : x
-                    );
-                    dispatch({ type: "SET_RUBRIC", questionId: question.id, rubric: newRubric });
-                  }}
-                  placeholder="What does full marks look like for this criterion?"
-                  className="mt-2 w-full rounded-lg border border-[#D5DAEC] px-3 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none"
-                />
-              </div>
-            ))}
-            {question.rubric.length < 5 && (
-              <button
-                onClick={() => {
-                  const newRubric = [...question.rubric, { name: "", description: "", maxMarks: 2 }];
-                  dispatch({ type: "SET_RUBRIC", questionId: question.id, rubric: newRubric });
-                }}
-                className="text-sm font-semibold text-[#3A4A9F] hover:underline"
-              >
-                + Add criterion
-              </button>
-            )}
+          <div className="mt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-bold uppercase tracking-wide text-[#565C82]">
+                Rubric criteria ({question.rubric.length})
+              </p>
+              <ApplyRubricButton
+                questionId={question.id}
+                dispatch={dispatch}
+              />
+            </div>
+            <RubricEditor
+              criteria={question.rubric}
+              onChange={(newRubric) =>
+                dispatch({ type: "SET_RUBRIC", questionId: question.id, rubric: newRubric })
+              }
+            />
           </div>
         </div>
 
@@ -569,5 +519,40 @@ function AnalyzingText() {
     <span className="text-sm font-medium text-[#26306A]">
       {LOADING_STAGES[stage]}
     </span>
+  );
+}
+
+// ─── Apply Rubric button ───────────────────────────────────────────────────
+
+function ApplyRubricButton({
+  questionId,
+  dispatch,
+}: {
+  questionId: string;
+  dispatch: React.Dispatch<AssessmentAction>;
+}) {
+  const [showPicker, setShowPicker] = useState(false);
+  const { rubrics } = useRubricLibrary();
+
+  return (
+    <>
+      <button
+        onClick={() => setShowPicker(true)}
+        className="rounded-lg border border-[#D5DAEC] px-3 py-1 text-xs font-semibold text-[#3A4A9F] hover:bg-[#E9ECF9]"
+        id={`apply-rubric-${questionId}`}
+      >
+        📚 Apply Rubric
+      </button>
+      {showPicker && (
+        <RubricPicker
+          rubrics={rubrics}
+          onSelect={(criteria) => {
+            dispatch({ type: "SET_RUBRIC", questionId, rubric: criteria });
+            setShowPicker(false);
+          }}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
+    </>
   );
 }

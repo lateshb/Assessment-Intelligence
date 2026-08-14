@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { RubricLibraryProvider } from "@/lib/use-rubric-library";
+import { HistoryProvider } from "@/lib/use-history";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -36,13 +38,23 @@ export default function RootLayout({
               <Link href="/how-to-use" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
                 How to use
               </Link>
+              <Link href="/rubric-library" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
+                Rubric Library
+              </Link>
+              <Link href="/history" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
+                History
+              </Link>
               <Link href="/build-and-scale" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
                 Build &amp; scale
               </Link>
             </nav>
           </div>
         </header>
+        <HistoryProvider>
+        <RubricLibraryProvider>
         {children}
+        </RubricLibraryProvider>
+        </HistoryProvider>
         <footer className="mt-12 border-t border-[#D5DAEC] bg-white">
           <div className="mx-auto max-w-6xl px-4 py-5 text-xs leading-relaxed text-[#565C82]">
             <p className="font-medium text-[#26306A]">
