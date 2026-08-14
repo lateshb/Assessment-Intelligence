@@ -212,3 +212,53 @@
 **Files changed:** 6 new files created, 3 modified (layout.tsx, QuestionCard.tsx, AssessmentWorkspace.test.tsx)
 
 ---
+
+## MVP: Analysis History (2026-08-14)
+
+**Objective:** Build a working frontend version of Analysis History using local state.
+
+**What was created:**
+- `src/lib/history-types.ts` — `HistoryEntry`, `HistoryQuestion`, `HistoryAction` types
+- `src/lib/use-history.tsx` — `historyReducer`, `HistoryProvider`, `useHistory`, `buildHistoryEntry`, snapshot builder
+- `src/lib/__tests__/history.test.ts` — 10 reducer/hook tests (SAVE/DELETE/RESTORE/PERMANENT_DELETE/CLEAR_TRASH, buildHistoryEntry, snapshot isolation, assessment-first structure)
+- `src/components/HistoryPage.tsx` — Full history page with:
+  - Active/Trash tabs
+  - Assessment list (name, question count, analyzed count, date, status badge)
+  - View → read-only detail view (assessment + all questions + inline results)
+  - Delete → Trash (soft delete)
+  - Restore → Active
+  - Permanently Delete with confirmation
+  - Back to History navigation
+  - Empty states
+- `src/components/__tests__/HistoryPage.test.tsx` — 17 component tests covering:
+  - Empty states (Active/Trash)
+  - Analyzed assessment appears in history
+  - Multiple questions belong to one assessment
+  - View opens correct assessment (detail shows question text, rubric, analysis)
+  - Delete moves to Trash
+  - Restore returns to Active
+  - Permanent delete with confirmation/cancel
+  - Assessment-first structure preserved
+- `src/app/history/page.tsx` — Route
+- Wired `HistoryProvider` into `src/app/layout.tsx` (wraps app)
+- Added "History" nav link in layout header
+- Wired `saveAssessment` into `src/components/AssessmentWorkspace.tsx`:
+  - Uses `useEffect` to detect when analysis completes (reference change on `question.analysis`)
+  - Calls `saveAssessment(state)` deterministically on completion
+  - Replaces previous setTimeout hack with effect-based approach
+
+**What was modified:**
+- `src/components/__tests__/AssessmentWorkspace.test.tsx` — Added `HistoryProvider` to test `Wrapper` (AssessmentWorkspace now uses `useHistory()`)
+
+**What was verified:**
+- `npm test` — 170 tests pass across 9 suites (27 new: 10 reducer + 17 component)
+- `npx tsc --noEmit` — clean
+- `npm run build` — success, new /history route appears
+- All existing tests pass (including AssessmentWorkspace with HistoryProvider)
+- No Supabase costs incurred
+
+**Files changed:** 7 new files created, 3 modified (layout.tsx, AssessmentWorkspace.tsx, AssessmentWorkspace.test.tsx)
+
+**State:** Local React state via `HistoryProvider`. Persistence (Supabase) is a future task.
+
+---

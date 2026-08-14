@@ -3,10 +3,15 @@ import { render, screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import AssessmentWorkspace from "../AssessmentWorkspace";
 import { RubricLibraryProvider } from "@/lib/use-rubric-library";
+import { HistoryProvider } from "@/lib/use-history";
 import type { ReactNode } from "react";
 
 function Wrapper({ children }: { children: ReactNode }) {
-  return <RubricLibraryProvider>{children}</RubricLibraryProvider>;
+  return (
+    <HistoryProvider>
+      <RubricLibraryProvider>{children}</RubricLibraryProvider>
+    </HistoryProvider>
+  );
 }
 
 // Mock fetch for demo data
