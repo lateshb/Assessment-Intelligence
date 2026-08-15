@@ -122,7 +122,11 @@ async function loadHistoryFromDb(): Promise<HistoryEntry[]> {
         createdAt: a.created_at,
         questionText: a.question_text_snapshot,
         rubric: (a.rubric_snapshot as Array<{ name: string; description: string; maxMarks: number }>) || [],
-        responses: (a.responses_snapshot as Array<{ id: string; text: string }>) || [],
+        responses: Array.isArray(a.responses_snapshot)
+          ? (a.responses_snapshot as Array<{ id: string; text: string }>)
+          : typeof a.responses_snapshot === "string" && (a.responses_snapshot as string).trim()
+            ? parsePasteText(a.responses_snapshot as string)
+            : [],
         analysis: {
           id: a.id,
           perResponse: a.per_response as unknown[],
