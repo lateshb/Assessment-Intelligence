@@ -37,6 +37,7 @@ export type Recommendation = {
 };
 
 export type Analysis = {
+  id?: string; // DB analysis ID when loaded from saved assessment
   perResponse: PerResponse[];
   clusters: Cluster[];
   gapMap: GapRow[];

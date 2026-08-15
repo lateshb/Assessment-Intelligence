@@ -50,24 +50,46 @@ export async function saveAssessmentToDb(state: AssessmentState, userId: string,
 
       // 3. Save analysis if present
       if (q.analysis) {
-        const { error: analysisError } = await supabase
-          .from('analyses')
-          .insert({
-            question_id: question.id,
-            is_current: true,
-            question_text_snapshot: q.questionText,
-            rubric_snapshot: q.rubric,
-            responses_snapshot: q.responseTab === 'csv' ? q.csvRows : q.pasteText,
-            per_response: q.analysis.perResponse,
-            clusters: q.analysis.clusters,
-            gap_map: q.analysis.gapMap,
-            recommendation: q.analysis.recommendation,
-            model: q.analysis.meta.model,
-            latency_ms: q.analysis.meta.latencyMs || null,
-            source: q.analysis.meta.source,
-          })
+        if (q.analysis.id) {
+          // Update existing analysis
+          const { error: analysisError } = await supabase
+            .from('analyses')
+            .update({
+              question_text_snapshot: q.questionText,
+              rubric_snapshot: q.rubric,
+              responses_snapshot: q.responseTab === 'csv' ? q.csvRows : q.pasteText,
+              per_response: q.analysis.perResponse,
+              clusters: q.analysis.clusters,
+              gap_map: q.analysis.gapMap,
+              recommendation: q.analysis.recommendation,
+              model: q.analysis.meta.model,
+              latency_ms: q.analysis.meta.latencyMs || null,
+              source: q.analysis.meta.source,
+            })
+            .eq('id', q.analysis.id)
 
-        if (analysisError) throw analysisError
+          if (analysisError) throw analysisError
+        } else {
+          // Insert new analysis
+          const { error: analysisError } = await supabase
+            .from('analyses')
+            .insert({
+              question_id: question.id,
+              is_current: true,
+              question_text_snapshot: q.questionText,
+              rubric_snapshot: q.rubric,
+              responses_snapshot: q.responseTab === 'csv' ? q.csvRows : q.pasteText,
+              per_response: q.analysis.perResponse,
+              clusters: q.analysis.clusters,
+              gap_map: q.analysis.gapMap,
+              recommendation: q.analysis.recommendation,
+              model: q.analysis.meta.model,
+              latency_ms: q.analysis.meta.latencyMs || null,
+              source: q.analysis.meta.source,
+            })
+
+          if (analysisError) throw analysisError
+        }
       }
 
       return question.id

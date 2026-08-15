@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AssessmentProvider } from "@/lib/AssessmentContext";
 import { RubricLibraryProvider } from "@/lib/use-rubric-library";
 import { HistoryProvider } from "@/lib/use-history";
 import { UserMenu } from "@/components/user-menu";
@@ -55,11 +56,13 @@ export default function RootLayout({
             </nav>
           </div>
         </header>
+        <AssessmentProvider>
         <HistoryProvider>
         <RubricLibraryProvider>
         {children}
         </RubricLibraryProvider>
         </HistoryProvider>
+        </AssessmentProvider>
         <footer className="mt-12 border-t border-[#D5DAEC] bg-white">
           <div className="mx-auto max-w-6xl px-4 py-5 text-xs leading-relaxed text-[#565C82]">
             <p className="font-medium text-[#26306A]">
