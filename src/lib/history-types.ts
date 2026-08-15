@@ -15,6 +15,15 @@ export type HistoryQuestion = {
   responses: StudentResponse[];
   analysis: Analysis | null;
   status: "draft" | "analyzed" | "failed";
+  /** Previous analyses for this question (older versions, reverse chronological) */
+  previousAnalyses?: Array<{
+    id: string;
+    createdAt: string;
+    questionText: string;
+    rubric: Rubric[];
+    responses: StudentResponse[];
+    analysis: Analysis;
+  }>;
 };
 
 /** A history entry = one saved assessment snapshot */

@@ -218,8 +218,27 @@ function HistoryQuestionCard({
   index: number;
 }) {
   const [expanded, setExpanded] = useState(index === 0);
+  const [showPrevious, setShowPrevious] = useState(false);
+  const [selectedVersionIndex, setSelectedVersionIndex] = useState<number | null>(null);
   const questionNumber = index + 1;
   const preview = question.questionText.slice(0, 80) || "Empty question";
+
+  // Determine which analysis/data to display
+  const displayData = selectedVersionIndex !== null && question.previousAnalyses?.[selectedVersionIndex]
+    ? {
+        questionText: question.previousAnalyses[selectedVersionIndex].questionText,
+        rubric: question.previousAnalyses[selectedVersionIndex].rubric,
+        responses: question.previousAnalyses[selectedVersionIndex].responses,
+        analysis: question.previousAnalyses[selectedVersionIndex].analysis,
+        createdAt: question.previousAnalyses[selectedVersionIndex].createdAt,
+      }
+    : {
+        questionText: question.questionText,
+        rubric: question.rubric,
+        responses: question.responses,
+        analysis: question.analysis,
+        createdAt: null,
+      };
 
   if (!expanded) {
     return (
@@ -277,6 +296,59 @@ function HistoryQuestionCard({
         </button>
       </div>
 
+      {/* Previous versions toggle */}
+      {question.previousAnalyses && question.previousAnalyses.length > 0 && (
+        <div className="border-b border-[#EDEFF6] px-5 py-2">
+          <button
+            onClick={() => {
+              setShowPrevious(!showPrevious);
+              if (showPrevious) setSelectedVersionIndex(null);
+            }}
+            className="flex items-center gap-2 text-xs font-semibold text-[#3A4A9F] hover:text-[#26306A]"
+          >
+            <span>{showPrevious ? "▼" : "▶"}</span>
+            <span>Previous analyses ({question.previousAnalyses.length})</span>
+          </button>
+          {showPrevious && (
+            <div className="mt-2 space-y-1 pl-5">
+              <button
+                onClick={() => setSelectedVersionIndex(null)}
+                className={`block w-full rounded px-2 py-1 text-left text-xs ${
+                  selectedVersionIndex === null
+                    ? "bg-[#3A4A9F] text-white font-semibold"
+                    : "text-[#565C82] hover:bg-[#EDEFF6]"
+                }`}
+              >
+                Current (latest)
+              </button>
+              {question.previousAnalyses.map((prev, idx) => (
+                <button
+                  key={prev.id}
+                  onClick={() => setSelectedVersionIndex(idx)}
+                  className={`block w-full rounded px-2 py-1 text-left text-xs ${
+                    selectedVersionIndex === idx
+                      ? "bg-[#3A4A9F] text-white font-semibold"
+                      : "text-[#565C82] hover:bg-[#EDEFF6]"
+                  }`}
+                >
+                  {new Date(prev.createdAt).toLocaleString()}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Version indicator */}
+      {selectedVersionIndex !== null && displayData.createdAt && (
+        <div className="border-b border-[#EDEFF6] bg-[#FFF9E6] px-5 py-2">
+          <p className="text-xs text-[#8B6914]">
+            <span className="font-semibold">Viewing previous version:</span>{" "}
+            {new Date(displayData.createdAt).toLocaleString()}
+          </p>
+        </div>
+      )}
+
       {/* Question text + rubric (read-only) */}
       <div className="grid gap-5 p-5 lg:grid-cols-2">
         <div>
@@ -284,14 +356,14 @@ function HistoryQuestionCard({
             Exam question
           </label>
           <p className="rounded-xl border border-[#EDEFF6] bg-[#F4F6FC] p-3 text-sm text-[#141834]">
-            {question.questionText || "—"}
+            {displayData.questionText || "—"}
           </p>
 
           <div className="mt-4 space-y-2">
             <p className="text-xs font-bold uppercase tracking-wide text-[#565C82]">
-              Rubric criteria ({question.rubric.length})
+              Rubric criteria ({displayData.rubric.length})
             </p>
-            {question.rubric.map((r, i) => (
+            {displayData.rubric.map((r, i) => (
               <div key={i} className="rounded-lg border border-[#EDEFF6] bg-[#F4F6FC] p-2 text-sm">
                 <span className="font-semibold text-[#141834]">{r.name}</span>
                 <span className="ml-2 text-xs text-[#565C82]">({r.maxMarks} marks)</span>
@@ -305,22 +377,22 @@ function HistoryQuestionCard({
 
         <div>
           <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#565C82]">
-            Responses ({question.responses.length})
+            Responses ({displayData.responses.length})
           </label>
           <div className="max-h-48 overflow-y-auto rounded-xl border border-[#EDEFF6] bg-[#F4F6FC] p-3">
-            {question.responses.length === 0 ? (
+            {displayData.responses.length === 0 ? (
               <p className="text-sm text-[#565C82]">No responses recorded</p>
             ) : (
-              question.responses.slice(0, 5).map((r, i) => (
+              displayData.responses.slice(0, 5).map((r, i) => (
                 <div key={i} className="border-b border-[#EDEFF6] py-1 text-xs text-[#1D2140] last:border-0">
                   <span className="font-medium text-[#3A4A9F]">{r.id}:</span>{" "}
                   {r.text.slice(0, 100)}{r.text.length > 100 ? "…" : ""}
                 </div>
               ))
             )}
-            {question.responses.length > 5 && (
+            {displayData.responses.length > 5 && (
               <p className="mt-1 text-xs text-[#565C82]">
-                + {question.responses.length - 5} more
+                + {displayData.responses.length - 5} more
               </p>
             )}
           </div>
@@ -328,18 +400,18 @@ function HistoryQuestionCard({
       </div>
 
       {/* Analysis results */}
-      {question.analysis && (
+      {displayData.analysis && (
         <div className="border-t border-[#EDEFF6] p-5">
           <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
-            <Results analysis={question.analysis} />
+            <Results analysis={displayData.analysis} />
             <div className="lg:sticky lg:top-20 lg:self-start">
-              <Recommendation analysis={question.analysis} />
+              <Recommendation analysis={displayData.analysis} />
             </div>
           </div>
         </div>
       )}
 
-      {!question.analysis && (
+      {!displayData.analysis && (
         <div className="border-t border-[#EDEFF6] p-5 text-center">
           <p className="text-sm text-[#565C82]">
             {question.status === "failed" ? "Analysis failed for this question." : "This question was not analyzed."}
