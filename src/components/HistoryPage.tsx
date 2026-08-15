@@ -230,6 +230,7 @@ function HistoryQuestionCard({
   const [expanded, setExpanded] = useState(index === 0);
   const [showPrevious, setShowPrevious] = useState(false);
   const [selectedVersionIndex, setSelectedVersionIndex] = useState<number | null>(null);
+  const [showAllResponses, setShowAllResponses] = useState(false);
   const questionNumber = index + 1;
   const preview = question.questionText.slice(0, 80) || "Empty question";
 
@@ -388,16 +389,17 @@ function HistoryQuestionCard({
         <div>
           {(() => {
             const responsesList = Array.isArray(displayData.responses) ? displayData.responses : [];
+            const visibleResponses = showAllResponses ? responsesList : responsesList.slice(0, 5);
             return (
               <>
                 <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#565C82]">
                   Responses ({responsesList.length})
                 </label>
-                <div className="max-h-48 overflow-y-auto rounded-xl border border-[#EDEFF6] bg-[#F4F6FC] p-3">
+                <div className="max-h-60 overflow-y-auto rounded-xl border border-[#EDEFF6] bg-[#F4F6FC] p-3">
                   {responsesList.length === 0 ? (
                     <p className="text-sm text-[#565C82]">No responses recorded</p>
                   ) : (
-                    responsesList.slice(0, 5).map((r, i) => (
+                    visibleResponses.map((r, i) => (
                       <div key={i} className="border-b border-[#EDEFF6] py-1 text-xs text-[#1D2140] last:border-0">
                         <span className="font-medium text-[#3A4A9F]">{r.id}:</span>{" "}
                         {r.text.slice(0, 100)}{r.text.length > 100 ? "…" : ""}
@@ -405,9 +407,13 @@ function HistoryQuestionCard({
                     ))
                   )}
                   {responsesList.length > 5 && (
-                    <p className="mt-1 text-xs text-[#565C82]">
-                      + {responsesList.length - 5} more
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowAllResponses(!showAllResponses)}
+                      className="mt-2 block font-semibold text-xs text-[#3A4A9F] hover:underline"
+                    >
+                      {showAllResponses ? "Show less" : `+ ${responsesList.length - 5} more`}
+                    </button>
                   )}
                 </div>
               </>
