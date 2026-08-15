@@ -50,7 +50,7 @@ export async function saveAssessmentToDb(state: AssessmentState, userId: string,
 
       // 3. Save analysis if present
       if (q.analysis) {
-        const { error: analysisError } = await supabase
+        const { data: analysisData, error: analysisError } = await supabase
           .from('analyses')
           .insert({
             question_id: question.id,
@@ -66,8 +66,15 @@ export async function saveAssessmentToDb(state: AssessmentState, userId: string,
             latency_ms: q.analysis.meta.latencyMs || null,
             source: q.analysis.meta.source,
           })
+          .select()
+          .single()
 
         if (analysisError) throw analysisError
+
+        // Update analysis ID in the question (for in-memory state)
+        if (analysisData && q.analysis) {
+          q.analysis.id = analysisData.id
+        }
       }
 
       return question.id
