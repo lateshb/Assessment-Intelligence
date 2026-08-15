@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { buildPrompt } from "@/lib/prompt";
 import { aggregate } from "@/lib/aggregate";
 import { API_TIMEOUT_MS, DISCLAIMER, MODEL_ID } from "@/lib/constants";
@@ -13,6 +14,17 @@ export const maxDuration = 60;
  * All aggregate math happens in lib/aggregate.ts, never in the model.
  */
 export async function POST(req: NextRequest) {
+  // Check authentication
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json(
+      { error: "Authentication required." },
+      { status: 401 }
+    );
+  }
+
   let body: AnalyzeRequest;
   try {
     body = (await req.json()) as AnalyzeRequest;

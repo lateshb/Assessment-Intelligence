@@ -6,6 +6,22 @@ import { RubricLibraryProvider } from "@/lib/use-rubric-library";
 import { HistoryProvider } from "@/lib/use-history";
 import type { ReactNode } from "react";
 
+// Mock Supabase client
+vi.mock("@/lib/supabase/client", () => ({
+  createClient: vi.fn(() => ({
+    auth: {
+      getUser: vi.fn(() => Promise.resolve({ data: { user: null }, error: null })),
+    },
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+        })),
+      })),
+    })),
+  })),
+}));
+
 function Wrapper({ children }: { children: ReactNode }) {
   return (
     <HistoryProvider>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { RubricLibraryProvider } from "@/lib/use-rubric-library";
 import { HistoryProvider } from "@/lib/use-history";
+import { UserMenu } from "@/components/user-menu";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -47,6 +48,7 @@ export default function RootLayout({
               <Link href="/build-and-scale" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
                 Build &amp; scale
               </Link>
+              <UserMenu />
             </nav>
           </div>
         </header>
