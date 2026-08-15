@@ -84,9 +84,13 @@ export default function SavedAssessmentsPage() {
   if (loading) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="mb-6 text-2xl font-bold text-[#26306A]">Saved Assessments</h1>
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#26306A]">Saved Assessments</h1>
+          <p className="mt-1 text-sm text-[#565C82]">Manage and revisit your previously saved assessments</p>
+        </div>
         <div className="rounded-2xl border border-[#D5DAEC] bg-white p-12 text-center shadow-sm">
-          <p className="text-sm text-[#565C82]">Loading assessments…</p>
+          <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-[#3A4A9F] border-t-transparent mb-3" />
+          <p className="text-sm font-semibold text-[#565C82]">Loading saved assessments…</p>
         </div>
       </main>
     );
@@ -94,43 +98,85 @@ export default function SavedAssessmentsPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-[#26306A]">Saved Assessments</h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#26306A]">Saved Assessments</h1>
+          <p className="mt-1 text-sm text-[#565C82]">Manage and revisit your previously saved assessments</p>
+        </div>
+        <button
+          onClick={() => router.push("/")}
+          className="inline-flex items-center gap-1.5 rounded-xl bg-[#26306A] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#3A4A9F] transition-all"
+        >
+          <span>+</span>
+          <span>New Assessment</span>
+        </button>
+      </div>
 
       {error && (
-        <div className="mb-4 rounded-xl border border-[#E4572E] bg-[#FBE9E3] px-4 py-3 text-sm font-medium text-[#B23A1B]">
+        <div className="mb-6 rounded-xl border border-[#E4572E] bg-[#FBE9E3] p-4 text-sm font-medium text-[#B23A1B]">
           {error}
         </div>
       )}
 
       {assessments.length === 0 ? (
         <div className="rounded-2xl border border-[#D5DAEC] bg-white p-12 text-center shadow-sm">
-          <p className="text-sm text-[#565C82]">No saved assessments yet.</p>
-          <p className="mt-1 text-xs text-[#8B92B5]">Create an assessment and save it to see it here.</p>
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EDEFF6] text-2xl">
+            📋
+          </div>
+          <h3 className="text-base font-bold text-[#141834]">No saved assessments yet</h3>
+          <p className="mt-1 text-sm text-[#565C82] max-w-md mx-auto">
+            Create an assessment in the workspace and click "Save Draft" to access it here anytime.
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-[#26306A] px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#3A4A9F] transition-all"
+          >
+            Create Your First Assessment →
+          </button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid gap-3">
           {assessments.map((assessment) => (
             <div
               key={assessment.id}
-              className="flex items-center justify-between rounded-xl border border-[#D5DAEC] bg-white px-4 py-3 shadow-sm hover:shadow-md"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-[#D5DAEC] bg-white p-4 sm:p-5 shadow-sm hover:border-[#3A4A9F] hover:shadow-md transition-all"
             >
               <div className="flex-1">
-                <h3 className="font-semibold text-[#26306A]">{assessment.name || "Untitled"}</h3>
-                <p className="text-xs text-[#565C82]">
-                  {assessment.updated_at ? new Date(assessment.updated_at).toLocaleDateString() : "—"}
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h3 className="text-base font-bold text-[#26306A]">
+                    {assessment.name || "Untitled Assessment"}
+                  </h3>
+                  {assessment._questionCount !== undefined && (
+                    <span className="rounded-md bg-[#EDEFF6] px-2 py-0.5 text-xs font-semibold text-[#565C82]">
+                      {assessment._questionCount} {assessment._questionCount === 1 ? "question" : "questions"}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-[#565C82]">
+                  Last modified:{" "}
+                  {assessment.updated_at
+                    ? new Date(assessment.updated_at).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "—"}
                 </p>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex items-center gap-2.5">
                 <button
                   onClick={() => handleOpen(assessment.id)}
-                  className="rounded-lg bg-[#26306A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#3A4A9F]"
+                  className="flex-1 sm:flex-none rounded-xl bg-[#26306A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#3A4A9F] transition-all"
                 >
-                  Open
+                  Open in Workspace
                 </button>
                 <button
                   onClick={() => setDeleteConfirm(assessment.id)}
-                  className="rounded-lg border border-[#D5DAEC] px-4 py-2 text-sm font-semibold text-[#565C82] hover:bg-[#EDEFF6]"
+                  className="rounded-xl border border-[#D5DAEC] px-3.5 py-2 text-sm font-semibold text-[#565C82] hover:bg-[#FBE9E3] hover:text-[#B23A1B] hover:border-[#E4572E]/40 transition-all"
+                  aria-label="Delete assessment"
                 >
                   Delete
                 </button>
@@ -140,24 +186,29 @@ export default function SavedAssessmentsPage() {
         </div>
       )}
 
-      {/* Delete confirmation dialog */}
+      {/* Delete confirmation modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="rounded-2xl bg-white p-6 shadow-lg">
-            <h2 className="mb-2 text-lg font-bold text-[#26306A]">Delete Assessment?</h2>
-            <p className="mb-4 text-sm text-[#565C82]">This action cannot be undone.</p>
-            <div className="flex gap-3 justify-end">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs"
+          onClick={(e) => { if (e.target === e.currentTarget) setDeleteConfirm(null); }}
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-[#D5DAEC]">
+            <h2 className="text-lg font-bold text-[#26306A]">Delete Assessment?</h2>
+            <p className="mt-2 text-sm text-[#565C82] leading-relaxed">
+              Are you sure you want to delete this assessment? This will permanently remove its associated questions, rubrics, and analysis records.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="rounded-lg border border-[#D5DAEC] px-4 py-2 text-sm font-semibold text-[#565C82] hover:bg-[#EDEFF6]"
+                className="rounded-xl border border-[#D5DAEC] px-4 py-2 text-sm font-semibold text-[#565C82] hover:bg-[#EDEFF6] transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="rounded-lg bg-[#E4572E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#B23A1B]"
+                className="rounded-xl bg-[#E4572E] px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-[#B23A1B] transition-all"
               >
-                Delete
+                Confirm Delete
               </button>
             </div>
           </div>

@@ -64,29 +64,29 @@ export default function HistoryPage() {
     <main className="mx-auto max-w-6xl px-4 py-8">
       {/* Header */}
       <div className="mb-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#B45309]">
-          Analysis History
-        </p>
-        <h1 className="text-2xl font-bold text-[#141834]">Past Assessments</h1>
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#EDEFF6] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#26306A] mb-2">
+          Assessment Records
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#26306A]">Analysis History</h1>
         <p className="mt-1 text-sm text-[#565C82]">
-          Review and revisit your completed analyses.
+          Review past diagnostic runs, recommendations, and logged teacher decisions.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="mb-4 flex gap-1 rounded-xl bg-[#EDEFF6] p-1 text-sm font-semibold">
+      <div className="mb-6 flex max-w-xs gap-1 rounded-xl bg-[#EDEFF6] p-1 text-sm font-semibold">
         <button
           onClick={() => setTab("active")}
-          className={`flex-1 rounded-lg px-3 py-1.5 ${
-            tab === "active" ? "bg-white text-[#26306A] shadow" : "text-[#565C82]"
+          className={`flex-1 rounded-lg px-3 py-1.5 transition-all ${
+            tab === "active" ? "bg-white text-[#26306A] shadow-xs" : "text-[#565C82] hover:text-[#26306A]"
           }`}
         >
           Active ({active.length})
         </button>
         <button
           onClick={() => setTab("trash")}
-          className={`flex-1 rounded-lg px-3 py-1.5 ${
-            tab === "trash" ? "bg-white text-[#26306A] shadow" : "text-[#565C82]"
+          className={`flex-1 rounded-lg px-3 py-1.5 transition-all ${
+            tab === "trash" ? "bg-white text-[#26306A] shadow-xs" : "text-[#565C82] hover:text-[#26306A]"
           }`}
         >
           Trash ({trashed.length})
@@ -96,17 +96,21 @@ export default function HistoryPage() {
       {/* Loading state */}
       {loading ? (
         <div className="rounded-2xl border border-[#D5DAEC] bg-white p-12 text-center shadow-sm">
-          <p className="text-sm text-[#565C82]">Loading history…</p>
+          <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-[#3A4A9F] border-t-transparent mb-3" />
+          <p className="text-sm font-semibold text-[#565C82]">Loading history records…</p>
         </div>
       ) : list.length === 0 ? (
         <div className="rounded-2xl border border-[#D5DAEC] bg-white p-12 text-center shadow-sm">
-          <p className="text-lg font-semibold text-[#141834]">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EDEFF6] text-2xl">
+            {tab === "active" ? "📊" : "🗑️"}
+          </div>
+          <h3 className="text-base font-bold text-[#141834]">
             {tab === "active" ? "No analyses yet" : "Trash is empty"}
-          </p>
-          <p className="mt-1 text-sm text-[#565C82]">
+          </h3>
+          <p className="mt-1 text-sm text-[#565C82] max-w-md mx-auto">
             {tab === "active"
-              ? "Analyze an assessment to see it here."
-              : "Deleted assessments will appear here."}
+              ? "When you analyze questions in the workspace, completed runs will automatically be recorded here."
+              : "Deleted assessments will be stored here until permanently removed."}
           </p>
         </div>
       ) : (
@@ -121,69 +125,75 @@ export default function HistoryPage() {
             return (
               <div
                 key={entry.id}
-                className="flex items-center justify-between rounded-2xl border border-[#D5DAEC] bg-white px-5 py-4 shadow-sm transition-all hover:border-[#3A4A9F]"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-[#D5DAEC] bg-white p-4 sm:p-5 shadow-sm transition-all hover:border-[#3A4A9F] hover:shadow-md"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-[#141834]">{entry.assessmentName}</p>
-                  <p className="mt-0.5 text-xs text-[#565C82]">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h3 className="text-base font-bold text-[#26306A]">{entry.assessmentName}</h3>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                        status === "complete"
+                          ? "bg-[#E4F5F3] text-[#0E7C71]"
+                          : status === "partial"
+                            ? "bg-[#FDF3E1] text-[#B45309]"
+                            : "bg-[#EDEFF6] text-[#565C82]"
+                      }`}
+                    >
+                      {status}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-[#565C82]">
                     {entry.questions.length} question{entry.questions.length !== 1 ? "s" : ""}
                     {" · "}
                     {analyzedCount} analyzed
                     {" · "}
-                    {new Date(entry.savedAt).toLocaleDateString()}
+                    Saved {new Date(entry.savedAt).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </p>
                 </div>
 
-                {/* Status badge */}
-                <span
-                  className={`mx-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
-                    status === "complete"
-                      ? "bg-[#E4F5F3] text-[#0E7C71]"
-                      : status === "partial"
-                        ? "bg-[#FDF3E1] text-[#B45309]"
-                        : "bg-[#EDEFF6] text-[#565C82]"
-                  }`}
-                >
-                  {status}
-                </span>
-
                 {/* Actions */}
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => setViewId(entry.id)}
-                    className="rounded-lg border border-[#D5DAEC] px-3 py-1.5 text-xs font-semibold text-[#3A4A9F] hover:bg-[#E9ECF9]"
+                    className="rounded-xl bg-[#26306A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#3A4A9F] transition-all"
                   >
                     View
                   </button>
                   {tab === "active" ? (
                     <button
                       onClick={() => dispatch({ type: "DELETE_ENTRY", id: entry.id })}
-                      className="rounded-lg border border-[#D5DAEC] px-3 py-1.5 text-xs font-semibold text-[#B23A1B] hover:bg-[#FBE9E3]"
+                      className="rounded-xl border border-[#D5DAEC] px-3.5 py-2 text-xs font-semibold text-[#565C82] hover:bg-[#FBE9E3] hover:text-[#B23A1B] hover:border-[#E4572E]/40 transition-all"
                     >
-                      Delete
+                      Move to trash
                     </button>
                   ) : (
                     <>
                       <button
                         onClick={() => dispatch({ type: "RESTORE_ENTRY", id: entry.id })}
-                        className="rounded-lg border border-[#D5DAEC] px-3 py-1.5 text-xs font-semibold text-[#0E7C71] hover:bg-[#E4F5F3]"
+                        className="rounded-xl border border-[#0E7C71] px-3.5 py-2 text-xs font-semibold text-[#0E7C71] hover:bg-[#E4F5F3] transition-all"
                       >
                         Restore
                       </button>
                       {confirmDelete === entry.id ? (
-                        <div className="flex gap-1">
+                        <div className="flex gap-1.5">
                           <button
                             onClick={() => {
                               dispatch({ type: "PERMANENT_DELETE", id: entry.id });
                               setConfirmDelete(null);
                             }}
-                            className="rounded-lg bg-[#B23A1B] px-2.5 py-1 text-[11px] font-bold text-white"
+                            className="rounded-xl bg-[#B23A1B] px-3 py-2 text-xs font-bold text-white shadow-xs"
                           >
                             Confirm
                           </button>
                           <button
                             onClick={() => setConfirmDelete(null)}
-                            className="rounded-lg px-2.5 py-1 text-[11px] text-[#565C82] hover:bg-[#EDEFF6]"
+                            className="rounded-xl border border-[#D5DAEC] px-2.5 py-2 text-xs font-semibold text-[#565C82] hover:bg-[#EDEFF6]"
                           >
                             Cancel
                           </button>
@@ -191,7 +201,7 @@ export default function HistoryPage() {
                       ) : (
                         <button
                           onClick={() => setConfirmDelete(entry.id)}
-                          className="rounded-lg border border-[#D5DAEC] px-3 py-1.5 text-xs font-semibold text-[#B23A1B] hover:bg-[#FBE9E3]"
+                          className="rounded-xl border border-[#E4572E]/40 px-3.5 py-2 text-xs font-semibold text-[#B23A1B] hover:bg-[#FBE9E3] transition-all"
                         >
                           Permanently Delete
                         </button>
