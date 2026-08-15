@@ -1,79 +1,27 @@
 "use client";
 
 /**
- * Analysis History state management — reducer + context.
+ * Analysis History state management — Supabase-backed.
  *
- * Stores history entries in local React state.
- * Persistence can later be swapped to Supabase without changing consumers.
+ * Loads history from assessments/questions/analyses tables on mount.
+ * Trash/restore uses the `trashed` column on assessments.
+ * Context API stays identical so consumers don't change.
  */
 
-import { createContext, useContext, useReducer, useCallback, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  type ReactNode,
+} from "react";
 import type { HistoryEntry, HistoryAction, HistoryQuestion } from "./history-types";
 import type { AssessmentState } from "./assessment-types";
 import { getResponses } from "./use-assessment";
+import { createClient } from "@/lib/supabase/client";
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
-
-let idCounter = 0;
-function generateHistoryId(): string {
-  return `hist-${Date.now()}-${++idCounter}`;
-}
-
-function now(): string {
-  return new Date().toISOString();
-}
-
-// ─── Reducer ───────────────────────────────────────────────────────────────
-
-export function historyReducer(
-  state: HistoryEntry[],
-  action: HistoryAction
-): HistoryEntry[] {
-  switch (action.type) {
-    case "SAVE_ENTRY": {
-      const existing = state.find(
-        (e) => !e.trashed && e.assessmentName === action.entry.assessmentName
-          && action.entry.assessmentName !== ""
-      );
-      if (existing) {
-        // Update existing entry for the same named assessment
-        return state.map((e) =>
-          e.id === existing.id
-            ? { ...e, ...action.entry, savedAt: now() }
-            : e
-        );
-      }
-      const newEntry: HistoryEntry = {
-        ...action.entry,
-        id: generateHistoryId(),
-        savedAt: now(),
-        trashed: false,
-      };
-      return [newEntry, ...state];
-    }
-
-    case "DELETE_ENTRY":
-      return state.map((e) =>
-        e.id === action.id ? { ...e, trashed: true } : e
-      );
-
-    case "RESTORE_ENTRY":
-      return state.map((e) =>
-        e.id === action.id ? { ...e, trashed: false } : e
-      );
-
-    case "PERMANENT_DELETE":
-      return state.filter((e) => e.id !== action.id);
-
-    case "CLEAR_TRASH":
-      return state.filter((e) => !e.trashed);
-
-    default:
-      return state;
-  }
-}
-
-// ─── Snapshot builder ──────────────────────────────────────────────────────
+// ─── Snapshot builder (for saving from workspace) ──────────────────────────
 
 export function buildHistoryEntry(assessment: AssessmentState): Omit<HistoryEntry, "id" | "savedAt" | "trashed"> {
   const questions: HistoryQuestion[] = assessment.questions.map((q) => {
@@ -97,30 +45,198 @@ export function buildHistoryEntry(assessment: AssessmentState): Omit<HistoryEntr
   };
 }
 
+// ─── DB row → HistoryEntry mapper ──────────────────────────────────────────
+
+async function loadHistoryFromDb(): Promise<HistoryEntry[]> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // Load assessments that have at least one analyzed question
+  const { data: assessments, error: aErr } = await supabase
+    .from("assessments")
+    .select("*")
+    .eq("owner_id", user.id)
+    .order("updated_at", { ascending: false });
+
+  if (aErr || !assessments) return [];
+
+  const entries: HistoryEntry[] = [];
+
+  for (const a of assessments) {
+    // Load questions
+    const { data: questions } = await supabase
+      .from("questions")
+      .select("*")
+      .eq("assessment_id", a.id)
+      .order("position", { ascending: true });
+
+    if (!questions || questions.length === 0) continue;
+
+    // Load analyses for each question
+    const historyQuestions: HistoryQuestion[] = [];
+    let hasAnyAnalysis = false;
+
+    for (const q of questions) {
+      const { data: analyses } = await supabase
+        .from("analyses")
+        .select("*")
+        .eq("question_id", q.id)
+        .eq("is_current", true)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      const analysis = analyses?.[0] || null;
+      if (analysis) hasAnyAnalysis = true;
+
+      historyQuestions.push({
+        id: q.id,
+        questionText: q.question_text || "",
+        rubric: (q.rubric_snapshot as Array<{ name: string; description: string; maxMarks: number }>) || [],
+        responses: (q.responses as Array<{ id: string; text: string }>) || [],
+        analysis: analysis ? {
+          perResponse: analysis.per_response as unknown[],
+          clusters: analysis.clusters as unknown[],
+          gapMap: analysis.gap_map as unknown[],
+          recommendation: analysis.recommendation as Record<string, unknown>,
+          meta: {
+            model: analysis.model,
+            latencyMs: analysis.latency_ms || 0,
+            disclaimer: "",
+            source: analysis.source as "live" | "cached",
+          },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any : null,
+        status: analysis ? "analyzed" : "draft",
+      });
+    }
+
+    // Only show assessments that have been analyzed at least once
+    if (!hasAnyAnalysis) continue;
+
+    entries.push({
+      id: a.id,
+      assessmentName: a.name || "Untitled Assessment",
+      course: "",
+      questions: historyQuestions,
+      savedAt: a.updated_at || a.created_at,
+      trashed: a.trashed ?? false,
+    });
+  }
+
+  return entries;
+}
+
 // ─── Context ───────────────────────────────────────────────────────────────
 
 type HistoryContextType = {
   entries: HistoryEntry[];
-  dispatch: React.Dispatch<HistoryAction>;
+  loading: boolean;
+  dispatch: (action: HistoryAction) => void;
   saveAssessment: (assessment: AssessmentState) => void;
+  reload: () => Promise<void>;
 };
 
 const HistoryContext = createContext<HistoryContextType | null>(null);
 
 export function HistoryProvider({ children }: { children: ReactNode }) {
-  const [entries, dispatch] = useReducer(historyReducer, []);
+  const [entries, setEntries] = useState<HistoryEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  const reload = useCallback(async () => {
+    setLoading(true);
+    const data = await loadHistoryFromDb();
+    setEntries(data);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  // saveAssessment is called after analysis completes — triggers a reload
   const saveAssessment = useCallback(
     (assessment: AssessmentState) => {
       const hasAnalysis = assessment.questions.some((q) => q.analysis !== null);
-      if (!hasAnalysis) return; // Don't save if nothing was analyzed
-      dispatch({ type: "SAVE_ENTRY", entry: buildHistoryEntry(assessment) });
+      if (!hasAnalysis) return;
+      // The workspace already saves to DB via saveAssessmentToDb.
+      // We just need to reload the history to pick up the new data.
+      reload();
     },
-    [dispatch]
+    [reload]
+  );
+
+  // Async dispatch for trash/restore/permanent delete
+  const dispatch = useCallback(
+    async (action: HistoryAction) => {
+      const supabase = createClient();
+
+      switch (action.type) {
+        case "DELETE_ENTRY": {
+          // Soft delete — set trashed = true
+          const { error } = await supabase
+            .from("assessments")
+            .update({ trashed: true })
+            .eq("id", action.id);
+          if (!error) {
+            setEntries((prev) =>
+              prev.map((e) => (e.id === action.id ? { ...e, trashed: true } : e))
+            );
+          }
+          break;
+        }
+
+        case "RESTORE_ENTRY": {
+          const { error } = await supabase
+            .from("assessments")
+            .update({ trashed: false })
+            .eq("id", action.id);
+          if (!error) {
+            setEntries((prev) =>
+              prev.map((e) => (e.id === action.id ? { ...e, trashed: false } : e))
+            );
+          }
+          break;
+        }
+
+        case "PERMANENT_DELETE": {
+          // CASCADE will delete questions → analyses → decisions
+          const { error } = await supabase
+            .from("assessments")
+            .delete()
+            .eq("id", action.id);
+          if (!error) {
+            setEntries((prev) => prev.filter((e) => e.id !== action.id));
+          }
+          break;
+        }
+
+        case "CLEAR_TRASH": {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) break;
+          const { error } = await supabase
+            .from("assessments")
+            .delete()
+            .eq("owner_id", user.id)
+            .eq("trashed", true);
+          if (!error) {
+            setEntries((prev) => prev.filter((e) => !e.trashed));
+          }
+          break;
+        }
+
+        case "SAVE_ENTRY": {
+          // This is handled by saveAssessment + reload
+          await reload();
+          break;
+        }
+      }
+    },
+    [reload]
   );
 
   return (
-    <HistoryContext.Provider value={{ entries, dispatch, saveAssessment }}>
+    <HistoryContext.Provider value={{ entries, loading, dispatch, saveAssessment, reload }}>
       {children}
     </HistoryContext.Provider>
   );
@@ -131,3 +247,7 @@ export function useHistory() {
   if (!ctx) throw new Error("useHistory must be used within a HistoryProvider");
   return ctx;
 }
+
+// Export context for test access
+export { HistoryContext };
+export type { HistoryContextType };

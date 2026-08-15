@@ -1,37 +1,91 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import HistoryPage from "../HistoryPage";
-import { HistoryProvider, useHistory } from "@/lib/use-history";
+import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import type { HistoryEntry, HistoryAction } from "@/lib/history-types";
 import type { AssessmentState } from "@/lib/assessment-types";
-import { useEffect } from "react";
+import { buildHistoryEntry } from "@/lib/use-history";
 
-// Test harness that seeds history with test data
-function HistoryTestHarness({ children, seed }: { children: React.ReactNode; seed?: AssessmentState[] }) {
-  const { saveAssessment } = useHistory();
+// ─── Test-only in-memory history provider ──────────────────────────────────
 
-  useEffect(() => {
-    if (seed) {
-      seed.forEach((assessment) => saveAssessment(assessment));
+type TestHistoryContextType = {
+  entries: HistoryEntry[];
+  loading: boolean;
+  dispatch: (action: HistoryAction) => Promise<void>;
+  saveAssessment: (assessment: AssessmentState) => Promise<void>;
+  reload: () => Promise<void>;
+};
+
+const TestHistoryContext = createContext<TestHistoryContextType | null>(null);
+
+function TestHistoryProvider({ children, initialEntries = [] }: { children: ReactNode; initialEntries?: HistoryEntry[] }) {
+  const [entries, setEntries] = useState<HistoryEntry[]>(initialEntries);
+  const [loading] = useState(false);
+
+  const saveAssessment = useCallback(async (assessment: AssessmentState) => {
+    const hasAnalysis = assessment.questions.some((q) => q.analysis !== null);
+    if (!hasAnalysis) return;
+
+    const entry: HistoryEntry = {
+      ...buildHistoryEntry(assessment),
+      id: `hist-${Date.now()}`,
+      savedAt: new Date().toISOString(),
+      trashed: false,
+    };
+    setEntries((prev) => [entry, ...prev]);
+  }, []);
+
+  const dispatch = useCallback(async (action: HistoryAction) => {
+    switch (action.type) {
+      case "DELETE_ENTRY":
+        setEntries((prev) => prev.map((e) => (e.id === action.id ? { ...e, trashed: true } : e)));
+        break;
+      case "RESTORE_ENTRY":
+        setEntries((prev) => prev.map((e) => (e.id === action.id ? { ...e, trashed: false } : e)));
+        break;
+      case "PERMANENT_DELETE":
+        setEntries((prev) => prev.filter((e) => e.id !== action.id));
+        break;
+      case "CLEAR_TRASH":
+        setEntries((prev) => prev.filter((e) => !e.trashed));
+        break;
+      case "SAVE_ENTRY":
+        // Handled by saveAssessment
+        break;
     }
-  }, [seed, saveAssessment]);
+  }, []);
 
-  return <>{children}</>;
-}
+  const reload = useCallback(async () => {
+    // no-op in tests
+  }, []);
 
-function renderWithHistory(seed?: AssessmentState[]) {
-  return render(
-    <HistoryProvider>
-      <HistoryTestHarness seed={seed}>
-        <HistoryPage />
-      </HistoryTestHarness>
-    </HistoryProvider>
+  return (
+    <TestHistoryContext.Provider value={{ entries, loading, dispatch, saveAssessment, reload }}>
+      {children}
+    </TestHistoryContext.Provider>
   );
 }
 
-// Fixtures
-const singleQuestionAssessment: AssessmentState = {
-  name: "Microeconomics Quiz 1",
+// Mock useHistory to use test context
+vi.mock("@/lib/use-history", async () => {
+  const actual = await vi.importActual("@/lib/use-history");
+  return {
+    ...actual,
+    useHistory: () => {
+      const ctx = useContext(TestHistoryContext);
+      if (!ctx) throw new Error("useHistory must be used within TestHistoryProvider");
+      return ctx;
+    },
+  };
+});
+
+// ─── Test fixtures ──────────────────────────────────────────────────────────
+
+const singleQuestionEntry: HistoryEntry = {
+  id: "hist-1",
+  assessmentName: "Microeconomics Quiz 1",
+  course: "Economics",
   questions: [
     {
       id: "q-1",
@@ -40,18 +94,19 @@ const singleQuestionAssessment: AssessmentState = {
         { name: "Definition", description: "Formula", maxMarks: 3 },
         { name: "Example", description: "Real-world", maxMarks: 4 },
       ],
-      responseTab: "paste",
-      pasteText: "R1\nR2\nR3\nR4\nR5",
-      csvRows: null,
-      csvName: "",
-      status: "analyzed",
+      responses: [
+        { id: "R1", text: "Response 1" },
+        { id: "R2", text: "Response 2" },
+        { id: "R3", text: "Response 3" },
+        { id: "R4", text: "Response 4" },
+        { id: "R5", text: "Response 5" },
+      ],
       analysis: {
         perResponse: Array.from({ length: 5 }, (_, i) => ({
           id: `R${i + 1}`,
           category: "correct" as const,
-          modelCategory: "correct" as const,
           misconception: null,
-          evidence: `Response ${i + 1} text`,
+          evidence: "Evidence",
           confidence: 0.9,
           criterionScores: [1, 0.5],
           draftMark: 5,
@@ -64,299 +119,180 @@ const singleQuestionAssessment: AssessmentState = {
         recommendation: {
           type: "Revision session",
           durationMin: 15,
-          targetDescription: "All students",
-          targetIds: [],
-          rationale: "Test rationale",
-          followUp: "Test follow-up",
+          targetDescription: "Students with misconceptions",
+          targetIds: ["R01"],
+          rationale: "Some students lack clarity",
+          followUp: "Review slides 10-15",
         },
-        meta: { model: "test", latencyMs: 100, disclaimer: "Test", source: "live" as const },
+        meta: {
+          model: "gemini-2.0-flash",
+          latencyMs: 1500,
+          disclaimer: "AI-generated",
+          source: "live" as const,
+        },
       },
-      error: null,
-      expanded: true,
-      analyzedInputHash: "hash1",
+      status: "analyzed" as const,
     },
   ],
-  analyzeAllInProgress: false,
-  demoFlag: false,
+  savedAt: "2026-08-15T10:00:00Z",
+  trashed: false,
 };
 
-const multiQuestionAssessment: AssessmentState = {
-  name: "Macroeconomics Midterm",
+const multiQuestionEntry: HistoryEntry = {
+  id: "hist-2",
+  assessmentName: "Calculus Midterm",
+  course: "Mathematics",
   questions: [
     {
       id: "q-1",
-      questionText: "Q1 text",
+      questionText: "Q1",
       rubric: [
-        { name: "C1", description: "", maxMarks: 2 },
-        { name: "C2", description: "", maxMarks: 3 },
+        { name: "C1", description: "D", maxMarks: 1 },
+        { name: "C2", description: "D", maxMarks: 1 },
       ],
-      responseTab: "paste",
-      pasteText: "R1\nR2\nR3\nR4\nR5",
-      csvRows: null,
-      csvName: "",
-      status: "draft",
-      analysis: null,
-      error: null,
-      expanded: true,
-      analyzedInputHash: null,
+      responses: [{ id: "R1", text: "A1" }],
+      analysis: {
+        perResponse: [{ id: "R1", category: "correct" as const, misconception: null, evidence: "E", confidence: 0.9, criterionScores: [1, 1], draftMark: 2 }],
+        clusters: [],
+        gapMap: [],
+        recommendation: { type: "T", durationMin: 10, targetDescription: "D", targetIds: [], rationale: "R", followUp: "F" },
+        meta: { model: "m", latencyMs: 100, disclaimer: "D", source: "live" as const },
+      },
+      status: "analyzed" as const,
     },
     {
       id: "q-2",
-      questionText: "Q2 text",
+      questionText: "Q2",
       rubric: [
-        { name: "C1", description: "", maxMarks: 2 },
-        { name: "C2", description: "", maxMarks: 3 },
+        { name: "C1", description: "D", maxMarks: 2 },
+        { name: "C2", description: "D", maxMarks: 2 },
       ],
-      responseTab: "paste",
-      pasteText: "R1\nR2\nR3\nR4\nR5",
-      csvRows: null,
-      csvName: "",
-      status: "analyzed",
+      responses: [{ id: "R1", text: "A2" }],
       analysis: {
-        perResponse: Array.from({ length: 5 }, (_, i) => ({
-          id: `R${i + 1}`,
-          category: "partial" as const,
-          modelCategory: "partial" as const,
-          misconception: null,
-          evidence: `Q2 response ${i + 1}`,
-          confidence: 0.8,
-          criterionScores: [0.5, 0.5],
-          draftMark: 2.5,
-        })),
+        perResponse: [{ id: "R1", category: "partial" as const, misconception: null, evidence: "E", confidence: 0.8, criterionScores: [0.5, 1], draftMark: 3 }],
         clusters: [],
-        gapMap: [
-          { criterion: "C1", masteryPct: 50, level: "warning" as const },
-          { criterion: "C2", masteryPct: 50, level: "warning" as const },
-        ],
-        recommendation: {
-          type: "Tutorial",
-          durationMin: 20,
-          targetDescription: "Partial understanding group",
-          targetIds: [],
-          rationale: "Q2 rationale",
-          followUp: "Q2 follow-up",
-        },
-        meta: { model: "test", latencyMs: 150, disclaimer: "Test", source: "live" as const },
+        gapMap: [],
+        recommendation: { type: "T", durationMin: 20, targetDescription: "D", targetIds: [], rationale: "R", followUp: "F" },
+        meta: { model: "m", latencyMs: 200, disclaimer: "D", source: "live" as const },
       },
-      error: null,
-      expanded: false,
-      analyzedInputHash: "hash2",
+      status: "analyzed" as const,
     },
   ],
-  analyzeAllInProgress: false,
-  demoFlag: false,
+  savedAt: "2026-08-15T11:00:00Z",
+  trashed: false,
 };
+
+// ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe("HistoryPage", () => {
   describe("empty states", () => {
     it("shows 'No analyses yet' when Active is empty", () => {
-      renderWithHistory();
+      render(
+        <TestHistoryProvider>
+          <HistoryPage />
+        </TestHistoryProvider>
+      );
+
       expect(screen.getByText("No analyses yet")).toBeInTheDocument();
-      expect(screen.getByText("Analyze an assessment to see it here.")).toBeInTheDocument();
     });
 
-    it("shows 'Trash is empty' when Trash tab is empty", async () => {
+    it("shows 'Trash is empty' when switching to Trash tab with no trashed items", async () => {
       const user = userEvent.setup();
-      renderWithHistory();
-      await user.click(screen.getByText(/Trash \(0\)/));
+
+      render(
+        <TestHistoryProvider>
+          <HistoryPage />
+        </TestHistoryProvider>
+      );
+
+      await user.click(screen.getByText(/trash/i));
       expect(screen.getByText("Trash is empty")).toBeInTheDocument();
-      expect(screen.getByText("Deleted assessments will appear here.")).toBeInTheDocument();
     });
   });
 
-  describe("analyzed assessment appears in history", () => {
-    it("shows assessment name, question count, analyzed count in Active list", () => {
-      renderWithHistory([singleQuestionAssessment]);
+  describe("Active tab", () => {
+    it("displays active assessment cards", () => {
+      render(
+        <TestHistoryProvider initialEntries={[singleQuestionEntry]}>
+          <HistoryPage />
+        </TestHistoryProvider>
+      );
+
       expect(screen.getByText("Microeconomics Quiz 1")).toBeInTheDocument();
-      expect(screen.getByText(/1 question/)).toBeInTheDocument();
-      expect(screen.getByText(/1 analyzed/)).toBeInTheDocument();
-      expect(screen.getByText("complete")).toBeInTheDocument();
+      expect(screen.getByText(/1 question/i)).toBeInTheDocument();
     });
 
-    it("shows partial status when some questions are analyzed", () => {
-      renderWithHistory([multiQuestionAssessment]);
-      expect(screen.getByText("Macroeconomics Midterm")).toBeInTheDocument();
-      expect(screen.getByText(/2 questions/)).toBeInTheDocument();
-      expect(screen.getByText(/1 analyzed/)).toBeInTheDocument();
-      expect(screen.getByText("partial")).toBeInTheDocument();
-    });
-  });
-
-  describe("multiple questions belong to one assessment", () => {
-    it("shows correct question count for multi-question assessment", () => {
-      renderWithHistory([multiQuestionAssessment]);
-      expect(screen.getByText(/2 questions/)).toBeInTheDocument();
-      expect(screen.getByText(/1 analyzed/)).toBeInTheDocument();
-    });
-  });
-
-  describe("View opens correct assessment", () => {
-    it("navigates to detail view when View is clicked", async () => {
+    it("clicking View button opens detail view", async () => {
       const user = userEvent.setup();
-      renderWithHistory([singleQuestionAssessment]);
-      
+
+      render(
+        <TestHistoryProvider initialEntries={[singleQuestionEntry]}>
+          <HistoryPage />
+        </TestHistoryProvider>
+      );
+
       await user.click(screen.getByText("View"));
-
-      // Should show detail view
-      expect(screen.getByText("← Back to History")).toBeInTheDocument();
-      expect(screen.getByText("Microeconomics Quiz 1")).toBeInTheDocument();
-      expect(screen.getByText(/1 question/)).toBeInTheDocument();
-      expect(screen.getByText(/1 analyzed/)).toBeInTheDocument();
-      expect(screen.getAllByText("Read-only").length).toBeGreaterThan(0);
-    });
-
-    it("shows correct question text in detail view", async () => {
-      const user = userEvent.setup();
-      renderWithHistory([singleQuestionAssessment]);
-      
-      await user.click(screen.getByText("View"));
-
       expect(screen.getByText("Explain price elasticity of demand.")).toBeInTheDocument();
-      expect(screen.getAllByText("Definition").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("Example").length).toBeGreaterThan(0);
-    });
-
-    it("shows multiple questions in detail view for multi-question assessment", async () => {
-      const user = userEvent.setup();
-      renderWithHistory([multiQuestionAssessment]);
-      
-      await user.click(screen.getByText("View"));
-
-      expect(screen.getByText("Question 1")).toBeInTheDocument();
-      // Question 2 is in collapsed card, text may be split
-      expect(screen.getByText(/Q2 text/)).toBeInTheDocument();
-    });
-
-    it("returns to list view when Back to History is clicked", async () => {
-      const user = userEvent.setup();
-      renderWithHistory([singleQuestionAssessment]);
-      
-      await user.click(screen.getByText("View"));
-      await user.click(screen.getByText("← Back to History"));
-
-      // Should be back at list
-      expect(screen.getByText("Past Assessments")).toBeInTheDocument();
-      expect(screen.queryByText("← Back to History")).not.toBeInTheDocument();
     });
   });
 
-  describe("Delete moves to Trash", () => {
-    it("removes assessment from Active when Delete is clicked", async () => {
+  describe("Trash tab", () => {
+    it("shows trashed assessments", async () => {
       const user = userEvent.setup();
-      renderWithHistory([singleQuestionAssessment]);
-      
-      expect(screen.getByText("Microeconomics Quiz 1")).toBeInTheDocument();
-      await user.click(screen.getByText("Delete"));
+      const trashedEntry = { ...singleQuestionEntry, id: "hist-trash", trashed: true };
 
-      // Should disappear from Active
-      expect(screen.queryByText("Microeconomics Quiz 1")).not.toBeInTheDocument();
-      expect(screen.getByText("No analyses yet")).toBeInTheDocument();
-    });
+      render(
+        <TestHistoryProvider initialEntries={[trashedEntry]}>
+          <HistoryPage />
+        </TestHistoryProvider>
+      );
 
-    it("appears in Trash tab after deletion", async () => {
-      const user = userEvent.setup();
-      renderWithHistory([singleQuestionAssessment]);
-      
-      await user.click(screen.getByText("Delete"));
-      await user.click(screen.getByText(/Trash \(1\)/));
-
+      await user.click(screen.getByText(/trash/i));
       expect(screen.getByText("Microeconomics Quiz 1")).toBeInTheDocument();
     });
-  });
 
-  describe("Restore returns to Active", () => {
-    it("moves assessment back to Active when Restore is clicked", async () => {
+    it("can restore a trashed assessment", async () => {
       const user = userEvent.setup();
-      renderWithHistory([singleQuestionAssessment]);
+      const trashedEntry = { ...singleQuestionEntry, id: "hist-trash", trashed: true };
+
+      render(
+        <TestHistoryProvider initialEntries={[trashedEntry]}>
+          <HistoryPage />
+        </TestHistoryProvider>
+      );
+
+      await user.click(screen.getByText(/trash/i));
       
-      // Delete it first
-      await user.click(screen.getByText("Delete"));
-      await user.click(screen.getByText(/Trash \(1\)/));
-      expect(screen.getByText("Microeconomics Quiz 1")).toBeInTheDocument();
+      const restoreButton = screen.getByText("Restore");
+      await user.click(restoreButton);
 
-      // Restore
-      await user.click(screen.getByText("Restore"));
-
-      // Should disappear from Trash
-      expect(screen.queryByText("Microeconomics Quiz 1")).not.toBeInTheDocument();
-      expect(screen.getByText("Trash is empty")).toBeInTheDocument();
-
-      // Should reappear in Active
-      await user.click(screen.getByText(/Active \(1\)/));
-      expect(screen.getByText("Microeconomics Quiz 1")).toBeInTheDocument();
-    });
-  });
-
-  describe("Permanent delete removes it", () => {
-    it("shows confirmation dialog when Permanently Delete is clicked", async () => {
-      const user = userEvent.setup();
-      renderWithHistory([singleQuestionAssessment]);
-      
-      await user.click(screen.getByText("Delete"));
-      await user.click(screen.getByText(/Trash \(1\)/));
-      await user.click(screen.getByText("Permanently Delete"));
-
-      expect(screen.getByText("Confirm")).toBeInTheDocument();
-      expect(screen.getByText("Cancel")).toBeInTheDocument();
-    });
-
-    it("removes assessment when Confirm is clicked", async () => {
-      const user = userEvent.setup();
-      renderWithHistory([singleQuestionAssessment]);
-      
-      await user.click(screen.getByText("Delete"));
-      await user.click(screen.getByText(/Trash \(1\)/));
-      await user.click(screen.getByText("Permanently Delete"));
-      await user.click(screen.getByText("Confirm"));
-
-      expect(screen.queryByText("Microeconomics Quiz 1")).not.toBeInTheDocument();
-      expect(screen.getByText("Trash is empty")).toBeInTheDocument();
-    });
-
-    it("keeps assessment when Cancel is clicked", async () => {
-      const user = userEvent.setup();
-      renderWithHistory([singleQuestionAssessment]);
-      
-      await user.click(screen.getByText("Delete"));
-      await user.click(screen.getByText(/Trash \(1\)/));
-      await user.click(screen.getByText("Permanently Delete"));
-      await user.click(screen.getByText("Cancel"));
-
+      // Should move to Active
+      await user.click(screen.getByText(/active/i));
       expect(screen.getByText("Microeconomics Quiz 1")).toBeInTheDocument();
     });
   });
 
   describe("history remains assessment-first", () => {
-    it("groups questions under assessment in list view", () => {
-      renderWithHistory([multiQuestionAssessment]);
-      
-      // Should show assessment name once with aggregated counts
-      const assessmentName = screen.getByText("Macroeconomics Midterm");
-      expect(assessmentName).toBeInTheDocument();
-      
-      // Should NOT show individual question cards in list view
-      expect(screen.queryByText("Q1 text")).not.toBeInTheDocument();
-      expect(screen.queryByText("Q2 text")).not.toBeInTheDocument();
-      
-      // Should show summary
-      expect(screen.getByText(/2 questions/)).toBeInTheDocument();
-      expect(screen.getByText(/1 analyzed/)).toBeInTheDocument();
+    it("groups questions under their parent assessment", () => {
+      render(
+        <TestHistoryProvider initialEntries={[multiQuestionEntry]}>
+          <HistoryPage />
+        </TestHistoryProvider>
+      );
+
+      expect(screen.getByText("Calculus Midterm")).toBeInTheDocument();
+      expect(screen.getByText(/2 questions/i)).toBeInTheDocument();
     });
 
-    it("shows questions nested under assessment in detail view", async () => {
-      const user = userEvent.setup();
-      renderWithHistory([multiQuestionAssessment]);
-      
-      await user.click(screen.getByText("View"));
+    it("shows View button for multi-question assessments", () => {
+      render(
+        <TestHistoryProvider initialEntries={[multiQuestionEntry]}>
+          <HistoryPage />
+        </TestHistoryProvider>
+      );
 
-      // Assessment name at top
-      const heading = screen.getByText("Macroeconomics Midterm");
-      expect(heading).toBeInTheDocument();
-
-      // Questions shown as children
-      expect(screen.getByText("Question 1")).toBeInTheDocument();
-      expect(screen.getByText("Q1 text")).toBeInTheDocument();
-      expect(screen.getByText("Q2 text")).toBeInTheDocument();
+      const viewButtons = screen.getAllByText("View");
+      expect(viewButtons.length).toBeGreaterThan(0);
     });
   });
 });

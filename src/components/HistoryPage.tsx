@@ -11,7 +11,7 @@ type Tab = "active" | "trash";
 // ─── Main History Page ─────────────────────────────────────────────────────
 
 export default function HistoryPage() {
-  const { entries, dispatch } = useHistory();
+  const { entries, loading, dispatch } = useHistory();
   const [tab, setTab] = useState<Tab>("active");
   const [viewId, setViewId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -93,8 +93,12 @@ export default function HistoryPage() {
         </button>
       </div>
 
-      {/* Empty state */}
-      {list.length === 0 ? (
+      {/* Loading state */}
+      {loading ? (
+        <div className="rounded-2xl border border-[#D5DAEC] bg-white p-12 text-center shadow-sm">
+          <p className="text-sm text-[#565C82]">Loading history…</p>
+        </div>
+      ) : list.length === 0 ? (
         <div className="rounded-2xl border border-[#D5DAEC] bg-white p-12 text-center shadow-sm">
           <p className="text-lg font-semibold text-[#141834]">
             {tab === "active" ? "No analyses yet" : "Trash is empty"}
