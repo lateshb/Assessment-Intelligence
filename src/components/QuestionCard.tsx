@@ -532,7 +532,8 @@ function ApplyRubricButton({
   dispatch: React.Dispatch<AssessmentAction>;
 }) {
   const [showPicker, setShowPicker] = useState(false);
-  const { rubrics } = useRubricLibrary();
+  const { rubrics, institutionRubrics } = useRubricLibrary();
+  const allRubrics = [...rubrics, ...institutionRubrics];
 
   return (
     <>
@@ -545,7 +546,7 @@ function ApplyRubricButton({
       </button>
       {showPicker && (
         <RubricPicker
-          rubrics={rubrics}
+          rubrics={allRubrics}
           onSelect={(criteria) => {
             dispatch({ type: "SET_RUBRIC", questionId, rubric: criteria });
             setShowPicker(false);

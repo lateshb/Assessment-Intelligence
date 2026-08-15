@@ -1,116 +1,23 @@
 /**
- * Rubric Library state management — reducer + context.
+ * Rubric Library state management — Supabase-backed.
  *
- * Stores library rubrics in local React state.
- * Persistence can later be swapped to Supabase without changing consumers.
+ * Loads rubrics from Supabase on mount, dispatches async mutations.
+ * Context API stays identical so consumers don't change.
  */
 
 "use client";
 
-import { createContext, useContext, useReducer, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  type ReactNode,
+} from "react";
 import type { LibraryRubric, RubricLibraryAction } from "./rubric-library-types";
-
-// ─── Helpers ───────────────────────────────────────────────────────────────
-
-let idCounter = 0;
-function generateRubricId(): string {
-  return `rubric-${Date.now()}-${++idCounter}`;
-}
-
-function now(): string {
-  return new Date().toISOString();
-}
-
-// ─── Sample rubrics for demo ───────────────────────────────────────────────
-
-const SAMPLE_RUBRICS: LibraryRubric[] = [
-  {
-    id: "sample-1",
-    name: "Price Elasticity Assessment",
-    course: "Economics",
-    description: "Assesses understanding of price elasticity of demand including formula, interpretation, and application.",
-    criteria: [
-      { name: "Definition", description: "Student states the correct formula and concept", maxMarks: 3 },
-      { name: "Interpretation", description: "Student explains what elasticity values mean", maxMarks: 4 },
-      { name: "Application", description: "Student applies to a real-world example", maxMarks: 3 },
-    ],
-    createdAt: "2026-01-15T10:00:00Z",
-    updatedAt: "2026-01-15T10:00:00Z",
-  },
-  {
-    id: "sample-2",
-    name: "Newton's Laws Problem Set",
-    course: "Physics",
-    description: "Rubric for assessing conceptual and mathematical understanding of Newton's three laws.",
-    criteria: [
-      { name: "Law identification", description: "Correctly identifies which law applies", maxMarks: 2 },
-      { name: "Free body diagram", description: "Accurate force diagram", maxMarks: 3 },
-      { name: "Mathematical solution", description: "Correct calculation with units", maxMarks: 3 },
-      { name: "Conceptual explanation", description: "Explains why the law applies", maxMarks: 2 },
-    ],
-    createdAt: "2026-02-10T10:00:00Z",
-    updatedAt: "2026-02-10T10:00:00Z",
-  },
-  {
-    id: "sample-3",
-    name: "Essay Structure",
-    course: "English",
-    description: "General essay structure rubric for argumentative writing.",
-    criteria: [
-      { name: "Thesis clarity", description: "Clear, debatable thesis statement", maxMarks: 3 },
-      { name: "Evidence quality", description: "Relevant, well-chosen supporting evidence", maxMarks: 4 },
-      { name: "Analysis depth", description: "Explains how evidence supports the thesis", maxMarks: 3 },
-    ],
-    createdAt: "2026-03-05T10:00:00Z",
-    updatedAt: "2026-03-05T10:00:00Z",
-  },
-];
-
-// ─── Reducer ───────────────────────────────────────────────────────────────
-
-export function rubricLibraryReducer(
-  state: LibraryRubric[],
-  action: RubricLibraryAction
-): LibraryRubric[] {
-  switch (action.type) {
-    case "CREATE_RUBRIC": {
-      const newRubric: LibraryRubric = {
-        ...action.rubric,
-        id: generateRubricId(),
-        createdAt: now(),
-        updatedAt: now(),
-      };
-      return [...state, newRubric];
-    }
-
-    case "UPDATE_RUBRIC":
-      return state.map((r) =>
-        r.id === action.id
-          ? { ...r, ...action.updates, updatedAt: now() }
-          : r
-      );
-
-    case "DELETE_RUBRIC":
-      return state.filter((r) => r.id !== action.id);
-
-    case "DUPLICATE_RUBRIC": {
-      const source = state.find((r) => r.id === action.id);
-      if (!source) return state;
-      const dup: LibraryRubric = {
-        ...source,
-        id: generateRubricId(),
-        name: `${source.name} (copy)`,
-        criteria: source.criteria.map((c) => ({ ...c })),
-        createdAt: now(),
-        updatedAt: now(),
-      };
-      return [...state, dup];
-    }
-
-    default:
-      return state;
-  }
-}
+import { createClient } from "@/lib/supabase/client";
+import type { Rubric } from "./types";
 
 // ─── Validation ────────────────────────────────────────────────────────────
 
@@ -126,19 +33,211 @@ export function validateLibraryRubric(
   return null;
 }
 
-// ─── Context ───────────────────────────────────────────────────────────────
+// ─── DB → LibraryRubric mapper ─────────────────────────────────────────────
+
+function toLibraryRubric(row: Record<string, unknown>): LibraryRubric {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    course: row.course as string,
+    description: (row.description as string) || "",
+    criteria: row.criteria as Rubric[],
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+// ─── Context type ──────────────────────────────────────────────────────────
 
 type RubricLibraryContextType = {
   rubrics: LibraryRubric[];
-  dispatch: React.Dispatch<RubricLibraryAction>;
+  institutionRubrics: LibraryRubric[];
+  loading: boolean;
+  error: string | null;
+  dispatch: (action: RubricLibraryAction) => void;
+  reload: () => Promise<void>;
 };
 
 const RubricLibraryContext = createContext<RubricLibraryContextType | null>(null);
 
+// ─── Provider ──────────────────────────────────────────────────────────────
+
 export function RubricLibraryProvider({ children }: { children: ReactNode }) {
-  const [rubrics, dispatch] = useReducer(rubricLibraryReducer, SAMPLE_RUBRICS);
+  const [rubrics, setRubrics] = useState<LibraryRubric[]>([]);
+  const [institutionRubrics, setInstitutionRubrics] = useState<LibraryRubric[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load rubrics from Supabase
+  const reload = useCallback(async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setRubrics([]);
+      setInstitutionRubrics([]);
+      setLoading(false);
+      return;
+    }
+
+    // Get profile for institution_id
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("institution_id")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile) {
+      setLoading(false);
+      return;
+    }
+
+    // My rubrics (owned by me)
+    const { data: myData, error: myError } = await supabase
+      .from("rubric_library")
+      .select("*")
+      .eq("owner_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (myError) {
+      setError(myError.message);
+      setLoading(false);
+      return;
+    }
+
+    // Institution rubrics (same institution, not mine)
+    const { data: instData } = await supabase
+      .from("rubric_library")
+      .select("*")
+      .eq("institution_id", profile.institution_id)
+      .neq("owner_id", user.id)
+      .order("created_at", { ascending: false });
+
+    setRubrics((myData || []).map(toLibraryRubric));
+    setInstitutionRubrics((instData || []).map(toLibraryRubric));
+    setError(null);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    reload();
+  }, [reload]);
+
+  // Async dispatch that persists to Supabase then updates local state
+  const dispatch = useCallback(
+    async (action: RubricLibraryAction) => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      switch (action.type) {
+        case "CREATE_RUBRIC": {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("institution_id")
+            .eq("id", user.id)
+            .single();
+          if (!profile) return;
+
+          const { data, error: createError } = await supabase
+            .from("rubric_library")
+            .insert({
+              owner_id: user.id,
+              institution_id: profile.institution_id,
+              name: action.rubric.name,
+              course: action.rubric.course,
+              description: action.rubric.description || null,
+              criteria: action.rubric.criteria,
+            })
+            .select()
+            .single();
+
+          if (createError) {
+            setError(createError.message);
+            return;
+          }
+          setRubrics((prev) => [toLibraryRubric(data), ...prev]);
+          break;
+        }
+
+        case "UPDATE_RUBRIC": {
+          const { data, error: updateError } = await supabase
+            .from("rubric_library")
+            .update({
+              name: action.updates.name,
+              course: action.updates.course,
+              description: action.updates.description,
+              criteria: action.updates.criteria,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", action.id)
+            .select()
+            .single();
+
+          if (updateError) {
+            setError(updateError.message);
+            return;
+          }
+          setRubrics((prev) =>
+            prev.map((r) => (r.id === action.id ? toLibraryRubric(data) : r))
+          );
+          break;
+        }
+
+        case "DELETE_RUBRIC": {
+          const { error: deleteError } = await supabase
+            .from("rubric_library")
+            .delete()
+            .eq("id", action.id);
+
+          if (deleteError) {
+            setError(deleteError.message);
+            return;
+          }
+          setRubrics((prev) => prev.filter((r) => r.id !== action.id));
+          break;
+        }
+
+        case "DUPLICATE_RUBRIC": {
+          const source = rubrics.find((r) => r.id === action.id)
+            || institutionRubrics.find((r) => r.id === action.id);
+          if (!source) return;
+
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("institution_id")
+            .eq("id", user.id)
+            .single();
+          if (!profile) return;
+
+          const { data, error: dupError } = await supabase
+            .from("rubric_library")
+            .insert({
+              owner_id: user.id,
+              institution_id: profile.institution_id,
+              name: `${source.name} (copy)`,
+              course: source.course,
+              description: source.description || null,
+              criteria: source.criteria.map((c) => ({ ...c })),
+            })
+            .select()
+            .single();
+
+          if (dupError) {
+            setError(dupError.message);
+            return;
+          }
+          setRubrics((prev) => [toLibraryRubric(data), ...prev]);
+          break;
+        }
+      }
+    },
+    [rubrics, institutionRubrics]
+  );
+
   return (
-    <RubricLibraryContext.Provider value={{ rubrics, dispatch }}>
+    <RubricLibraryContext.Provider
+      value={{ rubrics, institutionRubrics, loading, error, dispatch, reload }}
+    >
       {children}
     </RubricLibraryContext.Provider>
   );
@@ -149,3 +248,6 @@ export function useRubricLibrary() {
   if (!ctx) throw new Error("useRubricLibrary must be used within a RubricLibraryProvider");
   return ctx;
 }
+
+// Re-export the reducer for test compatibility
+export { validateLibraryRubric as validateRubric };

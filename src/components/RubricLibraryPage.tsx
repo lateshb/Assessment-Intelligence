@@ -7,6 +7,7 @@ import type { Rubric } from "@/lib/types";
 import RubricEditor from "@/components/RubricEditor";
 
 type Mode = "list" | "create" | "edit";
+type RubricTab = "my" | "institution";
 
 const EMPTY_CRITERIA: Rubric[] = [
   { name: "", description: "", maxMarks: 2 },
@@ -14,8 +15,9 @@ const EMPTY_CRITERIA: Rubric[] = [
 ];
 
 export default function RubricLibraryPage() {
-  const { rubrics, dispatch } = useRubricLibrary();
+  const { rubrics, institutionRubrics, loading, error: dbError, dispatch } = useRubricLibrary();
   const [mode, setMode] = useState<Mode>("list");
+  const [rubricTab, setRubricTab] = useState<RubricTab>("my");
   const [editId, setEditId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
@@ -27,13 +29,15 @@ export default function RubricLibraryPage() {
   const [formDescription, setFormDescription] = useState("");
   const [formCriteria, setFormCriteria] = useState<Rubric[]>(EMPTY_CRITERIA.map((c) => ({ ...c })));
 
+  const activeList = rubricTab === "my" ? rubrics : institutionRubrics;
+
   const courses = useMemo(
-    () => [...new Set(rubrics.map((r) => r.course))].sort(),
-    [rubrics]
+    () => [...new Set(activeList.map((r) => r.course))].sort(),
+    [activeList]
   );
 
   const filtered = useMemo(() => {
-    let list = rubrics;
+    let list = activeList;
     if (courseFilter) list = list.filter((r) => r.course === courseFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -42,7 +46,7 @@ export default function RubricLibraryPage() {
       );
     }
     return list;
-  }, [rubrics, courseFilter, search]);
+  }, [activeList, courseFilter, search]);
 
   function resetForm() {
     setFormName("");
@@ -251,10 +255,10 @@ export default function RubricLibraryPage() {
           className="rounded-lg border border-[#D5DAEC] bg-white px-3 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none"
           id="rubric-course-filter"
         >
-          <option value="">All courses ({rubrics.length})</option>
+          <option value="">All courses ({activeList.length})</option>
           {courses.map((c) => (
             <option key={c} value={c}>
-              {c} ({rubrics.filter((r) => r.course === c).length})
+              {c} ({activeList.filter((r) => r.course === c).length})
             </option>
           ))}
         </select>
@@ -262,27 +266,47 @@ export default function RubricLibraryPage() {
 
       {/* Tabs: My Rubrics / Institution */}
       <div className="mb-4 flex gap-1 rounded-xl bg-[#EDEFF6] p-1 text-sm font-semibold">
-        <button className="flex-1 rounded-lg bg-white px-3 py-1.5 text-[#26306A] shadow">
-          My Rubrics
+        <button
+          onClick={() => { setRubricTab("my"); setCourseFilter(""); }}
+          className={`flex-1 rounded-lg px-3 py-1.5 ${
+            rubricTab === "my" ? "bg-white text-[#26306A] shadow" : "text-[#565C82]"
+          }`}
+        >
+          My Rubrics ({rubrics.length})
         </button>
         <button
-          className="flex-1 rounded-lg px-3 py-1.5 text-[#565C82]"
-          title="Institution rubrics will be available after authentication is implemented"
+          onClick={() => { setRubricTab("institution"); setCourseFilter(""); }}
+          className={`flex-1 rounded-lg px-3 py-1.5 ${
+            rubricTab === "institution" ? "bg-white text-[#26306A] shadow" : "text-[#565C82]"
+          }`}
         >
-          Institution Rubrics
+          Institution Rubrics ({institutionRubrics.length})
         </button>
       </div>
 
-      {/* Rubric cards */}
-      {filtered.length === 0 ? (
+      {/* DB error */}
+      {dbError && (
+        <div className="mb-4 rounded-xl border border-[#E4572E] bg-[#FBE9E3] px-4 py-3 text-sm font-medium text-[#B23A1B]">
+          {dbError}
+        </div>
+      )}
+
+      {/* Loading state */}
+      {loading ? (
+        <div className="rounded-2xl border border-[#D5DAEC] bg-white p-12 text-center shadow-sm">
+          <p className="text-sm text-[#565C82]">Loading rubrics…</p>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-[#D5DAEC] bg-white p-12 text-center shadow-sm">
           <p className="text-lg font-semibold text-[#141834]">No rubrics found</p>
           <p className="mt-1 text-sm text-[#565C82]">
             {search || courseFilter
               ? "Try adjusting your search or filter."
-              : "Create your first rubric to get started."}
+              : rubricTab === "institution"
+                ? "No institution rubrics from other teachers yet."
+                : "Create your first rubric to get started."}
           </p>
-          {!search && !courseFilter && (
+          {!search && !courseFilter && rubricTab === "my" && (
             <button
               onClick={openCreate}
               className="mt-4 rounded-xl bg-[#26306A] px-5 py-2 text-sm font-bold text-white shadow hover:bg-[#3A4A9F]"
@@ -319,24 +343,28 @@ export default function RubricLibraryPage() {
               </div>
               <div className="mt-3 border-t border-[#EDEFF6] pt-3">
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => openEdit(r)}
-                    className="rounded-lg border border-[#D5DAEC] px-3 py-1 text-xs font-semibold text-[#3A4A9F] hover:bg-[#E9ECF9]"
-                  >
-                    Edit
-                  </button>
+                  {rubricTab === "my" && (
+                    <button
+                      onClick={() => openEdit(r)}
+                      className="rounded-lg border border-[#D5DAEC] px-3 py-1 text-xs font-semibold text-[#3A4A9F] hover:bg-[#E9ECF9]"
+                    >
+                      Edit
+                    </button>
+                  )}
                   <button
                     onClick={() => handleDuplicate(r.id)}
                     className="rounded-lg border border-[#D5DAEC] px-3 py-1 text-xs font-semibold text-[#565C82] hover:bg-[#EDEFF6]"
                   >
                     Duplicate
                   </button>
-                  <button
-                    onClick={() => handleDelete(r.id)}
-                    className="rounded-lg border border-[#D5DAEC] px-3 py-1 text-xs font-semibold text-[#B23A1B] hover:bg-[#FBE9E3]"
-                  >
-                    Delete
-                  </button>
+                  {rubricTab === "my" && (
+                    <button
+                      onClick={() => handleDelete(r.id)}
+                      className="rounded-lg border border-[#D5DAEC] px-3 py-1 text-xs font-semibold text-[#B23A1B] hover:bg-[#FBE9E3]"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

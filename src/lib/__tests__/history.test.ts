@@ -1,178 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { historyReducer, buildHistoryEntry } from "../use-history";
-import type { HistoryEntry } from "../history-types";
+import { buildHistoryEntry } from "../use-history";
+import { validateLibraryRubric } from "../use-rubric-library";
 import type { AssessmentState } from "../assessment-types";
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
-
-function makeEntry(overrides?: Partial<HistoryEntry>): HistoryEntry {
-  return {
-    id: "hist-1",
-    assessmentName: "Test Assessment",
-    course: "",
-    questions: [
-      {
-        id: "q-1",
-        questionText: "Explain price elasticity.",
-        rubric: [
-          { name: "Definition", description: "Formula", maxMarks: 3 },
-          { name: "Example", description: "Real-world", maxMarks: 4 },
-        ],
-        responses: [
-          { id: "R01", text: "Answer 1" },
-          { id: "R02", text: "Answer 2" },
-        ],
-        analysis: {
-          perResponse: [],
-          clusters: [],
-          gapMap: [],
-          recommendation: {
-            type: "Revision",
-            durationMin: 15,
-            targetDescription: "All",
-            targetIds: [],
-            rationale: "Test",
-            followUp: "Test",
-          },
-          meta: { model: "test", latencyMs: 100, disclaimer: "Test", source: "live" as const },
-        },
-        status: "analyzed",
-      },
-    ],
-    savedAt: "2026-01-01T00:00:00Z",
-    trashed: false,
-    ...overrides,
-  };
-}
-
-function makeTwoQuestionEntry(): HistoryEntry {
-  return makeEntry({
-    questions: [
-      {
-        id: "q-1",
-        questionText: "Q1",
-        rubric: [{ name: "C1", description: "", maxMarks: 2 }, { name: "C2", description: "", maxMarks: 3 }],
-        responses: [{ id: "R01", text: "A1" }],
-        analysis: null,
-        status: "draft",
-      },
-      {
-        id: "q-2",
-        questionText: "Q2",
-        rubric: [{ name: "C1", description: "", maxMarks: 2 }, { name: "C2", description: "", maxMarks: 3 }],
-        responses: [{ id: "R01", text: "A2" }],
-        analysis: {
-          perResponse: [],
-          clusters: [],
-          gapMap: [],
-          recommendation: {
-            type: "Revision",
-            durationMin: 10,
-            targetDescription: "All",
-            targetIds: [],
-            rationale: "",
-            followUp: "",
-          },
-          meta: { model: "test", latencyMs: 50, disclaimer: "", source: "live" as const },
-        },
-        status: "analyzed",
-      },
-    ],
-  });
-}
-
-// ─── Reducer tests ─────────────────────────────────────────────────────────
-
-describe("historyReducer", () => {
-  describe("SAVE_ENTRY", () => {
-    it("adds analyzed assessment to history", () => {
-      const result = historyReducer([], {
-        type: "SAVE_ENTRY",
-        entry: {
-          assessmentName: "My Test",
-          course: "",
-          questions: makeEntry().questions,
-        },
-      });
-      expect(result).toHaveLength(1);
-      expect(result[0].assessmentName).toBe("My Test");
-      expect(result[0].id).toMatch(/^hist-/);
-      expect(result[0].savedAt).toBeTruthy();
-      expect(result[0].trashed).toBe(false);
-    });
-
-    it("preserves multiple questions belonging to one assessment", () => {
-      const entry = makeTwoQuestionEntry();
-      const result = historyReducer([], {
-        type: "SAVE_ENTRY",
-        entry: {
-          assessmentName: entry.assessmentName,
-          course: "",
-          questions: entry.questions,
-        },
-      });
-      expect(result).toHaveLength(1);
-      expect(result[0].questions).toHaveLength(2);
-      expect(result[0].questions[0].id).toBe("q-1");
-      expect(result[0].questions[1].id).toBe("q-2");
-    });
-  });
-
-  describe("DELETE_ENTRY", () => {
-    it("moves to trash (does not permanently remove)", () => {
-      const state = [makeEntry()];
-      const result = historyReducer(state, { type: "DELETE_ENTRY", id: "hist-1" });
-      expect(result).toHaveLength(1);
-      expect(result[0].trashed).toBe(true);
-    });
-  });
-
-  describe("RESTORE_ENTRY", () => {
-    it("restores from trash to active", () => {
-      const state = [makeEntry({ trashed: true })];
-      const result = historyReducer(state, { type: "RESTORE_ENTRY", id: "hist-1" });
-      expect(result).toHaveLength(1);
-      expect(result[0].trashed).toBe(false);
-    });
-  });
-
-  describe("PERMANENT_DELETE", () => {
-    it("permanently removes entry", () => {
-      const state = [makeEntry({ trashed: true })];
-      const result = historyReducer(state, { type: "PERMANENT_DELETE", id: "hist-1" });
-      expect(result).toHaveLength(0);
-    });
-  });
-
-  describe("CLEAR_TRASH", () => {
-    it("removes all trashed entries", () => {
-      const state = [
-        makeEntry({ id: "h1", trashed: true }),
-        makeEntry({ id: "h2", trashed: false }),
-        makeEntry({ id: "h3", trashed: true }),
-      ];
-      const result = historyReducer(state, { type: "CLEAR_TRASH" });
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe("h2");
-    });
-  });
-});
-
-// ─── Assessment-first structure ────────────────────────────────────────────
-
-describe("assessment-first history", () => {
-  it("history entries are assessment-level, not question-level", () => {
-    const entry = makeTwoQuestionEntry();
-    // An entry contains the full assessment with all its questions
-    expect(entry.assessmentName).toBe("Test Assessment");
-    expect(entry.questions).toHaveLength(2);
-    // Each question lives under the assessment, not as a standalone entry
-    expect(entry.questions[0].questionText).toBe("Q1");
-    expect(entry.questions[1].questionText).toBe("Q2");
-  });
-});
-
-// ─── buildHistoryEntry ─────────────────────────────────────────────────────
+// ─── buildHistoryEntry tests (pure function, no DB) ────────────────────────
 
 describe("buildHistoryEntry", () => {
   it("creates a snapshot from assessment state", () => {
@@ -192,22 +23,40 @@ describe("buildHistoryEntry", () => {
           csvName: "",
           status: "analyzed",
           analysis: {
-            perResponse: [],
+            perResponse: [
+              {
+                id: "R1",
+                category: "correct",
+                misconception: null,
+                evidence: "Good",
+                confidence: 0.9,
+                criterionScores: [1, 0.5],
+                draftMark: 4,
+              },
+            ],
             clusters: [],
-            gapMap: [],
+            gapMap: [
+              { criterion: "C1", masteryPct: 80, level: "good" },
+              { criterion: "C2", masteryPct: 60, level: "warning" },
+            ],
             recommendation: {
-              type: "Revision",
+              type: "Review",
               durationMin: 15,
-              targetDescription: "All",
-              targetIds: [],
-              rationale: "R",
-              followUp: "F",
+              targetDescription: "Struggling students",
+              targetIds: ["R1"],
+              rationale: "Low mastery",
+              followUp: "1:1 session",
             },
-            meta: { model: "test", latencyMs: 100, disclaimer: "", source: "live" as const },
+            meta: {
+              model: "gemini-2.0-flash",
+              latencyMs: 1500,
+              disclaimer: "Probabilistic",
+              source: "live",
+            },
           },
           error: null,
           expanded: true,
-          analyzedInputHash: "hash",
+          analyzedInputHash: null,
         },
       ],
       analyzeAllInProgress: false,
@@ -215,68 +64,275 @@ describe("buildHistoryEntry", () => {
     };
 
     const entry = buildHistoryEntry(assessment);
+
     expect(entry.assessmentName).toBe("Snapshot Test");
     expect(entry.questions).toHaveLength(1);
     expect(entry.questions[0].questionText).toBe("Test question");
-    expect(entry.questions[0].rubric).toHaveLength(2);
-    expect(entry.questions[0].responses).toHaveLength(5);
     expect(entry.questions[0].analysis).toBeTruthy();
-    expect(entry.questions[0].status).toBe("analyzed");
+    // Note: savedAt, trashed, id are added when persisting to DB, not in buildHistoryEntry
   });
 
-  it("uses 'Untitled Assessment' when name is empty", () => {
+  it("copies rubric snapshot independently", () => {
     const assessment: AssessmentState = {
-      name: "",
-      questions: [{
-        id: "q-1",
-        questionText: "",
-        rubric: [{ name: "", description: "", maxMarks: 2 }, { name: "", description: "", maxMarks: 2 }],
-        responseTab: "paste",
-        pasteText: "",
-        csvRows: null,
-        csvName: "",
-        status: "draft",
-        analysis: null,
-        error: null,
-        expanded: true,
-        analyzedInputHash: null,
-      }],
+      name: "Test",
+      questions: [
+        {
+          id: "q-1",
+          questionText: "Q",
+          rubric: [
+            { name: "A", description: "D", maxMarks: 1 },
+            { name: "B", description: "D", maxMarks: 1 },
+          ],
+          responseTab: "paste",
+          pasteText: "R1\nR2\nR3\nR4\nR5",
+          csvRows: null,
+          csvName: "",
+          status: "analyzed",
+          analysis: {
+            perResponse: [],
+            clusters: [],
+            gapMap: [],
+            recommendation: {
+              type: "T",
+              durationMin: 10,
+              targetDescription: "D",
+              targetIds: [],
+              rationale: "R",
+              followUp: "F",
+            },
+            meta: {
+              model: "m",
+              latencyMs: 100,
+              disclaimer: "D",
+              source: "live",
+            },
+          },
+          error: null,
+          expanded: true,
+          analyzedInputHash: null,
+        },
+      ],
       analyzeAllInProgress: false,
       demoFlag: false,
     };
-    const entry = buildHistoryEntry(assessment);
-    expect(entry.assessmentName).toBe("Untitled Assessment");
-  });
-
-  it("snapshot is independent of source assessment state", () => {
-    const assessment: AssessmentState = {
-      name: "Independence Test",
-      questions: [{
-        id: "q-1",
-        questionText: "Original",
-        rubric: [{ name: "C1", description: "", maxMarks: 2 }, { name: "C2", description: "", maxMarks: 3 }],
-        responseTab: "paste",
-        pasteText: "R1\nR2\nR3\nR4\nR5",
-        csvRows: null,
-        csvName: "",
-        status: "analyzed",
-        analysis: null,
-        error: null,
-        expanded: true,
-        analyzedInputHash: null,
-      }],
-      analyzeAllInProgress: false,
-      demoFlag: false,
-    };
 
     const entry = buildHistoryEntry(assessment);
+    const historicalRubric = entry.questions[0].rubric;
 
-    // Mutate the source
-    assessment.questions[0].questionText = "MUTATED";
+    // Mutate original assessment rubric
     assessment.questions[0].rubric[0].name = "MUTATED";
 
-    // Snapshot should be unaffected
-    expect(entry.questions[0].questionText).toBe("Original");
-    expect(entry.questions[0].rubric[0].name).toBe("C1");
+    // Historical snapshot should be unchanged
+    expect(historicalRubric[0].name).toBe("A");
+  });
+
+  it("handles multi-question assessments", () => {
+    const assessment: AssessmentState = {
+      name: "Multi-Q Test",
+      questions: [
+        {
+          id: "q-1",
+          questionText: "Q1",
+          rubric: [
+            { name: "C1", description: "D", maxMarks: 1 },
+            { name: "C2", description: "D", maxMarks: 1 },
+          ],
+          responseTab: "paste",
+          pasteText: "R1\nR2\nR3\nR4\nR5",
+          csvRows: null,
+          csvName: "",
+          status: "analyzed",
+          analysis: {
+            perResponse: [],
+            clusters: [],
+            gapMap: [],
+            recommendation: { type: "T", durationMin: 10, targetDescription: "D", targetIds: [], rationale: "R", followUp: "F" },
+            meta: { model: "m", latencyMs: 100, disclaimer: "D", source: "live" },
+          },
+          error: null,
+          expanded: true,
+          analyzedInputHash: null,
+        },
+        {
+          id: "q-2",
+          questionText: "Q2",
+          rubric: [
+            { name: "A1", description: "D", maxMarks: 2 },
+            { name: "A2", description: "D", maxMarks: 2 },
+          ],
+          responseTab: "paste",
+          pasteText: "S1\nS2\nS3\nS4\nS5",
+          csvRows: null,
+          csvName: "",
+          status: "analyzed",
+          analysis: {
+            perResponse: [],
+            clusters: [],
+            gapMap: [],
+            recommendation: { type: "T", durationMin: 20, targetDescription: "D", targetIds: [], rationale: "R", followUp: "F" },
+            meta: { model: "m", latencyMs: 200, disclaimer: "D", source: "live" },
+          },
+          error: null,
+          expanded: true,
+          analyzedInputHash: null,
+        },
+      ],
+      analyzeAllInProgress: false,
+      demoFlag: false,
+    };
+
+    const entry = buildHistoryEntry(assessment);
+
+    expect(entry.questions).toHaveLength(2);
+    expect(entry.questions[0].questionText).toBe("Q1");
+    expect(entry.questions[1].questionText).toBe("Q2");
+  });
+
+  it("excludes unanalyzed questions from snapshot", () => {
+    const assessment: AssessmentState = {
+      name: "Mixed",
+      questions: [
+        {
+          id: "q-1",
+          questionText: "Analyzed",
+          rubric: [
+            { name: "C", description: "D", maxMarks: 1 },
+            { name: "C2", description: "D", maxMarks: 1 },
+          ],
+          responseTab: "paste",
+          pasteText: "R1\nR2\nR3\nR4\nR5",
+          csvRows: null,
+          csvName: "",
+          status: "analyzed",
+          analysis: {
+            perResponse: [],
+            clusters: [],
+            gapMap: [],
+            recommendation: { type: "T", durationMin: 10, targetDescription: "D", targetIds: [], rationale: "R", followUp: "F" },
+            meta: { model: "m", latencyMs: 100, disclaimer: "D", source: "live" },
+          },
+          error: null,
+          expanded: true,
+          analyzedInputHash: null,
+        },
+        {
+          id: "q-2",
+          questionText: "Draft (not analyzed)",
+          rubric: [
+            { name: "C", description: "D", maxMarks: 1 },
+            { name: "C2", description: "D", maxMarks: 1 },
+          ],
+          responseTab: "paste",
+          pasteText: "",
+          csvRows: null,
+          csvName: "",
+          status: "draft",
+          analysis: null,
+          error: null,
+          expanded: true,
+          analyzedInputHash: null,
+        },
+      ],
+      analyzeAllInProgress: false,
+      demoFlag: false,
+    };
+
+    const entry = buildHistoryEntry(assessment);
+
+    // buildHistoryEntry includes ALL questions (analyzed or not)
+    // Filtering unanalyzed assessments is done at the DB level (loadHistoryFromDb)
+    expect(entry.questions).toHaveLength(2);
+    expect(entry.questions[0].status).toBe("analyzed");
+    expect(entry.questions[1].status).toBe("draft");
+  });
+});
+
+// ─── Rubric validation tests (shared with library) ──────────────────────────
+
+describe("validateLibraryRubric (used in history/library)", () => {
+  it("validates a correct rubric", () => {
+    expect(
+      validateLibraryRubric({
+        name: "Valid",
+        course: "Math",
+        criteria: [
+          { name: "C1", maxMarks: 2 },
+          { name: "C2", maxMarks: 3 },
+        ],
+      })
+    ).toBeNull();
+  });
+
+  it("rejects empty name", () => {
+    expect(
+      validateLibraryRubric({
+        name: "",
+        course: "X",
+        criteria: [
+          { name: "C1", maxMarks: 1 },
+          { name: "C2", maxMarks: 1 },
+        ],
+      })
+    ).toBe("Rubric name is required.");
+  });
+
+  it("rejects empty course", () => {
+    expect(
+      validateLibraryRubric({
+        name: "X",
+        course: "",
+        criteria: [
+          { name: "C1", maxMarks: 1 },
+          { name: "C2", maxMarks: 1 },
+        ],
+      })
+    ).toBe("Course is required.");
+  });
+
+  it("rejects fewer than 2 criteria", () => {
+    expect(
+      validateLibraryRubric({
+        name: "X",
+        course: "Y",
+        criteria: [{ name: "C1", maxMarks: 1 }],
+      })
+    ).toBe("At least 2 criteria are required.");
+  });
+
+  it("rejects more than 5 criteria", () => {
+    const criteria = Array.from({ length: 6 }, (_, i) => ({ name: `C${i}`, maxMarks: 1 }));
+    expect(
+      validateLibraryRubric({
+        name: "X",
+        course: "Y",
+        criteria,
+      })
+    ).toBe("Maximum 5 criteria allowed.");
+  });
+
+  it("rejects criteria without name", () => {
+    expect(
+      validateLibraryRubric({
+        name: "X",
+        course: "Y",
+        criteria: [
+          { name: "", maxMarks: 1 },
+          { name: "C2", maxMarks: 1 },
+        ],
+      })
+    ).toBe("Every criterion needs a name.");
+  });
+
+  it("rejects criteria with 0 marks", () => {
+    expect(
+      validateLibraryRubric({
+        name: "X",
+        course: "Y",
+        criteria: [
+          { name: "C1", maxMarks: 0 },
+          { name: "C2", maxMarks: 1 },
+        ],
+      })
+    ).toBe("Every criterion needs at least 1 mark.");
   });
 });

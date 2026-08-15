@@ -162,11 +162,21 @@ export async function duplicateRubric(id: string): Promise<LibraryRubric | null>
     return null;
   }
 
+  // Get institution_id
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("institution_id")
+    .eq("id", user.user.id)
+    .single();
+
+  if (!profile) throw new Error("Profile not found");
+
   // Create the duplicate
   const { data, error } = await supabase
     .from("rubric_library")
     .insert({
-      user_id: user.user.id,
+      owner_id: user.user.id,
+      institution_id: profile.institution_id,
       name: `${source.name} (copy)`,
       course: source.course,
       description: source.description,
