@@ -42,9 +42,8 @@ export async function saveAssessmentToDb(
 
   if (assessmentError) throw assessmentError
 
-  // 2. Save questions and collect their IDs + analysis IDs
-  const analysisIds: (string | null)[] = []
-  const questionIds = await Promise.all(
+  // 2. Save questions and collect their IDs + analysis IDs synchronously in position order
+  const savedQuestions = await Promise.all(
     state.questions.map(async (q, position) => {
       const { data: question, error: questionError } = await supabase
         .from('questions')
@@ -121,13 +120,18 @@ export async function saveAssessmentToDb(
         }
       }
 
-      analysisIds.push(savedAnalysisId)
-      return question.id
+      return {
+        questionId: question.id,
+        analysisId: savedAnalysisId,
+      }
     })
   )
 
+  const questionIds = savedQuestions.map((s) => s.questionId)
+  const analysisIds = savedQuestions.map((s) => s.analysisId)
+
   // 4. Delete orphaned questions (removed from state but still in DB)
-  if (assessment.id) {
+  if (assessment.id && questionIds.length > 0) {
     const { error: deleteError } = await supabase
       .from('questions')
       .delete()

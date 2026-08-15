@@ -15,6 +15,7 @@ describe('Assessment Transformer: DB → AssessmentState', () => {
       institution_id: 'inst-1',
       sharing: 'private',
       shared_with: [],
+      trashed: false,
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
     }
@@ -62,6 +63,7 @@ describe('Assessment Transformer: DB → AssessmentState', () => {
       institution_id: 'inst-1',
       sharing: 'private',
       shared_with: [],
+      trashed: false,
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
     }
@@ -107,6 +109,7 @@ describe('Assessment Transformer: DB → AssessmentState', () => {
       institution_id: 'inst-1',
       sharing: 'private',
       shared_with: [],
+      trashed: false,
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
     }
@@ -181,6 +184,7 @@ describe('Assessment Transformer: DB → AssessmentState', () => {
       institution_id: 'inst-1',
       sharing: 'private',
       shared_with: [],
+      trashed: false,
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
     }
@@ -221,5 +225,56 @@ describe('Assessment Transformer: DB → AssessmentState', () => {
     expect(state.questions).toHaveLength(2)
     expect(state.questions[0].questionText).toBe('Q1: First')
     expect(state.questions[1].questionText).toBe('Q2: Second')
+  })
+
+  it('correctly sets status to needs_reanalysis when question text is edited after analysis', () => {
+    const dbAssessment: DbAssessment = {
+      id: 'a1',
+      name: 'Stale Test',
+      status: 'draft',
+      owner_id: 'user-1',
+      institution_id: 'inst-1',
+      sharing: 'private',
+      shared_with: [],
+      trashed: false,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    }
+
+    const dbQuestions = [
+      {
+        id: 'q1',
+        assessment_id: 'a1',
+        position: 0,
+        question_text: 'What is deep learning? (EDITED)',
+        rubric_snapshot: [{ name: 'C1', description: 'D', maxMarks: 5 }],
+        responses: 'Response 1\nResponse 2\nResponse 3\nResponse 4\nResponse 5',
+        rubric_source: null,
+        rubric_library_id: null,
+        has_current_analysis: true,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+        analysis: {
+          id: 'an1',
+          question_id: 'q1',
+          is_current: true,
+          question_text_snapshot: 'What is neural network?', // Original text before edit
+          rubric_snapshot: [{ name: 'C1', description: 'D', maxMarks: 5 }],
+          responses_snapshot: 'Response 1\nResponse 2\nResponse 3\nResponse 4\nResponse 5',
+          per_response: [],
+          clusters: [],
+          gap_map: [],
+          recommendation: { type: 'Review', durationMin: 5, targetDescription: 'All', targetIds: [], rationale: '', followUp: '' },
+          model: 'gemini-2.0-flash',
+          latency_ms: 1000,
+          source: 'live',
+          created_at: '2024-01-01T00:00:00Z',
+        } as any,
+      } as any,
+    ]
+
+    const state = transformDbToAssessmentState(dbAssessment, dbQuestions)
+
+    expect(state.questions[0].status).toBe('needs_reanalysis')
   })
 })
