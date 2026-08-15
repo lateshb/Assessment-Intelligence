@@ -19,34 +19,33 @@ export default function RootLayout({
     <html lang="en">
       <body className="flex min-h-screen flex-col bg-[#F4F6FC] text-[#1D2140] antialiased">
         <header className="sticky top-0 z-40 border-b border-[#D5DAEC] bg-white/95 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:flex-nowrap">
-            <Link href="/" className="flex items-center gap-3 shrink-0">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#26306A] text-lg font-bold text-[#F5A623] shadow-sm">
-                Ai
-              </span>
-              <span>
-                <span className="block text-sm font-bold leading-tight text-[#141834]">
-                  Assessment Intelligence
+          <div className="mx-auto flex max-w-6xl flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 px-4 py-2.5 sm:py-3">
+            <div className="flex items-center justify-between gap-3">
+              <Link href="/" className="flex items-center gap-3 shrink-0">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#26306A] text-lg font-bold text-[#F5A623] shadow-sm">
+                  Ai
                 </span>
-                <span className="block text-[11px] leading-tight text-[#565C82]">
-                  AI recommends. Teachers decide.
+                <span>
+                  <span className="block text-sm font-bold leading-tight text-[#141834]">
+                    Assessment Intelligence
+                  </span>
+                  <span className="block text-[11px] leading-tight text-[#565C82]">
+                    AI recommends. Teachers decide.
+                  </span>
                 </span>
-              </span>
-            </Link>
+              </Link>
+              <div className="sm:hidden shrink-0">
+                <UserMenu />
+              </div>
+            </div>
 
-            <div className="flex items-center gap-1 overflow-x-auto text-xs sm:text-sm font-medium">
-              <nav className="flex items-center gap-1">
+            <div className="flex items-center justify-between sm:justify-end gap-1 overflow-x-auto no-scrollbar py-0.5 text-xs sm:text-sm font-medium">
+              <nav className="flex items-center gap-1 shrink-0">
                 <Link
                   href="/"
-                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors"
-                >
-                  App
-                </Link>
-                <Link
-                  href="/rubric-library"
                   className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors whitespace-nowrap"
                 >
-                  Global Rubrics
+                  Workspace
                 </Link>
                 <Link
                   href="/saved-assessments"
@@ -55,13 +54,19 @@ export default function RootLayout({
                   Saved Assessments
                 </Link>
                 <Link
-                  href="/history"
-                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors"
+                  href="/rubric-library"
+                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors whitespace-nowrap"
                 >
-                  History
+                  Global Rubrics
+                </Link>
+                <Link
+                  href="/history"
+                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors whitespace-nowrap"
+                >
+                  Analysis History
                 </Link>
               </nav>
-              <div className="ml-1 shrink-0">
+              <div className="hidden sm:block ml-2 shrink-0">
                 <UserMenu />
               </div>
             </div>
@@ -108,12 +113,7 @@ export default function RootLayout({
                 <ul className="mt-3 space-y-2 text-xs">
                   <li>
                     <Link href="/" className="text-[#565C82] hover:text-[#26306A] hover:underline">
-                      Assessment Workspace
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/rubric-library" className="text-[#565C82] hover:text-[#26306A] hover:underline">
-                      Global Rubric Library
+                      Workspace
                     </Link>
                   </li>
                   <li>
@@ -122,8 +122,13 @@ export default function RootLayout({
                     </Link>
                   </li>
                   <li>
+                    <Link href="/rubric-library" className="text-[#565C82] hover:text-[#26306A] hover:underline">
+                      Global Rubrics
+                    </Link>
+                  </li>
+                  <li>
                     <Link href="/history" className="text-[#565C82] hover:text-[#26306A] hover:underline">
-                      Analysis History &amp; Trash
+                      Analysis History
                     </Link>
                   </li>
                 </ul>
