@@ -35,8 +35,8 @@ export function transformDbToAssessmentState(
       responseTab = 'paste'
     }
 
-    // Parse rubric
-    const rubric = (dbQ.rubric_snapshot as any) as Rubric[]
+    // Parse rubric with null guard
+    const rubric = (dbQ.rubric_snapshot as any) as Rubric[] || []
 
     // Parse analysis if present
     let analysis: Analysis | null = null
