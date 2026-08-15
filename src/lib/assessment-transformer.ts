@@ -8,6 +8,7 @@
 import type { AssessmentState, QuestionState } from './assessment-types'
 import type { Database } from '@/types/database.types'
 import type { Rubric, StudentResponse, Analysis } from './types'
+import { parsePasteText } from './use-assessment'
 
 type DbAssessment = Database['public']['Tables']['assessments']['Row']
 type DbQuestion = Database['public']['Tables']['questions']['Row']
@@ -112,11 +113,12 @@ function computeInputHash(q: {
   pasteText: string
   csvRows: StudentResponse[] | null
 }): string {
-  const rubricStr = JSON.stringify(q.rubric)
-  const responsesStr = q.csvRows
-    ? JSON.stringify(q.csvRows)
-    : q.pasteText
-  return `${q.questionText}|${rubricStr}|${responsesStr}`
+  const responses = q.csvRows || parsePasteText(q.pasteText)
+  return JSON.stringify({
+    questionText: q.questionText,
+    rubric: q.rubric,
+    responses: responses.map((r: StudentResponse) => r.text),
+  })
 }
 
 function computeQuestionStatus(q: {

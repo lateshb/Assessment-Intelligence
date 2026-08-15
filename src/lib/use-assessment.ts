@@ -110,7 +110,7 @@ function updateQuestion(
   };
 }
 
-export function assessmentReducer(
+export function reducer(
   state: AssessmentState,
   action: AssessmentAction
 ): AssessmentState {
@@ -320,7 +320,7 @@ export function createInitialState(): AssessmentState {
 // ─── Hook ──────────────────────────────────────────────────────────────────
 
 export function useAssessment() {
-  const [state, dispatch] = useReducer(assessmentReducer, null, createInitialState);
+  const [state, dispatch] = useReducer(reducer, null, createInitialState);
 
   // Check for ?demo=1 on mount
   useEffect(() => {
