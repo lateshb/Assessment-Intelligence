@@ -14,6 +14,7 @@ describe('Assessment Transformer: DB → AssessmentState', () => {
       owner_id: 'user-1',
       institution_id: 'inst-1',
       sharing: 'private',
+      shared_with: [],
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
     }
@@ -60,6 +61,7 @@ describe('Assessment Transformer: DB → AssessmentState', () => {
       owner_id: 'user-1',
       institution_id: 'inst-1',
       sharing: 'private',
+      shared_with: [],
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
     }
@@ -104,6 +106,7 @@ describe('Assessment Transformer: DB → AssessmentState', () => {
       owner_id: 'user-1',
       institution_id: 'inst-1',
       sharing: 'private',
+      shared_with: [],
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
     }
@@ -177,6 +180,7 @@ describe('Assessment Transformer: DB → AssessmentState', () => {
       owner_id: 'user-1',
       institution_id: 'inst-1',
       sharing: 'private',
+      shared_with: [],
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
     }

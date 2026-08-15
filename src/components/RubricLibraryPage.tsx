@@ -242,10 +242,10 @@ export default function RubricLibraryPage() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#B45309]">
-            Rubric Library
+            Course Outline
           </p>
           <h1 className="text-2xl font-bold text-[#141834]">
-            Reusable Rubrics
+            Global Rubrics
           </h1>
           <p className="mt-1 text-sm text-[#565C82]">
             Create and manage rubrics that can be applied to any assessment question.
@@ -284,7 +284,7 @@ export default function RubricLibraryPage() {
         </select>
       </div>
 
-      {/* Tabs: My Rubrics / Institution */}
+      {/* Tabs: My Global Rubrics / Institution */}
       <div className="mb-4 flex gap-1 rounded-xl bg-[#EDEFF6] p-1 text-sm font-semibold">
         <button
           onClick={() => { setRubricTab("my"); setCourseFilter(""); }}
@@ -292,7 +292,7 @@ export default function RubricLibraryPage() {
             rubricTab === "my" ? "bg-white text-[#26306A] shadow" : "text-[#565C82]"
           }`}
         >
-          My Rubrics ({rubrics.length})
+          My Global Rubrics ({rubrics.length})
         </button>
         <button
           onClick={() => { setRubricTab("institution"); setCourseFilter(""); }}

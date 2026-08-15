@@ -392,6 +392,7 @@ export default function QuestionCard({
               </p>
               <ApplyRubricButton
                 questionId={question.id}
+                currentCriteria={question.rubric}
                 dispatch={dispatch}
               />
             </div>
@@ -526,9 +527,11 @@ function AnalyzingText() {
 
 function ApplyRubricButton({
   questionId,
+  currentCriteria,
   dispatch,
 }: {
   questionId: string;
+  currentCriteria: Rubric[];
   dispatch: React.Dispatch<AssessmentAction>;
 }) {
   const [showPicker, setShowPicker] = useState(false);
@@ -542,11 +545,12 @@ function ApplyRubricButton({
         className="rounded-lg border border-[#D5DAEC] px-3 py-1 text-xs font-semibold text-[#3A4A9F] hover:bg-[#E9ECF9]"
         id={`apply-rubric-${questionId}`}
       >
-        📚 Apply Rubric
+        📚 Apply Global Rubric
       </button>
       {showPicker && (
         <RubricPicker
           rubrics={allRubrics}
+          currentCriteria={currentCriteria}
           onSelect={(criteria) => {
             dispatch({ type: "SET_RUBRIC", questionId, rubric: criteria });
             setShowPicker(false);
