@@ -48,9 +48,13 @@ export default function AssessmentWorkspace() {
     prevStateRef.current = state;
 
     // Check if any question just got analysis (reference changed)
-    const newlyAnalyzed = state.questions.some((q, i) => 
-      q.analysis && (!prev.questions[i] || prev.questions[i].analysis !== q.analysis)
-    );
+    // Compare by dbId if available, otherwise by index
+    const newlyAnalyzed = state.questions.some((q) => {
+      const prevQ = q.dbId 
+        ? prev.questions.find(pq => pq.dbId === q.dbId)
+        : prev.questions[state.questions.indexOf(q)];
+      return q.analysis && (!prevQ || prevQ.analysis !== q.analysis);
+    });
 
     if (newlyAnalyzed) {
       saveAssessment(state);

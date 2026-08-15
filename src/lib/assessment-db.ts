@@ -96,6 +96,17 @@ export async function saveAssessmentToDb(state: AssessmentState, userId: string,
     })
   )
 
+  // 4. Delete orphaned questions (removed from state but still in DB)
+  if (assessment.id) {
+    const { error: deleteError } = await supabase
+      .from('questions')
+      .delete()
+      .eq('assessment_id', assessment.id)
+      .not('id', 'in', `(${questionIds.join(',')})`)
+
+    if (deleteError) throw deleteError
+  }
+
   return {
     ...assessment,
     questionIds, // Return question IDs so caller can update state
