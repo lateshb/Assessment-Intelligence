@@ -50,6 +50,16 @@ export async function saveAssessmentToDb(state: AssessmentState, userId: string,
 
       // 3. Save analysis if present
       if (q.analysis) {
+        // Before inserting new analysis, mark any existing analyses for this question as stale
+        const { error: markStaleError } = await supabase
+          .from('analyses')
+          .update({ is_current: false })
+          .eq('question_id', question.id)
+          .eq('is_current', true)
+
+        if (markStaleError) throw markStaleError
+
+        // Now insert the new current analysis
         const { data: analysisData, error: analysisError } = await supabase
           .from('analyses')
           .insert({
