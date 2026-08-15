@@ -42,6 +42,9 @@ export default function RootLayout({
               <Link href="/rubric-library" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
                 Rubric Library
               </Link>
+              <Link href="/saved-assessments" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
+                Saved Assessments
+              </Link>
               <Link href="/history" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
                 History
               </Link>

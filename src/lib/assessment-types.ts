@@ -97,6 +97,6 @@ export type AssessmentAction =
   | { type: "LOAD_DEMO"; question: string; rubric: Rubric[]; responses: StudentResponse[] }
   | { type: "SET_DEMO_FLAG"; flag: boolean }
   | { type: "START_SAVE" }
-  | { type: "COMPLETE_SAVE"; assessmentId: string }
+  | { type: "COMPLETE_SAVE"; assessmentId: string; questionIds: string[] }
   | { type: "FAIL_SAVE"; error: string }
   | { type: "LOAD_ASSESSMENT"; state: AssessmentState };

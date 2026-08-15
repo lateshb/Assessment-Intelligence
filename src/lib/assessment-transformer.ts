@@ -1,0 +1,147 @@
+/**
+ * Transforms database records into AssessmentState for the UI.
+ * 
+ * Handles the mapping from Supabase row format to the local-first
+ * assessment state model used by the reducer.
+ */
+
+import type { AssessmentState, QuestionState } from './assessment-types'
+import type { Database } from '@/types/database.types'
+import type { Rubric, StudentResponse, Analysis } from './types'
+
+type DbAssessment = Database['public']['Tables']['assessments']['Row']
+type DbQuestion = Database['public']['Tables']['questions']['Row']
+type DbAnalysis = Database['public']['Tables']['analyses']['Row']
+
+export function transformDbToAssessmentState(
+  assessment: DbAssessment,
+  questions: Array<DbQuestion & { analysis: DbAnalysis | null }>
+): AssessmentState {
+  const transformedQuestions: QuestionState[] = questions.map((dbQ) => {
+    // Parse responses
+    const responseData = dbQ.responses as any
+    let pasteText = ''
+    let csvRows: StudentResponse[] | null = null
+    let responseTab: 'paste' | 'csv' = 'paste'
+
+    if (Array.isArray(responseData)) {
+      // CSV format (array of StudentResponse)
+      csvRows = responseData as StudentResponse[]
+      responseTab = 'csv'
+    } else if (typeof responseData === 'string') {
+      // Paste format (string)
+      pasteText = responseData
+      responseTab = 'paste'
+    }
+
+    // Parse rubric
+    const rubric = (dbQ.rubric_snapshot as any) as Rubric[]
+
+    // Parse analysis if present
+    let analysis: Analysis | null = null
+    if (dbQ.analysis) {
+      const dbAnalysis = dbQ.analysis
+      analysis = {
+        perResponse: dbAnalysis.per_response as any,
+        clusters: dbAnalysis.clusters as any,
+        gapMap: dbAnalysis.gap_map as any,
+        recommendation: dbAnalysis.recommendation as any,
+        meta: {
+          model: dbAnalysis.model,
+          latencyMs: dbAnalysis.latency_ms ?? 0,
+          disclaimer: '',
+          source: dbAnalysis.source as 'live' | 'cached',
+        },
+      }
+    }
+
+    // Compute input hash for staleness detection
+    const inputHash = analysis
+      ? computeInputHash({
+          questionText: dbQ.question_text,
+          rubric,
+          pasteText,
+          csvRows,
+        })
+      : null
+
+    // Compute status
+    const status = computeQuestionStatus({
+      questionText: dbQ.question_text,
+      rubric,
+      pasteText,
+      csvRows,
+      analysis,
+      analyzedInputHash: inputHash,
+    })
+
+    return {
+      id: `q-db-${dbQ.id}`, // Unique local ID
+      dbId: dbQ.id,
+      rubricSource: dbQ.rubric_source as 'custom' | 'library' | null | undefined,
+      rubricLibraryId: dbQ.rubric_library_id || null,
+      questionText: dbQ.question_text,
+      rubric,
+      responseTab,
+      pasteText,
+      csvRows,
+      csvName: csvRows ? `${csvRows.length} responses` : '',
+      status,
+      analysis,
+      error: null,
+      expanded: false,
+      analyzedInputHash: inputHash,
+    }
+  })
+
+  return {
+    id: assessment.id,
+    name: assessment.name || '',
+    questions: transformedQuestions,
+    analyzeAllInProgress: false,
+    demoFlag: false,
+    saveInProgress: false,
+    saveError: null,
+  }
+}
+
+function computeInputHash(q: {
+  questionText: string
+  rubric: Rubric[]
+  pasteText: string
+  csvRows: StudentResponse[] | null
+}): string {
+  const rubricStr = JSON.stringify(q.rubric)
+  const responsesStr = q.csvRows
+    ? JSON.stringify(q.csvRows)
+    : q.pasteText
+  return `${q.questionText}|${rubricStr}|${responsesStr}`
+}
+
+function computeQuestionStatus(q: {
+  questionText: string
+  rubric: Rubric[]
+  pasteText: string
+  csvRows: StudentResponse[] | null
+  analysis: Analysis | null
+  analyzedInputHash: string | null
+}): QuestionState['status'] {
+  const hasQuestion = q.questionText.trim().length > 0
+  const hasRubric = q.rubric.some((r) => r.name.trim() !== '')
+  const hasResponses =
+    (q.csvRows && q.csvRows.length > 0) || q.pasteText.trim().length > 0
+
+  if (!hasQuestion || !hasRubric || !hasResponses) {
+    return 'draft'
+  }
+
+  if (q.analysis) {
+    const currentHash = computeInputHash(q)
+    if (q.analyzedInputHash && currentHash !== q.analyzedInputHash) {
+      return 'needs_reanalysis'
+    }
+    return 'analyzed'
+  }
+
+  return 'ready'
+}

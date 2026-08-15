@@ -281,7 +281,16 @@ export function assessmentReducer(
       return { ...state, saveInProgress: true, saveError: null };
 
     case "COMPLETE_SAVE":
-      return { ...state, id: action.assessmentId, saveInProgress: false, saveError: null };
+      return {
+        ...state,
+        id: action.assessmentId,
+        saveInProgress: false,
+        saveError: null,
+        questions: state.questions.map((q, i) => ({
+          ...q,
+          dbId: action.questionIds[i] || q.dbId,
+        })),
+      };
 
     case "FAIL_SAVE":
       return { ...state, saveInProgress: false, saveError: action.error };

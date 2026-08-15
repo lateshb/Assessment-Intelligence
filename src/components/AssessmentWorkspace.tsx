@@ -89,8 +89,8 @@ export default function AssessmentWorkspace() {
     dispatch({ type: "START_SAVE" });
 
     try {
-      const assessment = await saveAssessmentToDb(state, userId, institutionId);
-      dispatch({ type: "COMPLETE_SAVE", assessmentId: assessment.id });
+      const result = await saveAssessmentToDb(state, userId, institutionId);
+      dispatch({ type: "COMPLETE_SAVE", assessmentId: result.id, questionIds: result.questionIds });
     } catch (error: any) {
       dispatch({ type: "FAIL_SAVE", error: error.message });
       alert('Save failed: ' + error.message);
