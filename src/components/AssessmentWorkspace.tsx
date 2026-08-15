@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect, useState } from "react";
 import type { Rubric, StudentResponse } from "@/lib/types";
 import { useAssessment } from "@/lib/use-assessment";
 import { useHistory } from "@/lib/use-history";
+import { createClient } from "@/lib/supabase/client";
+import { saveAssessmentToDb } from "@/lib/assessment-db";
 import QuestionCard from "./QuestionCard";
 
 /**
@@ -15,6 +17,27 @@ import QuestionCard from "./QuestionCard";
 export default function AssessmentWorkspace() {
   const { state, dispatch, analyzeQuestion, analyzeAll } = useAssessment();
   const { saveAssessment } = useHistory();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [institutionId, setInstitutionId] = useState<string | null>(null);
+
+  // Get user ID and institution ID
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserId(user.id);
+        // Fetch profile to get institution_id
+        supabase
+          .from('profiles')
+          .select('institution_id')
+          .eq('id', user.id)
+          .single()
+          .then(({ data }) => {
+            if (data) setInstitutionId(data.institution_id);
+          });
+      }
+    });
+  }, []);
 
   // Track previous state to detect when analysis completes
   const prevStateRef = useRef(state);
@@ -56,6 +79,23 @@ export default function AssessmentWorkspace() {
       responses: d.responses,
     });
   }, [dispatch]);
+
+  const handleSaveDraft = useCallback(async () => {
+    if (!userId || !institutionId) {
+      alert('Not authenticated');
+      return;
+    }
+
+    dispatch({ type: "START_SAVE" });
+
+    try {
+      const assessment = await saveAssessmentToDb(state, userId, institutionId);
+      dispatch({ type: "COMPLETE_SAVE", assessmentId: assessment.id });
+    } catch (error: any) {
+      dispatch({ type: "FAIL_SAVE", error: error.message });
+      alert('Save failed: ' + error.message);
+    }
+  }, [state, userId, institutionId, dispatch]);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
@@ -121,6 +161,13 @@ export default function AssessmentWorkspace() {
             id="add-question-btn"
           >
             + Add Question
+          </button>
+          <button
+            onClick={handleSaveDraft}
+            disabled={state.saveInProgress || !userId}
+            className="rounded-xl border border-[#0E7C71] px-4 py-2 text-sm font-semibold text-[#0E7C71] hover:bg-[#E6F7F5] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {state.saveInProgress ? "Saving…" : "Save Draft"}
           </button>
           <button
             onClick={analyzeAll}

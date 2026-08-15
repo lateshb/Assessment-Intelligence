@@ -23,6 +23,12 @@ export type QuestionStatus =
 export type QuestionState = {
   /** Stable unique ID (UUID-like). Survives reordering. */
   id: string;
+  /** Database ID (null for unsaved questions) */
+  dbId?: string | null;
+  /** Rubric source (custom, library, or null) */
+  rubricSource?: 'custom' | 'library' | null;
+  /** Rubric library ID if from library */
+  rubricLibraryId?: string | null;
   /** Exam question text */
   questionText: string;
   /** Rubric criteria */
@@ -50,6 +56,8 @@ export type QuestionState = {
 // ─── Assessment state ──────────────────────────────────────────────────────
 
 export type AssessmentState = {
+  /** Database ID (null for unsaved assessments) */
+  id?: string | null;
   /** Assessment name (optional) */
   name: string;
   /** Ordered list of questions */
@@ -58,6 +66,10 @@ export type AssessmentState = {
   analyzeAllInProgress: boolean;
   /** Whether demo mode (?demo=1) is active */
   demoFlag: boolean;
+  /** Whether save is in progress */
+  saveInProgress?: boolean;
+  /** Last save error */
+  saveError?: string | null;
 };
 
 // ─── Action types for the assessment reducer ───────────────────────────────
@@ -83,4 +95,8 @@ export type AssessmentAction =
   | { type: "FAIL_ANALYSIS"; questionId: string; error: string }
   | { type: "SET_ANALYZE_ALL"; inProgress: boolean }
   | { type: "LOAD_DEMO"; question: string; rubric: Rubric[]; responses: StudentResponse[] }
-  | { type: "SET_DEMO_FLAG"; flag: boolean };
+  | { type: "SET_DEMO_FLAG"; flag: boolean }
+  | { type: "START_SAVE" }
+  | { type: "COMPLETE_SAVE"; assessmentId: string }
+  | { type: "FAIL_SAVE"; error: string }
+  | { type: "LOAD_ASSESSMENT"; state: AssessmentState };

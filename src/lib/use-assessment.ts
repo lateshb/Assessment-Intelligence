@@ -277,6 +277,18 @@ export function assessmentReducer(
     case "SET_DEMO_FLAG":
       return { ...state, demoFlag: action.flag };
 
+    case "START_SAVE":
+      return { ...state, saveInProgress: true, saveError: null };
+
+    case "COMPLETE_SAVE":
+      return { ...state, id: action.assessmentId, saveInProgress: false, saveError: null };
+
+    case "FAIL_SAVE":
+      return { ...state, saveInProgress: false, saveError: action.error };
+
+    case "LOAD_ASSESSMENT":
+      return action.state;
+
     default:
       return state;
   }
@@ -286,10 +298,13 @@ export function assessmentReducer(
 
 export function createInitialState(): AssessmentState {
   return {
+    id: null,
     name: "",
     questions: [createEmptyQuestion(true)],
     analyzeAllInProgress: false,
     demoFlag: false,
+    saveInProgress: false,
+    saveError: null,
   };
 }
 
