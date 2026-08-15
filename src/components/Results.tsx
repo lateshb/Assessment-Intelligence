@@ -128,7 +128,7 @@ export default function Results({ analysis }: { analysis: Analysis }) {
         </div>
       </section>
 
-      {/* Response table */}
+      {/* Response table — opens as overlay to avoid shifting the recommendation panel */}
       <section className="rounded-2xl border border-[#D5DAEC] bg-white shadow-sm">
         <button
           onClick={() => setTableOpen((v) => !v)}
@@ -137,54 +137,75 @@ export default function Results({ analysis }: { analysis: Analysis }) {
           <span className="text-sm font-bold text-[#26306A]">
             Response-level detail ({total}) — draft marks for teacher review
           </span>
-          <span className="text-[#565C82]">{tableOpen ? "▲ Hide" : "▼ Show"}</span>
+          <span className="text-[#565C82]">▼ Show</span>
         </button>
-        {tableOpen && (
-          <div className="overflow-x-auto border-t border-[#D5DAEC]">
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead>
-                <tr className="bg-[#F4F6FC] text-xs uppercase tracking-wide text-[#565C82]">
-                  <th className="px-4 py-2">ID</th>
-                  <th className="px-4 py-2">Response</th>
-                  <th className="px-4 py-2">Category</th>
-                  <th className="px-4 py-2">Misconception</th>
-                  <th className="px-4 py-2">Confidence</th>
-                  <th className="px-4 py-2">
-                    Mark <span className="normal-case">(DRAFT — teacher confirms)</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {analysis.perResponse.map((p) => (
-                  <tr key={p.id} className="border-t border-[#EDEFF6] align-top">
-                    <td className="px-4 py-2 font-mono text-xs">{p.id}</td>
-                    <td className="max-w-[280px] px-4 py-2 text-xs text-[#1D2140]">
-                      {p.evidence || "—"}
-                    </td>
-                    <td className="px-4 py-2">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${CATEGORY_META[p.category].chip}`}
-                      >
-                        {CATEGORY_META[p.category].label}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 text-xs">{p.misconception ?? "—"}</td>
-                    <td className="px-4 py-2">
-                      <ConfidenceBadge value={p.confidence} />
-                    </td>
-                    <td className="px-4 py-2 text-xs font-semibold">
-                      {p.draftMark}
-                      <span className="ml-1 rounded bg-[#EDEFF6] px-1 py-0.5 text-[10px] font-bold uppercase text-[#565C82]">
-                        draft
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </section>
+
+      {/* Fixed overlay — response detail never shifts the parent layout */}
+      {tableOpen && (
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/40"
+          onClick={(e) => { if (e.target === e.currentTarget) setTableOpen(false); }}
+        >
+          <div className="mx-auto my-8 w-full max-w-5xl rounded-2xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-[#D5DAEC] px-5 py-4">
+              <span className="text-sm font-bold text-[#26306A]">
+                Response-level detail ({total}) — draft marks for teacher review
+              </span>
+              <button
+                onClick={() => setTableOpen(false)}
+                className="rounded-lg px-3 py-1.5 text-sm font-semibold text-[#565C82] hover:bg-[#EDEFF6]"
+                aria-label="Close response detail"
+              >
+                ✕ Close
+              </button>
+            </div>
+            <div className="overflow-x-auto p-2">
+              <table className="w-full min-w-[720px] text-left text-sm">
+                <thead>
+                  <tr className="bg-[#F4F6FC] text-xs uppercase tracking-wide text-[#565C82]">
+                    <th className="px-4 py-2">ID</th>
+                    <th className="px-4 py-2">Response</th>
+                    <th className="px-4 py-2">Category</th>
+                    <th className="px-4 py-2">Misconception</th>
+                    <th className="px-4 py-2">Confidence</th>
+                    <th className="px-4 py-2">
+                      Mark <span className="normal-case">(DRAFT — teacher confirms)</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {analysis.perResponse.map((p) => (
+                    <tr key={p.id} className="border-t border-[#EDEFF6] align-top">
+                      <td className="px-4 py-2 font-mono text-xs">{p.id}</td>
+                      <td className="max-w-[280px] px-4 py-2 text-xs text-[#1D2140]">
+                        {p.evidence || "—"}
+                      </td>
+                      <td className="px-4 py-2">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${CATEGORY_META[p.category].chip}`}
+                        >
+                          {CATEGORY_META[p.category].label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-xs">{p.misconception ?? "—"}</td>
+                      <td className="px-4 py-2">
+                        <ConfidenceBadge value={p.confidence} />
+                      </td>
+                      <td className="px-4 py-2 text-xs font-semibold">
+                        {p.draftMark}
+                        <span className="ml-1 rounded bg-[#EDEFF6] px-1 py-0.5 text-[10px] font-bold uppercase text-[#565C82]">
+                          draft
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
