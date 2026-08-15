@@ -27,7 +27,8 @@ export default function RubricPicker({
   const [search, setSearch] = useState("");
   const [courseFilter, setCourseFilter] = useState<string>("");
   const [preview, setPreview] = useState<LibraryRubric | null>(null);
-  const [applyMode, setApplyMode] = useState<ApplyMode>("replace");
+  const hasExistingCriteria = currentCriteria.some((c) => c.name.trim() !== "");
+  const [applyMode, setApplyMode] = useState<ApplyMode>(hasExistingCriteria ? "add" : "replace");
 
   const courses = useMemo(
     () => [...new Set(rubrics.map((r) => r.course))].sort(),
@@ -46,7 +47,7 @@ export default function RubricPicker({
     return list;
   }, [rubrics, courseFilter, search]);
 
-  const hasExistingCriteria = currentCriteria.length > 0;
+
 
   function criteriaMatch(a: Rubric, b: Rubric): boolean {
     return (

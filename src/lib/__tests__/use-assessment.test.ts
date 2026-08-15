@@ -377,14 +377,16 @@ describe("reducer — staleness detection", () => {
     expect(next.questions[0].status).toBe("needs_reanalysis");
   });
 
-  it("analysis preserved (visible) even when stale", () => {
+  it("analysis preserved in state for history even when stale (hidden from UI)", () => {
     const { state, qId } = analyzedState();
     const next = reducer(state, {
       type: "SET_QUESTION_TEXT",
       questionId: qId,
       text: "Changed",
     });
+    // Analysis object kept in state for History page, but UI hides it
     expect(next.questions[0].analysis).not.toBeNull();
+    expect(next.questions[0].status).toBe("needs_reanalysis");
   });
 });
 

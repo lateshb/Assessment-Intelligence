@@ -484,9 +484,9 @@ export default function QuestionCard({
         </div>
       </div>
 
-      {/* Analysis results (inline) */}
-      {question.analysis && question.status !== "analyzing" && (
-        <div className={`border-t border-[#EDEFF6] p-5 ${question.status === "needs_reanalysis" ? "opacity-60" : ""}`}>
+      {/* Analysis results (inline) — only shown when analysis matches current inputs */}
+      {question.analysis && question.status === "analyzed" && (
+        <div className="border-t border-[#EDEFF6] p-5">
           <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
             <Results analysis={question.analysis} />
             <div className="lg:sticky lg:top-20 lg:self-start">
