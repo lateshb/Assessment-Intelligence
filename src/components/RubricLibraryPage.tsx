@@ -239,40 +239,41 @@ export default function RubricLibraryPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       {/* Header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#B45309]">
-            Course Outline
-          </p>
-          <h1 className="text-2xl font-bold text-[#141834]">
-            Global Rubrics
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#EDEFF6] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#26306A] mb-2">
+            Standardization
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#26306A]">
+            Global Rubric Library
           </h1>
           <p className="mt-1 text-sm text-[#565C82]">
-            Create and manage rubrics that can be applied to any assessment question.
+            Create, manage, and share standardized grading criteria across assessments.
           </p>
         </div>
         <button
           onClick={openCreate}
-          className="rounded-xl bg-[#26306A] px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-[#3A4A9F]"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-[#26306A] px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#3A4A9F] transition-all"
           id="create-rubric-btn"
         >
-          + Create Rubric
+          <span>+</span>
+          <span>Create Rubric</span>
         </button>
       </div>
 
       {/* Filters */}
-      <div className="mb-4 flex gap-3">
+      <div className="mb-4 flex flex-col sm:flex-row gap-3">
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search rubrics…"
-          className="flex-1 rounded-lg border border-[#D5DAEC] bg-white px-3 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none"
+          placeholder="Search rubrics by title or subject…"
+          className="flex-1 rounded-xl border border-[#D5DAEC] bg-white px-3.5 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none transition-colors"
           id="rubric-search"
         />
         <select
           value={courseFilter}
           onChange={(e) => setCourseFilter(e.target.value)}
-          className="rounded-lg border border-[#D5DAEC] bg-white px-3 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none"
+          className="rounded-xl border border-[#D5DAEC] bg-white px-3.5 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none transition-colors"
           id="rubric-course-filter"
         >
           <option value="">All courses ({activeList.length})</option>
@@ -285,28 +286,28 @@ export default function RubricLibraryPage() {
       </div>
 
       {/* Tabs: My Global Rubrics / Institution */}
-      <div className="mb-4 flex gap-1 rounded-xl bg-[#EDEFF6] p-1 text-sm font-semibold">
+      <div className="mb-6 flex max-w-md gap-1 rounded-xl bg-[#EDEFF6] p-1 text-sm font-semibold">
         <button
           onClick={() => { setRubricTab("my"); setCourseFilter(""); }}
-          className={`flex-1 rounded-lg px-3 py-1.5 ${
-            rubricTab === "my" ? "bg-white text-[#26306A] shadow" : "text-[#565C82]"
+          className={`flex-1 rounded-lg px-3 py-1.5 transition-all ${
+            rubricTab === "my" ? "bg-white text-[#26306A] shadow-xs" : "text-[#565C82] hover:text-[#26306A]"
           }`}
         >
           My Global Rubrics ({rubrics.length})
         </button>
         <button
           onClick={() => { setRubricTab("institution"); setCourseFilter(""); }}
-          className={`flex-1 rounded-lg px-3 py-1.5 ${
-            rubricTab === "institution" ? "bg-white text-[#26306A] shadow" : "text-[#565C82]"
+          className={`flex-1 rounded-lg px-3 py-1.5 transition-all ${
+            rubricTab === "institution" ? "bg-white text-[#26306A] shadow-xs" : "text-[#565C82] hover:text-[#26306A]"
           }`}
         >
-          Institution Rubrics ({institutionRubrics.length})
+          Institution Library ({institutionRubrics.length})
         </button>
       </div>
 
       {/* DB error */}
       {dbError && (
-        <div className="mb-4 rounded-xl border border-[#E4572E] bg-[#FBE9E3] px-4 py-3 text-sm font-medium text-[#B23A1B]">
+        <div className="mb-6 rounded-xl border border-[#E4572E] bg-[#FBE9E3] p-4 text-sm font-medium text-[#B23A1B]">
           {dbError}
         </div>
       )}
@@ -314,24 +315,29 @@ export default function RubricLibraryPage() {
       {/* Loading state */}
       {loading ? (
         <div className="rounded-2xl border border-[#D5DAEC] bg-white p-12 text-center shadow-sm">
-          <p className="text-sm text-[#565C82]">Loading rubrics…</p>
+          <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-[#3A4A9F] border-t-transparent mb-3" />
+          <p className="text-sm font-semibold text-[#565C82]">Loading rubrics…</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-[#D5DAEC] bg-white p-12 text-center shadow-sm">
-          <p className="text-lg font-semibold text-[#141834]">No rubrics found</p>
-          <p className="mt-1 text-sm text-[#565C82]">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EDEFF6] text-2xl">
+            📐
+          </div>
+          <h3 className="text-base font-bold text-[#141834]">No rubrics found</h3>
+          <p className="mt-1 text-sm text-[#565C82] max-w-md mx-auto">
             {search || courseFilter
-              ? "Try adjusting your search or filter."
+              ? "Try adjusting your search or course filter to find matching criteria."
               : rubricTab === "institution"
-                ? "No institution rubrics from other teachers yet."
-                : "Create your first rubric to get started."}
+                ? "No shared rubrics from other teachers in your institution yet."
+                : "Create your first standardized rubric template to get started."}
           </p>
           {!search && !courseFilter && rubricTab === "my" && (
             <button
               onClick={openCreate}
-              className="mt-4 rounded-xl bg-[#26306A] px-5 py-2 text-sm font-bold text-white shadow hover:bg-[#3A4A9F]"
+              className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-[#26306A] px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#3A4A9F] transition-all"
             >
-              + Create Rubric
+              <span>+</span>
+              <span>Create Your First Rubric</span>
             </button>
           )}
         </div>
@@ -340,47 +346,54 @@ export default function RubricLibraryPage() {
           {filtered.map((r) => (
             <div
               key={r.id}
-              className="rounded-2xl border border-[#D5DAEC] bg-white p-5 shadow-sm transition-all hover:border-[#3A4A9F]"
+              className="flex flex-col justify-between rounded-2xl border border-[#D5DAEC] bg-white p-5 shadow-sm transition-all hover:border-[#3A4A9F] hover:shadow-md"
             >
-              <div className="flex items-start justify-between">
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-bold text-[#141834]">{r.name}</h3>
-                  <span className="inline-flex items-center rounded-full bg-[#E9ECF9] px-2 py-0.5 text-[10px] font-bold text-[#3A4A9F]">
+              <div>
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-base font-bold text-[#26306A] leading-snug">{r.name}</h3>
+                  <span className="shrink-0 inline-flex items-center rounded-md bg-[#EDEFF6] px-2 py-0.5 text-xs font-semibold text-[#3A4A9F]">
                     {r.course}
                   </span>
                 </div>
-              </div>
-              {r.description && (
-                <p className="mt-2 text-xs text-[#565C82] line-clamp-2">{r.description}</p>
-              )}
-              <div className="mt-3 space-y-1">
-                {r.criteria.map((c, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs">
-                    <span className="text-[#1D2140]">{c.name}</span>
-                    <span className="text-[#565C82]">{c.maxMarks} marks</span>
+                {r.description && (
+                  <p className="mt-2 text-xs text-[#565C82] line-clamp-2 leading-relaxed">{r.description}</p>
+                )}
+                <div className="mt-4 space-y-1.5 border-t border-[#EDEFF6] pt-3">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-[#565C82]">
+                    Criteria ({r.criteria.length}) · {r.criteria.reduce((s, c) => s + c.maxMarks, 0)} total marks
                   </div>
-                ))}
+                  {r.criteria.slice(0, 4).map((c, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className="truncate text-[#1D2140] font-medium">{c.name}</span>
+                      <span className="ml-2 shrink-0 font-semibold text-[#565C82]">{c.maxMarks}m</span>
+                    </div>
+                  ))}
+                  {r.criteria.length > 4 && (
+                    <p className="text-[11px] text-[#565C82]">+{r.criteria.length - 4} more criteria</p>
+                  )}
+                </div>
               </div>
-              <div className="mt-3 border-t border-[#EDEFF6] pt-3">
-                <div className="flex gap-2">
+
+              <div className="mt-5 border-t border-[#EDEFF6] pt-3">
+                <div className="flex items-center gap-2">
                   {rubricTab === "my" && (
                     <button
                       onClick={() => openEdit(r)}
-                      className="rounded-lg border border-[#D5DAEC] px-3 py-1 text-xs font-semibold text-[#3A4A9F] hover:bg-[#E9ECF9]"
+                      className="rounded-xl border border-[#D5DAEC] px-3 py-1.5 text-xs font-semibold text-[#3A4A9F] hover:bg-[#E9ECF9] transition-all"
                     >
                       Edit
                     </button>
                   )}
                   <button
                     onClick={() => handleDuplicate(r.id)}
-                    className="rounded-lg border border-[#D5DAEC] px-3 py-1 text-xs font-semibold text-[#565C82] hover:bg-[#EDEFF6]"
+                    className="rounded-xl border border-[#D5DAEC] px-3 py-1.5 text-xs font-semibold text-[#565C82] hover:bg-[#EDEFF6] transition-all"
                   >
                     Duplicate
                   </button>
                   {rubricTab === "my" && (
                     <button
                       onClick={() => handleDelete(r.id)}
-                      className="rounded-lg border border-[#D5DAEC] px-3 py-1 text-xs font-semibold text-[#B23A1B] hover:bg-[#FBE9E3]"
+                      className="rounded-xl border border-[#D5DAEC] px-3 py-1.5 text-xs font-semibold text-[#565C82] hover:bg-[#FBE9E3] hover:text-[#B23A1B] hover:border-[#E4572E]/40 transition-all"
                     >
                       Delete
                     </button>

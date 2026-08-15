@@ -17,11 +17,11 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-[#F4F6FC] text-[#1D2140] antialiased">
-        <header className="sticky top-0 z-40 border-b border-[#D5DAEC] bg-white/90 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-            <Link href="/" className="flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#26306A] text-lg font-bold text-[#F5A623]">
+      <body className="flex min-h-screen flex-col bg-[#F4F6FC] text-[#1D2140] antialiased">
+        <header className="sticky top-0 z-40 border-b border-[#D5DAEC] bg-white/95 backdrop-blur">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:flex-nowrap">
+            <Link href="/" className="flex items-center gap-3 shrink-0">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#26306A] text-lg font-bold text-[#F5A623] shadow-sm">
                 Ai
               </span>
               <span>
@@ -33,46 +33,131 @@ export default function RootLayout({
                 </span>
               </span>
             </Link>
-            <nav className="flex items-center gap-1 text-sm font-medium">
-              <Link href="/" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
-                App
-              </Link>
-              <Link href="/how-to-use" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
-                How to use
-              </Link>
-              <Link href="/rubric-library" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
-                Course Outline
-              </Link>
-              <Link href="/saved-assessments" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
-                Saved Assessments
-              </Link>
-              <Link href="/history" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
-                History
-              </Link>
-              <Link href="/build-and-scale" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
-                Build &amp; scale
-              </Link>
-              <UserMenu />
-            </nav>
+
+            <div className="flex items-center gap-1 overflow-x-auto text-xs sm:text-sm font-medium">
+              <nav className="flex items-center gap-1">
+                <Link
+                  href="/"
+                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors"
+                >
+                  App
+                </Link>
+                <Link
+                  href="/rubric-library"
+                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors whitespace-nowrap"
+                >
+                  Global Rubrics
+                </Link>
+                <Link
+                  href="/saved-assessments"
+                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors whitespace-nowrap"
+                >
+                  Saved Assessments
+                </Link>
+                <Link
+                  href="/history"
+                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors"
+                >
+                  History
+                </Link>
+              </nav>
+              <div className="ml-1 shrink-0">
+                <UserMenu />
+              </div>
+            </div>
           </div>
         </header>
-        <AssessmentProvider>
-        <HistoryProvider>
-        <RubricLibraryProvider>
-        {children}
-        </RubricLibraryProvider>
-        </HistoryProvider>
-        </AssessmentProvider>
-        <footer className="mt-12 border-t border-[#D5DAEC] bg-white">
-          <div className="mx-auto max-w-6xl px-4 py-5 text-xs leading-relaxed text-[#565C82]">
-            <p className="font-medium text-[#26306A]">
-              AI-assisted analysis on this site is probabilistic and can be wrong. Every mark and
-              intervention requires teacher approval. This prototype runs on synthetic data only.
-            </p>
-            <p className="mt-1">
-              DTAI Capstone · IIM Lucknow · Prototype for the PhysicsWallah AI transformation
-              strategy · Vibe-coded; all AI-generated code disclosed in the repository README.
-            </p>
+
+        <div className="flex-1">
+          <AssessmentProvider>
+            <HistoryProvider>
+              <RubricLibraryProvider>
+                {children}
+              </RubricLibraryProvider>
+            </HistoryProvider>
+          </AssessmentProvider>
+        </div>
+
+        <footer className="mt-16 border-t border-[#D5DAEC] bg-white">
+          <div className="mx-auto max-w-6xl px-4 py-8">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Brand Col */}
+              <div className="space-y-2 sm:col-span-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#26306A] text-sm font-bold text-[#F5A623]">
+                    Ai
+                  </span>
+                  <span className="text-sm font-bold text-[#141834]">
+                    Assessment Intelligence
+                  </span>
+                </div>
+                <p className="max-w-md text-xs leading-relaxed text-[#565C82]">
+                  Diagnose student misconceptions from open-text answers in minutes.
+                  AI proposes targeted interventions; teachers make every final decision.
+                </p>
+                <p className="text-[11px] font-semibold text-[#0E7C71]">
+                  AI recommends. Teachers decide.
+                </p>
+              </div>
+
+              {/* Workspace Navigation */}
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#141834]">
+                  Workspace
+                </p>
+                <ul className="mt-3 space-y-2 text-xs">
+                  <li>
+                    <Link href="/" className="text-[#565C82] hover:text-[#26306A] hover:underline">
+                      Assessment Workspace
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/rubric-library" className="text-[#565C82] hover:text-[#26306A] hover:underline">
+                      Global Rubric Library
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/saved-assessments" className="text-[#565C82] hover:text-[#26306A] hover:underline">
+                      Saved Assessments
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/history" className="text-[#565C82] hover:text-[#26306A] hover:underline">
+                      Analysis History &amp; Trash
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Documentation & System Briefs */}
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#141834]">
+                  Documentation
+                </p>
+                <ul className="mt-3 space-y-2 text-xs">
+                  <li>
+                    <Link href="/how-to-use" className="text-[#3A4A9F] font-semibold hover:underline">
+                      User Guide &amp; 3-Min Demo →
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/build-and-scale" className="text-[#3A4A9F] font-semibold hover:underline">
+                      Build &amp; Scale Technical Brief →
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom bar & Academic disclaimers */}
+            <div className="mt-8 border-t border-[#EDEFF6] pt-5 text-xs text-[#6C7396] space-y-1.5">
+              <p className="font-medium text-[#26306A]">
+                AI-assisted analysis on this site is probabilistic and can be wrong. Every mark and intervention requires teacher approval. This prototype runs on synthetic data only.
+              </p>
+              <p className="text-[11px] text-[#8B92B5]">
+                DTAI Capstone · IIM Lucknow · Prototype for the PhysicsWallah AI transformation strategy · Vibe-coded; all AI-generated code disclosed in the repository README.
+              </p>
+            </div>
           </div>
         </footer>
       </body>
