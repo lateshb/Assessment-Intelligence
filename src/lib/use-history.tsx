@@ -73,7 +73,7 @@ async function loadHistoryFromDb(): Promise<HistoryEntry[]> {
 
     if (!questions || questions.length === 0) continue;
 
-    // Load analyses for each question
+    // Load analyses for each question (current + previous)
     const historyQuestions: HistoryQuestion[] = [];
     let hasAnyAnalysis = false;
 
@@ -82,32 +82,70 @@ async function loadHistoryFromDb(): Promise<HistoryEntry[]> {
         .from("analyses")
         .select("*")
         .eq("question_id", q.id)
-        .eq("is_current", true)
-        .order("created_at", { ascending: false })
-        .limit(1);
+        .order("created_at", { ascending: false });
 
-      const analysis = analyses?.[0] || null;
-      if (analysis) hasAnyAnalysis = true;
+      if (!analyses || analyses.length === 0) {
+        historyQuestions.push({
+          id: q.id,
+          questionText: q.question_text || "",
+          rubric: (q.rubric_snapshot as Array<{ name: string; description: string; maxMarks: number }>) || [],
+          responses: (q.responses as Array<{ id: string; text: string }>) || [],
+          analysis: null,
+          status: "draft",
+        });
+        continue;
+      }
+
+      hasAnyAnalysis = true;
+
+      // First analysis is the current one (most recent)
+      const currentAnalysis = analyses[0];
+      const currentAnalysisData = {
+        id: currentAnalysis.id,
+        perResponse: currentAnalysis.per_response as unknown[],
+        clusters: currentAnalysis.clusters as unknown[],
+        gapMap: currentAnalysis.gap_map as unknown[],
+        recommendation: currentAnalysis.recommendation as Record<string, unknown>,
+        meta: {
+          model: currentAnalysis.model,
+          latencyMs: currentAnalysis.latency_ms || 0,
+          disclaimer: "",
+          source: currentAnalysis.source as "live" | "cached",
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any;
+
+      // Previous analyses (if any)
+      const previousAnalyses = analyses.slice(1).map(a => ({
+        id: a.id,
+        createdAt: a.created_at,
+        questionText: a.question_text_snapshot,
+        rubric: (a.rubric_snapshot as Array<{ name: string; description: string; maxMarks: number }>) || [],
+        responses: (a.responses_snapshot as Array<{ id: string; text: string }>) || [],
+        analysis: {
+          id: a.id,
+          perResponse: a.per_response as unknown[],
+          clusters: a.clusters as unknown[],
+          gapMap: a.gap_map as unknown[],
+          recommendation: a.recommendation as Record<string, unknown>,
+          meta: {
+            model: a.model,
+            latencyMs: a.latency_ms || 0,
+            disclaimer: "",
+            source: a.source as "live" | "cached",
+          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
+      }));
 
       historyQuestions.push({
         id: q.id,
-        questionText: q.question_text || "",
-        rubric: (q.rubric_snapshot as Array<{ name: string; description: string; maxMarks: number }>) || [],
-        responses: (q.responses as Array<{ id: string; text: string }>) || [],
-        analysis: analysis ? {
-          perResponse: analysis.per_response as unknown[],
-          clusters: analysis.clusters as unknown[],
-          gapMap: analysis.gap_map as unknown[],
-          recommendation: analysis.recommendation as Record<string, unknown>,
-          meta: {
-            model: analysis.model,
-            latencyMs: analysis.latency_ms || 0,
-            disclaimer: "",
-            source: analysis.source as "live" | "cached",
-          },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any : null,
-        status: analysis ? "analyzed" : "draft",
+        questionText: currentAnalysis.question_text_snapshot || q.question_text || "",
+        rubric: (currentAnalysis.rubric_snapshot as Array<{ name: string; description: string; maxMarks: number }>) || [],
+        responses: (currentAnalysis.responses_snapshot as Array<{ id: string; text: string }>) || [],
+        analysis: currentAnalysisData,
+        status: "analyzed",
+        previousAnalyses: previousAnalyses.length > 0 ? previousAnalyses : undefined,
       });
     }
 
