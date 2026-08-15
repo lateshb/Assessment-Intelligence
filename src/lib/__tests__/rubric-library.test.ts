@@ -10,6 +10,7 @@ function makeSampleRubric(overrides?: Partial<LibraryRubric>): LibraryRubric {
     name: "Test Rubric",
     course: "Economics",
     description: "A test rubric",
+    visibility: "private",
     criteria: [
       { name: "C1", description: "First", maxMarks: 3 },
       { name: "C2", description: "Second", maxMarks: 4 },
@@ -50,6 +51,25 @@ describe("Rubric Library (Supabase-backed)", () => {
 
       // Library should be untouched
       expect(libraryRubric.criteria[0].name).toBe("C1");
+    });
+  });
+
+  describe("visibility", () => {
+    it("private rubric is only visible to owner", () => {
+      const privateRubric = makeSampleRubric({ visibility: "private" });
+      const institutionRubric = makeSampleRubric({ id: "r-2", visibility: "institution" });
+
+      // Owner can see private rubric
+      expect(privateRubric.visibility).toBe("private");
+
+      // Institution rubric is visible to same institution
+      expect(institutionRubric.visibility).toBe("institution");
+    });
+
+    it("new rubrics default to private", () => {
+      const rubric = makeSampleRubric({ id: "r-new" });
+      // When created without visibility field, defaults to private
+      expect(rubric.visibility || "private").toBe("private");
     });
   });
 

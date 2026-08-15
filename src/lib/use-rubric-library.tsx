@@ -42,6 +42,7 @@ function toLibraryRubric(row: Record<string, unknown>): LibraryRubric {
     course: row.course as string,
     description: (row.description as string) || "",
     criteria: row.criteria as Rubric[],
+    visibility: (row.visibility as 'private' | 'institution') || 'private',
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -104,11 +105,12 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Institution rubrics (same institution, not mine)
+    // Institution rubrics (same institution, not mine, visibility=institution)
     const { data: instData } = await supabase
       .from("rubric_library")
       .select("*")
       .eq("institution_id", profile.institution_id)
+      .eq("visibility", "institution")
       .neq("owner_id", user.id)
       .order("created_at", { ascending: false });
 
@@ -147,6 +149,7 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
               course: action.rubric.course,
               description: action.rubric.description || null,
               criteria: action.rubric.criteria,
+              visibility: action.rubric.visibility || 'private',
             })
             .select()
             .single();
@@ -167,6 +170,7 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
               course: action.updates.course,
               description: action.updates.description,
               criteria: action.updates.criteria,
+              visibility: action.updates.visibility,
               updated_at: new Date().toISOString(),
             })
             .eq("id", action.id)
@@ -218,6 +222,7 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
               course: source.course,
               description: source.description || null,
               criteria: source.criteria.map((c) => ({ ...c })),
+              visibility: 'private', // duplicates default to private
             })
             .select()
             .single();

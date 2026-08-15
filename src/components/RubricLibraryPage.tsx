@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRubricLibrary, validateLibraryRubric } from "@/lib/use-rubric-library";
-import type { LibraryRubric } from "@/lib/rubric-library-types";
+import type { LibraryRubric, RubricVisibility } from "@/lib/rubric-library-types";
 import type { Rubric } from "@/lib/types";
 import RubricEditor from "@/components/RubricEditor";
 
@@ -28,6 +28,7 @@ export default function RubricLibraryPage() {
   const [formCourse, setFormCourse] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [formCriteria, setFormCriteria] = useState<Rubric[]>(EMPTY_CRITERIA.map((c) => ({ ...c })));
+  const [formVisibility, setFormVisibility] = useState<RubricVisibility>("private");
 
   const activeList = rubricTab === "my" ? rubrics : institutionRubrics;
 
@@ -53,6 +54,7 @@ export default function RubricLibraryPage() {
     setFormCourse("");
     setFormDescription("");
     setFormCriteria(EMPTY_CRITERIA.map((c) => ({ ...c })));
+    setFormVisibility("private");
     setError(null);
     setEditId(null);
   }
@@ -67,6 +69,7 @@ export default function RubricLibraryPage() {
     setFormCourse(rubric.course);
     setFormDescription(rubric.description);
     setFormCriteria(rubric.criteria.map((c) => ({ ...c })));
+    setFormVisibility(rubric.visibility);
     setEditId(rubric.id);
     setError(null);
     setMode("edit");
@@ -91,6 +94,7 @@ export default function RubricLibraryPage() {
           course: formCourse.trim(),
           description: formDescription.trim(),
           criteria: formCriteria.map((c) => ({ ...c })),
+          visibility: formVisibility,
         },
       });
     } else if (mode === "edit" && editId) {
@@ -102,6 +106,7 @@ export default function RubricLibraryPage() {
           course: formCourse.trim(),
           description: formDescription.trim(),
           criteria: formCriteria.map((c) => ({ ...c })),
+          visibility: formVisibility,
         },
       });
     }
@@ -185,6 +190,21 @@ export default function RubricLibraryPage() {
               className="w-full rounded-lg border border-[#D5DAEC] px-3 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none"
               id="rubric-description"
             />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#565C82]">
+              Visibility
+            </label>
+            <select
+              value={formVisibility}
+              onChange={(e) => setFormVisibility(e.target.value as RubricVisibility)}
+              className="w-full rounded-lg border border-[#D5DAEC] px-3 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none"
+              id="rubric-visibility"
+            >
+              <option value="private">Private (only I can see this)</option>
+              <option value="institution">Institution (teachers in my institution can see this)</option>
+            </select>
           </div>
 
           <RubricEditor criteria={formCriteria} onChange={setFormCriteria} />
