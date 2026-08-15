@@ -85,7 +85,7 @@ export default function AssessmentWorkspace() {
   }, [dispatch]);
 
   const handleSaveDraft = useCallback(async () => {
-    if (!userId || !institutionId) {
+    if (!userId) {
       alert('Not authenticated');
       return;
     }
@@ -94,7 +94,12 @@ export default function AssessmentWorkspace() {
 
     try {
       const result = await saveAssessmentToDb(state, userId, institutionId);
-      dispatch({ type: "COMPLETE_SAVE", assessmentId: result.id, questionIds: result.questionIds });
+      dispatch({
+        type: "COMPLETE_SAVE",
+        assessmentId: result.id,
+        questionIds: result.questionIds,
+        analysisIds: result.analysisIds,
+      });
     } catch (error: any) {
       dispatch({ type: "FAIL_SAVE", error: error.message });
       alert('Save failed: ' + error.message);

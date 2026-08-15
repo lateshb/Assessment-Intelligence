@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { QuestionState, QuestionStatus, AssessmentAction } from "@/lib/assessment-types";
 import type { Rubric, StudentResponse } from "@/lib/types";
 import { getResponses } from "@/lib/use-assessment";
@@ -503,19 +503,14 @@ export default function QuestionCard({
 
 function AnalyzingText() {
   const [stage, setStage] = useState(0);
-  // Advance through loading stages
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useState(() => {
-    // Using useState initializer as a one-time side effect for simplicity
-    if (typeof window !== "undefined") {
-      const t = setInterval(
-        () => setStage((s) => Math.min(s + 1, LOADING_STAGES.length - 1)),
-        2500
-      );
-      // Note: cleanup is handled by React unmount since this is a one-time init
-      return () => clearInterval(t);
-    }
-  });
+  // Advance through loading stages with proper cleanup
+  useEffect(() => {
+    const t = setInterval(
+      () => setStage((s) => Math.min(s + 1, LOADING_STAGES.length - 1)),
+      2500
+    );
+    return () => clearInterval(t);
+  }, []);
   return (
     <span className="text-sm font-medium text-[#26306A]">
       {LOADING_STAGES[stage]}

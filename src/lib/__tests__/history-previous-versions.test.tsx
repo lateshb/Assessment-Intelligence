@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { HistoryProvider, useHistory } from "../use-history";
+import { AssessmentProvider } from "../AssessmentContext";
 import { createClient } from "../supabase/client";
 
 vi.mock("../supabase/client");
@@ -94,9 +95,11 @@ describe("History Previous Versions", () => {
     vi.mocked(createClient).mockReturnValue(mockSupabase as any);
 
     render(
-      <HistoryProvider>
-        <TestConsumer />
-      </HistoryProvider>
+      <AssessmentProvider>
+        <HistoryProvider>
+          <TestConsumer />
+        </HistoryProvider>
+      </AssessmentProvider>
     );
 
     await waitFor(() => {
@@ -185,9 +188,11 @@ describe("History Previous Versions", () => {
     vi.mocked(createClient).mockReturnValue(mockSupabase as any);
 
     render(
-      <HistoryProvider>
-        <TestConsumer />
-      </HistoryProvider>
+      <AssessmentProvider>
+        <HistoryProvider>
+          <TestConsumer />
+        </HistoryProvider>
+      </AssessmentProvider>
     );
 
     await waitFor(() => {
@@ -260,9 +265,11 @@ describe("History Previous Versions", () => {
     vi.mocked(createClient).mockReturnValue(mockSupabase as any);
 
     render(
-      <HistoryProvider>
-        <TestConsumer />
-      </HistoryProvider>
+      <AssessmentProvider>
+        <HistoryProvider>
+          <TestConsumer />
+        </HistoryProvider>
+      </AssessmentProvider>
     );
 
     await waitFor(() => {

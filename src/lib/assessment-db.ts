@@ -3,8 +3,6 @@ import type { AssessmentState } from './assessment-types'
 import type { Database } from '@/types/database.types'
 
 type Assessment = Database['public']['Tables']['assessments']['Row']
-type Question = Database['public']['Tables']['questions']['Row']
-type Analysis = Database['public']['Tables']['analyses']['Row']
 
 export async function saveAssessmentToDb(
   state: AssessmentState,

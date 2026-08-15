@@ -32,6 +32,16 @@ describe('Re-analysis and History Versioning', () => {
               ),
             })),
           })),
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              single: vi.fn(() =>
+                Promise.resolve({
+                  data: { institution_id: 'inst-1' },
+                  error: null,
+                })
+              ),
+            })),
+          })),
           update: vi.fn((data: any) => {
             updateCalls.push({ table, data })
             return {
@@ -59,6 +69,11 @@ describe('Re-analysis and History Versioning', () => {
               })),
             }
           }),
+          delete: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              not: vi.fn(() => Promise.resolve({ data: null, error: null })),
+            })),
+          })),
         }
         return chain
       }),
@@ -70,7 +85,7 @@ describe('Re-analysis and History Versioning', () => {
     vi.mocked(createClient).mockReturnValue(mockSupabase as any)
   })
 
-  it('marks old analyses as is_current=false before inserting new analysis', async () => {
+  it('updates existing analysis in-place when analysis.id is present', async () => {
     const state: AssessmentState = {
       id: 'assessment-1',
       name: 'Test Assessment',
@@ -104,23 +119,21 @@ describe('Re-analysis and History Versioning', () => {
 
     await saveAssessmentToDb(state, 'user-1', 'inst-1')
 
-    // Verify UPDATE was called to mark old analyses as stale
-    expect(updateCalls).toContainEqual({
+    // When analysis.id is present, it updates the existing analysis in-place
+    // Verify UPDATE was called on the analyses table
+    const analysisUpdate = updateCalls.find(c => c.table === 'analyses')
+    expect(analysisUpdate).toBeDefined()
+
+    // Verify eq() was called with the analysis id
+    expect(eqCalls).toContainEqual({
       table: 'analyses',
-      data: { is_current: false },
+      field: 'id',
+      value: 'analysis-1',
     })
 
-    // Verify eq() was called with question_id and is_current
-    expect(eqCalls).toContainEqual({
-      table: 'analyses',
-      field: 'question_id',
-      value: 'question-1',
-    })
-    expect(eqCalls).toContainEqual({
-      table: 'analyses',
-      field: 'is_current',
-      value: true,
-    })
+    // No insert should happen when updating existing analysis
+    const analysisInsert = insertCalls.find(c => c.table === 'analyses')
+    expect(analysisInsert).toBeUndefined()
   })
 
   it('inserts new analysis with is_current=true after marking old ones stale', async () => {

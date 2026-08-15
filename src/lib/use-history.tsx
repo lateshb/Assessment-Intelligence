@@ -18,7 +18,8 @@ import {
 } from "react";
 import type { HistoryEntry, HistoryAction, HistoryQuestion } from "./history-types";
 import type { AssessmentState } from "./assessment-types";
-import { getResponses } from "./use-assessment";
+import { getResponses, parsePasteText } from "./use-assessment";
+import { useAssessment } from "./AssessmentContext";
 import { createClient } from "@/lib/supabase/client";
 
 // ─── Snapshot builder (for saving from workspace) ──────────────────────────
@@ -142,7 +143,11 @@ async function loadHistoryFromDb(): Promise<HistoryEntry[]> {
         id: q.id,
         questionText: currentAnalysis.question_text_snapshot || q.question_text || "",
         rubric: (currentAnalysis.rubric_snapshot as Array<{ name: string; description: string; maxMarks: number }>) || [],
-        responses: (currentAnalysis.responses_snapshot as Array<{ id: string; text: string }>) || [],
+        responses: Array.isArray(currentAnalysis.responses_snapshot)
+          ? (currentAnalysis.responses_snapshot as Array<{ id: string; text: string }>)
+          : typeof currentAnalysis.responses_snapshot === "string" && (currentAnalysis.responses_snapshot as string).trim()
+            ? parsePasteText(currentAnalysis.responses_snapshot as string)
+            : [],
         analysis: currentAnalysisData,
         status: "analyzed",
         previousAnalyses: previousAnalyses.length > 0 ? previousAnalyses : undefined,
@@ -180,6 +185,7 @@ const HistoryContext = createContext<HistoryContextType | null>(null);
 export function HistoryProvider({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const { dispatch: assessmentDispatch } = useAssessment();
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -192,16 +198,35 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
     reload();
   }, [reload]);
 
-  // saveAssessment is called after analysis completes — triggers a reload
+  // saveAssessment is called after analysis completes — persists to DB then reloads
   const saveAssessment = useCallback(
-    (assessment: AssessmentState) => {
+    async (assessment: AssessmentState) => {
       const hasAnalysis = assessment.questions.some((q) => q.analysis !== null);
       if (!hasAnalysis) return;
-      // The workspace already saves to DB via saveAssessmentToDb.
-      // We just need to reload the history to pick up the new data.
-      reload();
+
+      // Persist the assessment + questions + analyses to Supabase
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        try {
+          const { saveAssessmentToDb } = await import("@/lib/assessment-db");
+          const result = await saveAssessmentToDb(assessment, user.id);
+
+          // Update the shared AssessmentContext with DB IDs
+          assessmentDispatch({
+            type: "COMPLETE_SAVE",
+            assessmentId: result.id,
+            questionIds: result.questionIds,
+            analysisIds: result.analysisIds,
+          });
+        } catch (err) {
+          console.error("Auto-saving assessment to DB failed:", err);
+        }
+      }
+      // Reload history entries from DB
+      await reload();
     },
-    [reload]
+    [reload, assessmentDispatch]
   );
 
   // Async dispatch for trash/restore/permanent delete
