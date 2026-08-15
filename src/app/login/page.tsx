@@ -8,10 +8,16 @@ export default function LoginPage() {
   const supabase = createClient()
 
   const handleGoogleSignIn = async () => {
+    // Use explicit URLs for both environments to ensure correct OAuth callback
+    const isDevelopment = window.location.hostname === 'localhost'
+    const redirectTo = isDevelopment
+      ? 'http://localhost:3000/auth/callback'
+      : 'https://assessment-intelligence.vercel.app/auth/callback'
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo,
       },
     })
 
