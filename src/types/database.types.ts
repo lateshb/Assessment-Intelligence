@@ -62,6 +62,7 @@ export interface Database {
           status: 'draft' | 'partial' | 'complete' | 'archived'
           sharing: 'private' | 'institution' | 'teachers'
           shared_with: string[]
+          trashed: boolean
           created_at: string
           updated_at: string
         }
@@ -73,6 +74,7 @@ export interface Database {
           status?: 'draft' | 'partial' | 'complete' | 'archived'
           sharing?: 'private' | 'institution' | 'teachers'
           shared_with?: string[]
+          trashed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -84,6 +86,7 @@ export interface Database {
           status?: 'draft' | 'partial' | 'complete' | 'archived'
           sharing?: 'private' | 'institution' | 'teachers'
           shared_with?: string[]
+          trashed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -220,6 +223,7 @@ export interface Database {
           name: string
           description: string | null
           criteria: Json
+          visibility: 'private' | 'institution'
           created_at: string
           updated_at: string
         }
@@ -231,6 +235,7 @@ export interface Database {
           name: string
           description?: string | null
           criteria: Json
+          visibility?: 'private' | 'institution'
           created_at?: string
           updated_at?: string
         }
@@ -242,6 +247,7 @@ export interface Database {
           name?: string
           description?: string | null
           criteria?: Json
+          visibility?: 'private' | 'institution'
           created_at?: string
           updated_at?: string
         }

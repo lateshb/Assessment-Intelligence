@@ -57,15 +57,22 @@ export function transformDbToAssessmentState(
       }
     }
 
-    // Compute input hash for staleness detection
-    const inputHash = analysis
-      ? computeInputHash({
-          questionText: dbQ.question_text,
-          rubric,
-          pasteText,
-          csvRows,
-        })
-      : null
+    // Compute analyzed input hash from analysis snapshots for accurate staleness detection
+    let analyzedInputHash: string | null = null
+    if (dbQ.analysis) {
+      const snapResponses = dbQ.analysis.responses_snapshot as any
+      const parsedResponses = Array.isArray(snapResponses)
+        ? (snapResponses as StudentResponse[])
+        : typeof snapResponses === 'string'
+          ? parsePasteText(snapResponses)
+          : []
+
+      analyzedInputHash = JSON.stringify({
+        questionText: dbQ.analysis.question_text_snapshot || '',
+        rubric: (dbQ.analysis.rubric_snapshot as Rubric[]) || [],
+        responses: parsedResponses.map((r) => r.text),
+      })
+    }
 
     // Compute status
     const status = computeQuestionStatus({
@@ -74,7 +81,7 @@ export function transformDbToAssessmentState(
       pasteText,
       csvRows,
       analysis,
-      analyzedInputHash: inputHash,
+      analyzedInputHash,
     })
 
     return {
@@ -92,7 +99,7 @@ export function transformDbToAssessmentState(
       analysis,
       error: null,
       expanded: false,
-      analyzedInputHash: inputHash,
+      analyzedInputHash,
     }
   })
 
