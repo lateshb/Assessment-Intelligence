@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { Analysis, Decision } from "@/lib/types";
 import { AIBadge, SectionTitle } from "./ui";
+import { saveTeacherDecision } from "@/lib/teacher-decisions-db";
+import { createClient } from "@/lib/supabase/client";
 
 const LOG_KEY = "ai-decision-log-v1";
 const REJECT_REASONS = ["Not the real gap", "No class time", "Will handle differently", "Other"];
@@ -15,6 +17,7 @@ export default function Recommendation({ analysis }: { analysis: Analysis }) {
   const [state, setState] = useState<"idle" | "modifying" | "rejecting" | "done">("idle");
   const [modText, setModText] = useState("");
   const [outcome, setOutcome] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     try {
@@ -36,21 +39,62 @@ export default function Recommendation({ analysis }: { analysis: Analysis }) {
     }
   }
 
+  async function persistDecisionToDb(
+    action: 'approve' | 'modify' | 'reject',
+    summary: string,
+    reason?: string,
+    modifiedText?: string
+  ) {
+    if (!analysis.id) {
+      console.warn('Analysis has no ID, skipping DB persistence');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.warn('No authenticated user, skipping DB persistence');
+        return;
+      }
+
+      await saveTeacherDecision(
+        analysis.id,
+        user.id,
+        action,
+        summary,
+        reason,
+        modifiedText
+      );
+    } catch (error) {
+      console.error('Failed to persist decision:', error);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const impact = `Targeted ${rec.targetIds.length} of ${total} students instead of reteaching all ${total}.`;
 
   function approve() {
-    log("approve", `${rec.type} · ${rec.durationMin} min · ${rec.targetIds.length} students`);
+    const summary = `${rec.type} · ${rec.durationMin} min · ${rec.targetIds.length} students`;
+    log("approve", summary);
+    persistDecisionToDb('approve', summary);
     setOutcome(`Intervention approved for ${rec.targetIds.length} students · ${impact}`);
     setState("done");
   }
   function saveModify() {
-    log("modify", modText.trim() || rec.type);
+    const summary = modText.trim() || rec.type;
+    log("modify", summary);
+    persistDecisionToDb('modify', summary, 'Teacher edited the recommendation before accepting', modText.trim());
     setOutcome(`Modified intervention saved and logged · ${impact}`);
     setState("done");
   }
   function reject(reason: string) {
     log("reject", rec.type, reason);
-    setOutcome(`Recommendation rejected (“${reason}”) and logged. Nothing was applied to students.`);
+    persistDecisionToDb('reject', rec.type, reason);
+    setOutcome(`Recommendation rejected ("${reason}") and logged. Nothing was applied to students.`);
     setState("done");
   }
 
@@ -58,22 +102,19 @@ export default function Recommendation({ analysis }: { analysis: Analysis }) {
     <div className="space-y-6">
       <section className="rounded-2xl border-2 border-[#26306A] bg-white p-5 shadow-md">
         <SectionTitle kicker="Step 3 · Recommend → Intervene" title="One decision, ready for you" />
-        <div className="rounded-xl bg-[#26306A] p-5 text-white">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#F5A623]">
-            AI-proposed intervention <AIBadge />
+        <AIBadge />
+
+        <div className="mt-4 rounded-xl border border-[#D5DAEC] bg-[#F4F6FC] p-4">
+          <p className="text-sm font-bold text-[#141834]">{rec.type}</p>
+          <p className="mt-1 text-sm text-[#1D2140]">
+            <span className="font-semibold">Duration:</span> {rec.durationMin} minutes ·{" "}
+            <span className="font-semibold">For:</span> {rec.targetDescription} ({rec.targetIds.length} students)
           </p>
-          <h3 className="mt-1 text-lg font-bold">
-            {rec.type} · {rec.durationMin} minutes
-          </h3>
-          <p className="mt-2 text-sm leading-relaxed text-[#D4DAF2]">
-            <span className="font-semibold text-white">Who:</span> {rec.targetDescription} (
-            {rec.targetIds.length} of {total}).
+          <p className="mt-2 text-sm text-[#1D2140]">
+            <span className="font-semibold">Rationale:</span> {rec.rationale}
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-[#D4DAF2]">
-            <span className="font-semibold text-white">Why:</span> {rec.rationale}
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-[#D4DAF2]">
-            <span className="font-semibold text-white">Then:</span> {rec.followUp}
+          <p className="mt-2 text-sm text-[#1D2140]">
+            <span className="font-semibold">Follow-up:</span> {rec.followUp}
           </p>
         </div>
 
@@ -81,7 +122,8 @@ export default function Recommendation({ analysis }: { analysis: Analysis }) {
           <div className="mt-4 flex flex-wrap gap-3">
             <button
               onClick={approve}
-              className="rounded-xl bg-[#0F766E] px-5 py-2.5 text-sm font-bold text-white shadow hover:brightness-95"
+              disabled={saving}
+              className="rounded-xl bg-[#0F766E] px-5 py-2.5 text-sm font-bold text-white shadow hover:brightness-95 disabled:opacity-50"
             >
               ✓ Approve
             </button>
@@ -92,13 +134,15 @@ export default function Recommendation({ analysis }: { analysis: Analysis }) {
                 );
                 setState("modifying");
               }}
-              className="rounded-xl bg-[#F5A623] px-5 py-2.5 text-sm font-bold text-[#141834] shadow hover:brightness-95"
+              disabled={saving}
+              className="rounded-xl bg-[#F5A623] px-5 py-2.5 text-sm font-bold text-[#141834] shadow hover:brightness-95 disabled:opacity-50"
             >
               ✎ Modify
             </button>
             <button
               onClick={() => setState("rejecting")}
-              className="rounded-xl border-2 border-[#B23A1B] px-5 py-2.5 text-sm font-bold text-[#B23A1B] hover:bg-[#FBE9E3]"
+              disabled={saving}
+              className="rounded-xl border-2 border-[#B23A1B] px-5 py-2.5 text-sm font-bold text-[#B23A1B] hover:bg-[#FBE9E3] disabled:opacity-50"
             >
               ✕ Reject
             </button>
@@ -116,16 +160,18 @@ export default function Recommendation({ analysis }: { analysis: Analysis }) {
               rows={4}
               className="w-full rounded-xl border border-[#D5DAEC] p-3 text-sm focus:border-[#3A4A9F] focus:outline-none"
             />
-            <div className="mt-2 flex gap-3">
+            <div className="mt-2 flex gap-2">
               <button
                 onClick={saveModify}
-                className="rounded-xl bg-[#26306A] px-5 py-2 text-sm font-bold text-white"
+                disabled={saving}
+                className="rounded-xl bg-[#0F766E] px-5 py-2 text-sm font-bold text-white shadow hover:brightness-95 disabled:opacity-50"
               >
-                Save modified intervention
+                {saving ? 'Saving…' : 'Save Modified'}
               </button>
               <button
                 onClick={() => setState("idle")}
-                className="rounded-xl px-4 py-2 text-sm font-semibold text-[#565C82] hover:bg-[#EDEFF6]"
+                disabled={saving}
+                className="rounded-xl border border-[#D5DAEC] px-5 py-2 text-sm font-semibold text-[#565C82] hover:bg-[#EDEFF6] disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -135,20 +181,24 @@ export default function Recommendation({ analysis }: { analysis: Analysis }) {
 
         {state === "rejecting" && (
           <div className="mt-4">
-            <p className="mb-2 text-sm font-semibold text-[#141834]">Why reject? (logged)</p>
-            <div className="flex flex-wrap gap-2">
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#565C82]">
+              Why are you rejecting this?
+            </label>
+            <div className="space-y-2">
               {REJECT_REASONS.map((r) => (
                 <button
                   key={r}
                   onClick={() => reject(r)}
-                  className="rounded-full border border-[#D5DAEC] bg-white px-4 py-1.5 text-sm font-medium text-[#26306A] hover:border-[#B23A1B] hover:text-[#B23A1B]"
+                  disabled={saving}
+                  className="block w-full rounded-lg border border-[#D5DAEC] px-4 py-2 text-left text-sm font-medium text-[#141834] hover:bg-[#EDEFF6] disabled:opacity-50"
                 >
                   {r}
                 </button>
               ))}
               <button
                 onClick={() => setState("idle")}
-                className="rounded-full px-4 py-1.5 text-sm text-[#565C82] hover:bg-[#EDEFF6]"
+                disabled={saving}
+                className="w-full rounded-lg border border-[#D5DAEC] px-4 py-2 text-sm font-semibold text-[#565C82] hover:bg-[#EDEFF6] disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -157,28 +207,20 @@ export default function Recommendation({ analysis }: { analysis: Analysis }) {
         )}
 
         {state === "done" && outcome && (
-          <div className="mt-4 rounded-xl border border-[#17B0A0] bg-[#E4F5F3] px-4 py-3">
-            <p className="text-sm font-bold text-[#0E7C71]">{outcome}</p>
-            <p className="mt-1 text-xs text-[#0E7C71]">
-              Logged at {new Date().toLocaleTimeString()}. The teacher decision is the product — the
-              AI only drafted the option.
-            </p>
-            <button
-              onClick={() => setState("idle")}
-              className="mt-2 text-xs font-semibold text-[#26306A] underline"
-            >
-              Take another decision on this recommendation
-            </button>
+          <div className="mt-4 rounded-xl border border-[#0F766E] bg-[#D1FAE5] px-4 py-3 text-sm font-medium text-[#065F46]">
+            {outcome}
           </div>
         )}
       </section>
 
       {decisions.length > 0 && (
         <section className="rounded-2xl border border-[#D5DAEC] bg-white p-5 shadow-sm">
-          <SectionTitle kicker="Audit trail" title="Decision log" />
+          <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-[#565C82]">
+            Decision log (last 25)
+          </h3>
           <ul className="space-y-2">
             {decisions.map((d, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm">
+              <li key={i} className="flex items-start gap-2 text-sm">
                 <span
                   className={`mt-0.5 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase text-white ${
                     d.action === "approve"
@@ -199,7 +241,7 @@ export default function Recommendation({ analysis }: { analysis: Analysis }) {
             ))}
           </ul>
           <p className="mt-3 text-xs text-[#565C82]">
-            Stored locally in this browser session (localStorage). In production this feedback
+            Stored locally and in Supabase. In production this feedback
             signal retrains the classifier — see Build &amp; scale.
           </p>
         </section>

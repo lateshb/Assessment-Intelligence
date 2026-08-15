@@ -42,6 +42,7 @@ export function transformDbToAssessmentState(
     if (dbQ.analysis) {
       const dbAnalysis = dbQ.analysis
       analysis = {
+        id: dbAnalysis.id, // Include DB ID for decision persistence
         perResponse: dbAnalysis.per_response as any,
         clusters: dbAnalysis.clusters as any,
         gapMap: dbAnalysis.gap_map as any,
