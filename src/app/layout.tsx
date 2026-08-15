@@ -40,7 +40,7 @@ export default function RootLayout({
                 How to use
               </Link>
               <Link href="/rubric-library" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
-                Rubric Library
+                Course Outline
               </Link>
               <Link href="/saved-assessments" className="rounded-lg px-3 py-1.5 text-[#26306A] hover:bg-[#E9ECF9]">
                 Saved Assessments

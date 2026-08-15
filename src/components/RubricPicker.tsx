@@ -4,24 +4,30 @@ import { useState, useMemo } from "react";
 import type { LibraryRubric } from "@/lib/rubric-library-types";
 import type { Rubric } from "@/lib/types";
 
+type ApplyMode = "replace" | "add";
+
 /**
  * RubricPicker — modal/panel for selecting a library rubric to apply to a question.
  *
  * Shows rubrics grouped by course with search, preview, and "Use this rubric" action.
  * The caller receives a COPY of the criteria (snapshot), not a reference.
+ * If currentCriteria exist, shows add/replace choice.
  */
 export default function RubricPicker({
   rubrics,
+  currentCriteria = [],
   onSelect,
   onClose,
 }: {
   rubrics: LibraryRubric[];
+  currentCriteria?: Rubric[];
   onSelect: (criteria: Rubric[]) => void;
   onClose: () => void;
 }) {
   const [search, setSearch] = useState("");
   const [courseFilter, setCourseFilter] = useState<string>("");
   const [preview, setPreview] = useState<LibraryRubric | null>(null);
+  const [applyMode, setApplyMode] = useState<ApplyMode>("replace");
 
   const courses = useMemo(
     () => [...new Set(rubrics.map((r) => r.course))].sort(),
@@ -40,10 +46,33 @@ export default function RubricPicker({
     return list;
   }, [rubrics, courseFilter, search]);
 
+  const hasExistingCriteria = currentCriteria.length > 0;
+
+  function criteriaMatch(a: Rubric, b: Rubric): boolean {
+    return (
+      a.name.trim().toLowerCase() === b.name.trim().toLowerCase() &&
+      a.description.trim().toLowerCase() === b.description.trim().toLowerCase() &&
+      a.maxMarks === b.maxMarks
+    );
+  }
+
   function applyRubric(rubric: LibraryRubric) {
     // SNAPSHOT: deep copy of criteria
     const snapshot = rubric.criteria.map((c) => ({ ...c }));
-    onSelect(snapshot);
+
+    if (applyMode === "replace" || !hasExistingCriteria) {
+      onSelect(snapshot);
+    } else {
+      // Add mode: merge, avoiding exact duplicates
+      const merged = [...currentCriteria];
+      for (const newCrit of snapshot) {
+        const isDuplicate = merged.some((existing) => criteriaMatch(existing, newCrit));
+        if (!isDuplicate) {
+          merged.push(newCrit);
+        }
+      }
+      onSelect(merged);
+    }
   }
 
   return (
@@ -117,6 +146,36 @@ export default function RubricPicker({
                     </div>
                   ))}
                 </div>
+                {/* Add/Replace choice */}
+                {hasExistingCriteria && (
+                  <div className="mt-3 rounded-lg border border-[#D5DAEC] bg-white p-3">
+                    <p className="mb-2 text-xs font-semibold text-[#141834]">
+                      This question already has {currentCriteria.length} criteria. How should this rubric be applied?
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setApplyMode("replace")}
+                        className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                          applyMode === "replace"
+                            ? "bg-[#26306A] text-white"
+                            : "border border-[#D5DAEC] text-[#565C82] hover:bg-[#EDEFF6]"
+                        }`}
+                      >
+                        Replace existing
+                      </button>
+                      <button
+                        onClick={() => setApplyMode("add")}
+                        className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                          applyMode === "add"
+                            ? "bg-[#26306A] text-white"
+                            : "border border-[#D5DAEC] text-[#565C82] hover:bg-[#EDEFF6]"
+                        }`}
+                      >
+                        Add criteria
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="mt-4 flex justify-between">
                   <span className="text-xs text-[#565C82]">
                     {preview.criteria.length} criteria · {preview.criteria.reduce((s, c) => s + c.maxMarks, 0)} total marks
@@ -125,7 +184,7 @@ export default function RubricPicker({
                     onClick={() => applyRubric(preview)}
                     className="rounded-xl bg-[#26306A] px-5 py-2 text-sm font-bold text-white shadow hover:bg-[#3A4A9F]"
                   >
-                    Use this rubric
+                    {hasExistingCriteria && applyMode === "add" ? "Add to question" : "Use this rubric"}
                   </button>
                 </div>
               </div>
