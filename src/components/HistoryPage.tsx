@@ -376,26 +376,33 @@ function HistoryQuestionCard({
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#565C82]">
-            Responses ({displayData.responses.length})
-          </label>
-          <div className="max-h-48 overflow-y-auto rounded-xl border border-[#EDEFF6] bg-[#F4F6FC] p-3">
-            {displayData.responses.length === 0 ? (
-              <p className="text-sm text-[#565C82]">No responses recorded</p>
-            ) : (
-              displayData.responses.slice(0, 5).map((r, i) => (
-                <div key={i} className="border-b border-[#EDEFF6] py-1 text-xs text-[#1D2140] last:border-0">
-                  <span className="font-medium text-[#3A4A9F]">{r.id}:</span>{" "}
-                  {r.text.slice(0, 100)}{r.text.length > 100 ? "…" : ""}
+          {(() => {
+            const responsesList = Array.isArray(displayData.responses) ? displayData.responses : [];
+            return (
+              <>
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#565C82]">
+                  Responses ({responsesList.length})
+                </label>
+                <div className="max-h-48 overflow-y-auto rounded-xl border border-[#EDEFF6] bg-[#F4F6FC] p-3">
+                  {responsesList.length === 0 ? (
+                    <p className="text-sm text-[#565C82]">No responses recorded</p>
+                  ) : (
+                    responsesList.slice(0, 5).map((r, i) => (
+                      <div key={i} className="border-b border-[#EDEFF6] py-1 text-xs text-[#1D2140] last:border-0">
+                        <span className="font-medium text-[#3A4A9F]">{r.id}:</span>{" "}
+                        {r.text.slice(0, 100)}{r.text.length > 100 ? "…" : ""}
+                      </div>
+                    ))
+                  )}
+                  {responsesList.length > 5 && (
+                    <p className="mt-1 text-xs text-[#565C82]">
+                      + {responsesList.length - 5} more
+                    </p>
+                  )}
                 </div>
-              ))
-            )}
-            {displayData.responses.length > 5 && (
-              <p className="mt-1 text-xs text-[#565C82]">
-                + {displayData.responses.length - 5} more
-              </p>
-            )}
-          </div>
+              </>
+            );
+          })()}
         </div>
       </div>
 

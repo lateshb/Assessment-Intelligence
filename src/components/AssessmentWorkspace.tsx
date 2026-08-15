@@ -48,9 +48,13 @@ export default function AssessmentWorkspace() {
     prevStateRef.current = state;
 
     // Check if any question just got analysis (reference changed)
-    const newlyAnalyzed = state.questions.some((q, i) => 
-      q.analysis && (!prev.questions[i] || prev.questions[i].analysis !== q.analysis)
-    );
+    // Compare by dbId if available, otherwise by index
+    const newlyAnalyzed = state.questions.some((q) => {
+      const prevQ = q.dbId 
+        ? prev.questions.find(pq => pq.dbId === q.dbId)
+        : prev.questions[state.questions.indexOf(q)];
+      return q.analysis && (!prevQ || prevQ.analysis !== q.analysis);
+    });
 
     if (newlyAnalyzed) {
       saveAssessment(state);
@@ -81,7 +85,7 @@ export default function AssessmentWorkspace() {
   }, [dispatch]);
 
   const handleSaveDraft = useCallback(async () => {
-    if (!userId || !institutionId) {
+    if (!userId) {
       alert('Not authenticated');
       return;
     }
@@ -90,7 +94,12 @@ export default function AssessmentWorkspace() {
 
     try {
       const result = await saveAssessmentToDb(state, userId, institutionId);
-      dispatch({ type: "COMPLETE_SAVE", assessmentId: result.id, questionIds: result.questionIds });
+      dispatch({
+        type: "COMPLETE_SAVE",
+        assessmentId: result.id,
+        questionIds: result.questionIds,
+        analysisIds: result.analysisIds,
+      });
     } catch (error: any) {
       dispatch({ type: "FAIL_SAVE", error: error.message });
       alert('Save failed: ' + error.message);

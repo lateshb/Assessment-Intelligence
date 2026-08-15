@@ -3,11 +3,27 @@ import type { AssessmentState } from './assessment-types'
 import type { Database } from '@/types/database.types'
 
 type Assessment = Database['public']['Tables']['assessments']['Row']
-type Question = Database['public']['Tables']['questions']['Row']
-type Analysis = Database['public']['Tables']['analyses']['Row']
 
-export async function saveAssessmentToDb(state: AssessmentState, userId: string, institutionId: string) {
+export async function saveAssessmentToDb(
+  state: AssessmentState,
+  userId: string,
+  institutionId?: string | null,
+) {
   const supabase = createClient()
+
+  // Auto-fetch institutionId from profiles if not provided
+  let instId = institutionId
+  if (!instId) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('institution_id')
+      .eq('id', userId)
+      .single()
+    instId = profile?.institution_id ?? null
+  }
+  if (!instId) {
+    throw new Error('User profile or institution ID not found')
+  }
 
   // 1. Upsert assessment
   const { data: assessment, error: assessmentError } = await supabase
@@ -15,7 +31,7 @@ export async function saveAssessmentToDb(state: AssessmentState, userId: string,
     .upsert({
       id: state.id || undefined,
       owner_id: userId,
-      institution_id: institutionId,
+      institution_id: instId,
       name: state.name || null,
       status: 'draft',
       sharing: 'private',
@@ -26,7 +42,8 @@ export async function saveAssessmentToDb(state: AssessmentState, userId: string,
 
   if (assessmentError) throw assessmentError
 
-  // 2. Save questions and collect their IDs
+  // 2. Save questions and collect their IDs + analysis IDs
+  const analysisIds: (string | null)[] = []
   const questionIds = await Promise.all(
     state.questions.map(async (q, position) => {
       const { data: question, error: questionError } = await supabase
@@ -49,51 +66,81 @@ export async function saveAssessmentToDb(state: AssessmentState, userId: string,
       if (questionError) throw questionError
 
       // 3. Save analysis if present
+      let savedAnalysisId: string | null = null
       if (q.analysis) {
-        // Before inserting new analysis, mark any existing analyses for this question as stale
-        const { error: markStaleError } = await supabase
-          .from('analyses')
-          .update({ is_current: false })
-          .eq('question_id', question.id)
-          .eq('is_current', true)
+        if (q.analysis.id) {
+          // Update existing analysis in-place
+          const { error: analysisError } = await supabase
+            .from('analyses')
+            .update({
+              question_text_snapshot: q.questionText,
+              rubric_snapshot: q.rubric,
+              responses_snapshot: q.responseTab === 'csv' ? q.csvRows : q.pasteText,
+              per_response: q.analysis.perResponse,
+              clusters: q.analysis.clusters,
+              gap_map: q.analysis.gapMap,
+              recommendation: q.analysis.recommendation,
+              model: q.analysis.meta.model,
+              latency_ms: q.analysis.meta.latencyMs || null,
+              source: q.analysis.meta.source,
+            })
+            .eq('id', q.analysis.id)
 
-        if (markStaleError) throw markStaleError
+          if (analysisError) throw analysisError
+          savedAnalysisId = q.analysis.id
+        } else {
+          // Mark previous analyses for this question as not current
+          await supabase
+            .from('analyses')
+            .update({ is_current: false })
+            .eq('question_id', question.id)
+            .eq('is_current', true)
 
-        // Now insert the new current analysis
-        const { data: analysisData, error: analysisError } = await supabase
-          .from('analyses')
-          .insert({
-            question_id: question.id,
-            is_current: true,
-            question_text_snapshot: q.questionText,
-            rubric_snapshot: q.rubric,
-            responses_snapshot: q.responseTab === 'csv' ? q.csvRows : q.pasteText,
-            per_response: q.analysis.perResponse,
-            clusters: q.analysis.clusters,
-            gap_map: q.analysis.gapMap,
-            recommendation: q.analysis.recommendation,
-            model: q.analysis.meta.model,
-            latency_ms: q.analysis.meta.latencyMs || null,
-            source: q.analysis.meta.source,
-          })
-          .select()
-          .single()
+          // Insert new current analysis
+          const { data: newAnalysis, error: analysisError } = await supabase
+            .from('analyses')
+            .insert({
+              question_id: question.id,
+              is_current: true,
+              question_text_snapshot: q.questionText,
+              rubric_snapshot: q.rubric,
+              responses_snapshot: q.responseTab === 'csv' ? q.csvRows : q.pasteText,
+              per_response: q.analysis.perResponse,
+              clusters: q.analysis.clusters,
+              gap_map: q.analysis.gapMap,
+              recommendation: q.analysis.recommendation,
+              model: q.analysis.meta.model,
+              latency_ms: q.analysis.meta.latencyMs || null,
+              source: q.analysis.meta.source,
+            })
+            .select('id')
+            .single()
 
-        if (analysisError) throw analysisError
-
-        // Update analysis ID in the question (for in-memory state)
-        if (analysisData && q.analysis) {
-          q.analysis.id = analysisData.id
+          if (analysisError) throw analysisError
+          savedAnalysisId = newAnalysis?.id ?? null
         }
       }
 
+      analysisIds.push(savedAnalysisId)
       return question.id
     })
   )
 
+  // 4. Delete orphaned questions (removed from state but still in DB)
+  if (assessment.id) {
+    const { error: deleteError } = await supabase
+      .from('questions')
+      .delete()
+      .eq('assessment_id', assessment.id)
+      .not('id', 'in', `(${questionIds.join(',')})`)
+
+    if (deleteError) throw deleteError
+  }
+
   return {
     ...assessment,
-    questionIds, // Return question IDs so caller can update state
+    questionIds,
+    analysisIds,
   }
 }
 
@@ -104,6 +151,7 @@ export async function loadAssessmentsFromDb(userId: string): Promise<Assessment[
     .from('assessments')
     .select('*')
     .eq('owner_id', userId)
+    .eq('trashed', false)
     .order('updated_at', { ascending: false })
 
   if (error) throw error

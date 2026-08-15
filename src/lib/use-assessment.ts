@@ -1,13 +1,13 @@
 /**
- * Assessment state management — reducer + hook.
+ * Assessment state management — reducer + pure functions.
  *
- * All assessment/question state lives here, isolated from presentation.
- * The hook exposes state + dispatch so components never own business logic.
- * Persistence can later wrap this hook without changing any UI component.
+ * All assessment/question state logic lives here, isolated from presentation.
+ * The useAssessment hook is re-exported from AssessmentContext.tsx to ensure
+ * all components share the same React Context state.
+ * Persistence can later wrap this without changing any UI component.
  */
 
-import { useCallback, useEffect, useReducer } from "react";
-import type { Analysis, Rubric, StudentResponse } from "./types";
+import type { Rubric, StudentResponse } from "./types";
 import type {
   AssessmentAction,
   AssessmentState,
@@ -110,7 +110,7 @@ function updateQuestion(
   };
 }
 
-export function assessmentReducer(
+export function reducer(
   state: AssessmentState,
   action: AssessmentAction
 ): AssessmentState {
@@ -286,10 +286,17 @@ export function assessmentReducer(
         id: action.assessmentId,
         saveInProgress: false,
         saveError: null,
-        questions: state.questions.map((q, i) => ({
-          ...q,
-          dbId: action.questionIds[i] || q.dbId,
-        })),
+        questions: state.questions.map((q, i) => {
+          const analysisId = action.analysisIds?.[i];
+          return {
+            ...q,
+            dbId: action.questionIds[i] || q.dbId,
+            // Attach the DB analysis ID so subsequent saves update rather than re-insert
+            analysis: q.analysis && analysisId
+              ? { ...q.analysis, id: analysisId }
+              : q.analysis,
+          };
+        }),
       };
 
     case "FAIL_SAVE":
@@ -317,114 +324,13 @@ export function createInitialState(): AssessmentState {
   };
 }
 
-// ─── Hook ──────────────────────────────────────────────────────────────────
+// ─── Hook (re-exported from AssessmentContext) ────────────────────────────
+//
+// DO NOT define useAssessment() here with its own useReducer.
+// That would create isolated state per component, breaking shared state.
+// The canonical useAssessment() lives in AssessmentContext.tsx and uses
+// React Context so all components share the same state & dispatch.
+//
 
-export function useAssessment() {
-  const [state, dispatch] = useReducer(assessmentReducer, null, createInitialState);
+export { useAssessment } from "./AssessmentContext";
 
-  // Check for ?demo=1 on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const flag = new URLSearchParams(window.location.search).get("demo") === "1";
-      if (flag) dispatch({ type: "SET_DEMO_FLAG", flag: true });
-    }
-  }, []);
-
-  const analyzeQuestion = useCallback(
-    async (questionId: string) => {
-      const q = state.questions.find((q) => q.id === questionId);
-      if (!q) return;
-      if (q.status === "analyzing") return; // Prevent duplicate
-
-      const responses = getResponses(q);
-
-      // Validation
-      if (!q.questionText.trim()) {
-        dispatch({ type: "FAIL_ANALYSIS", questionId, error: "Please enter the question." });
-        return;
-      }
-      if (q.rubric.some((r) => !r.name.trim())) {
-        dispatch({ type: "FAIL_ANALYSIS", questionId, error: "Every rubric criterion needs a name." });
-        return;
-      }
-      if (responses.length < 5) {
-        dispatch({
-          type: "FAIL_ANALYSIS",
-          questionId,
-          error: `Need at least 5 responses (currently ${responses.length}).`,
-        });
-        return;
-      }
-
-      dispatch({ type: "START_ANALYSIS", questionId });
-
-      // Demo mode: use cached results
-      if (state.demoFlag) {
-        try {
-          const res = await fetch("/demo-results.json");
-          const cached = (await res.json()) as Analysis;
-          dispatch({ type: "COMPLETE_ANALYSIS", questionId, analysis: cached });
-        } catch {
-          dispatch({ type: "FAIL_ANALYSIS", questionId, error: "Failed to load demo results." });
-        }
-        return;
-      }
-
-      try {
-        const body = { question: q.questionText, rubric: q.rubric, responses };
-        const res = await fetch("/api/analyze", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          if (data?.fallbackAdvised) {
-            // Fall back to cached demo results
-            const fallback = await fetch("/demo-results.json");
-            const cached = (await fallback.json()) as Analysis;
-            dispatch({ type: "COMPLETE_ANALYSIS", questionId, analysis: cached });
-          } else {
-            dispatch({
-              type: "FAIL_ANALYSIS",
-              questionId,
-              error: data?.error ?? "Analysis failed.",
-            });
-          }
-          return;
-        }
-        dispatch({ type: "COMPLETE_ANALYSIS", questionId, analysis: data as Analysis });
-      } catch {
-        // Network error — fall back to cached
-        try {
-          const fallback = await fetch("/demo-results.json");
-          const cached = (await fallback.json()) as Analysis;
-          dispatch({ type: "COMPLETE_ANALYSIS", questionId, analysis: cached });
-        } catch {
-          dispatch({ type: "FAIL_ANALYSIS", questionId, error: "Analysis failed. Please try again." });
-        }
-      }
-    },
-    [state.questions, state.demoFlag]
-  );
-
-  const analyzeAll = useCallback(async () => {
-    if (state.analyzeAllInProgress) return; // Prevent duplicate
-
-    const readyQuestions = state.questions.filter(
-      (q) => q.status === "ready" || q.status === "needs_reanalysis" || q.status === "failed"
-    );
-    if (readyQuestions.length === 0) return;
-
-    dispatch({ type: "SET_ANALYZE_ALL", inProgress: true });
-
-    // Process each independently — one failure doesn't stop others
-    await Promise.allSettled(
-      readyQuestions.map((q) => analyzeQuestion(q.id))
-    );
-
-    dispatch({ type: "SET_ANALYZE_ALL", inProgress: false });
-  }, [state.questions, state.analyzeAllInProgress, analyzeQuestion]);
-
-  return { state, dispatch, analyzeQuestion, analyzeAll, getResponses };
-}
