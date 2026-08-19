@@ -92,11 +92,10 @@ scripts/
 4. **Confidence routing**: Low confidence → needs_review regardless of model category
 5. **Fallback**: API failure → cached demo results automatically
 
-## 2. What exists today (Features)
-
-- [x] Public Logged-Out Landing Page (10 sections: Hero, Product Visual, Workflow, Capabilities, Diagnosis Output, Trust, Comparison, Personas, Interactive Demo CTAs, How It Works guide)
+- [x] Public Logged-Out Landing Page (Polished, teacher-friendly copy, 9 streamlined sections: Hero, Product Visual, Workflow, Interactive Segmented Capabilities, Diagnosis Output, Trust, Comparison, Personas, Roadmap)
 - [x] Dual-Mode Root Routing (Logged-out → PublicLandingPage; Logged-in → AppFlow / AssessmentWorkspace)
-- [x] Dynamic AppHeader (Responsive navigation, public anchor links, workspace links, mobile drawer)
+- [x] Dynamic AppHeader (Responsive navigation, public anchor links, workspace links, touch-optimized mobile hamburger drawer)
+- [x] Interactive Platform Capabilities Showcase (Single-line pills, responsive scroll, feature breakdown & live-feel UI card preview)
 - [x] Authenticated User Menu (User identity display, profile initial/avatar, role badge, accessible sign out, loading state, error banner)
 - [x] Google OAuth Sign-in (Dynamic origin resolution, mobile touch handling, error banner)
 - [x] Supabase Auth + Database Integration (Saved Assessments, Global Rubrics, Analysis History, Teacher Decisions persistence with RLS)
