@@ -62,7 +62,7 @@ export function UserMenu() {
       }
       setIsOpen(false);
       setIsSigningOut(false);
-      router.push("/login");
+      router.push("/");
       router.refresh();
     } catch (err: any) {
       setSignOutError(err?.message || "An unexpected error occurred during sign out.");

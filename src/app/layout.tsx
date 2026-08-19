@@ -3,11 +3,12 @@ import Link from "next/link";
 import { AssessmentProvider } from "@/lib/AssessmentContext";
 import { RubricLibraryProvider } from "@/lib/use-rubric-library";
 import { HistoryProvider } from "@/lib/use-history";
-import { UserMenu } from "@/components/user-menu";
+import { LoginModalProvider } from "@/lib/use-login-modal";
+import AppHeader from "@/components/AppHeader";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Assessment Intelligence — Learning-Gap Engine",
+  title: "Assessment Intelligence — Turn student responses into better teaching decisions",
   description:
     "Predicts the misconception behind each student response so faculty can decide targeted remediation faster and better. AI recommends. Teachers decide.",
 };
@@ -18,70 +19,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex min-h-screen flex-col bg-[#F4F6FC] text-[#1D2140] antialiased">
-        <header className="sticky top-0 z-40 border-b border-[#D5DAEC] bg-white/95 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 px-4 py-2.5 sm:py-3">
-            <div className="flex items-center justify-between gap-3">
-              <Link href="/" className="flex items-center gap-3 shrink-0">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#26306A] text-lg font-bold text-[#F5A623] shadow-sm">
-                  Ai
-                </span>
-                <span>
-                  <span className="block text-sm font-bold leading-tight text-[#141834]">
-                    Assessment Intelligence
-                  </span>
-                  <span className="block text-[11px] leading-tight text-[#565C82]">
-                    AI recommends. Teachers decide.
-                  </span>
-                </span>
-              </Link>
-              <div className="sm:hidden shrink-0">
-                <UserMenu />
-              </div>
-            </div>
+        <LoginModalProvider>
+          <AppHeader />
 
-            <div className="flex items-center justify-between sm:justify-end gap-1 py-0.5 text-xs sm:text-sm font-medium">
-              <nav className="flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar">
-                <Link
-                  href="/"
-                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors whitespace-nowrap"
-                >
-                  Workspace
-                </Link>
-                <Link
-                  href="/saved-assessments"
-                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors whitespace-nowrap"
-                >
-                  Saved Assessments
-                </Link>
-                <Link
-                  href="/rubric-library"
-                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors whitespace-nowrap"
-                >
-                  Global Rubrics
-                </Link>
-                <Link
-                  href="/history"
-                  className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors whitespace-nowrap"
-                >
-                  Analysis History
-                </Link>
-              </nav>
-              <div className="hidden sm:block ml-2 shrink-0">
-                <UserMenu />
-              </div>
-            </div>
+          <div className="flex-1">
+            <AssessmentProvider>
+              <HistoryProvider>
+                <RubricLibraryProvider>
+                  {children}
+                </RubricLibraryProvider>
+              </HistoryProvider>
+            </AssessmentProvider>
           </div>
-        </header>
-
-        <div className="flex-1">
-          <AssessmentProvider>
-            <HistoryProvider>
-              <RubricLibraryProvider>
-                {children}
-              </RubricLibraryProvider>
-            </HistoryProvider>
-          </AssessmentProvider>
-        </div>
+        </LoginModalProvider>
 
         <footer className="mt-16 border-t border-[#D5DAEC] bg-white">
           <div className="mx-auto max-w-6xl px-4 py-8">
