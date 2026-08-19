@@ -2,39 +2,39 @@
 
 const trustPrinciples = [
   {
-    title: "Probabilistic AI & Visible Confidence",
+    title: "Visible Confidence Scores",
     description:
-      "All LLM classifications are probabilistic estimates. Exact numerical confidence scores are displayed on every single response, so teachers always know where the model is confident and where it is uncertain.",
+      "Every single response displays a clear AI confidence score. You always know when the model is certain and when it recommends a human double-check.",
     icon: "🎯",
   },
   {
-    title: "Verbatim Student Evidence",
+    title: "Exact Student Quotes",
     description:
-      "No diagnosis is made without cited proof. The system extracts and highlights verbatim quotes from actual student answers to justify every assigned misconception and classification.",
+      "No guessing or mysterious labels. Every diagnosis highlights verbatim quotes from the student's actual text as clear evidence.",
     icon: "🔍",
   },
   {
-    title: "Draft Marks, Never Final Grades",
+    title: "Draft Marks, Not Final Grades",
     description:
-      "Scores computed during analysis are strictly draft marks. AI never finalizes or submits a grade without explicit review, override, and confirmation by the teacher.",
+      "Scores are generated purely as draft suggestions for the educator. The AI never finalizes or publishes grades without your approval.",
     icon: "📋",
   },
   {
-    title: "Automatic Human-Review Routing",
+    title: "Flags Uncertain Answers",
     description:
-      "Any student response classified with confidence below 60% is automatically routed to a dedicated 'Needs Teacher Review' queue, preventing false-positive categorization from affecting class remediation.",
+      "Any response with low confidence (below 60%) is automatically sent to a 'Needs Review' queue so you can quickly review it yourself.",
     icon: "🛡️",
   },
   {
-    title: "Strict Teacher Approval Gate",
+    title: "Teacher Decides Every Action",
     description:
-      "The engine recommends interventions, but can never trigger one on its own. Every teaching action requires faculty to explicitly Approve, Modify, or Reject the recommendation.",
+      "The AI suggests helpful 15-minute interventions, but never teaches or changes lessons without you clicking Approve, Modify, or Reject.",
     icon: "✋",
   },
   {
-    title: "Immutable Snapshots & Audit Trail",
+    title: "Clear History & Audit Trail",
     description:
-      "Analysis history preserves exact snapshots of rubrics, responses, and AI outputs. When you edit inputs, stale analyses are clearly flagged rather than silently overwriting historical evidence.",
+      "Every run is saved with its original rubric and student responses. If you edit questions later, earlier records stay intact.",
     icon: "🔒",
   },
 ];
@@ -45,14 +45,14 @@ export default function TrustSection() {
       <div className="rounded-3xl bg-[#26306A] p-6 sm:p-10 lg:p-12 text-white shadow-xl">
         <div className="text-center max-w-3xl mx-auto">
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#F5A623]">
-            Trust, Ethics &amp; Explainability
+            Trust &amp; Transparency
           </p>
           <h2 className="mt-2 text-2xl font-extrabold sm:text-3xl lg:text-4xl text-white">
-            AI assists the decision. The teacher owns it.
+            AI recommends. The teacher decides.
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-[#C3CAEC] sm:text-base">
-            We reject black-box automation in education. Every number, classification, and recommended action
-            is designed to empower the educator with transparent evidence and total final authority.
+            We believe in transparent, explainable tools for educators. Every score, quote, and recommendation
+            is designed to give teachers total clarity and final authority.
           </p>
         </div>
 
@@ -73,18 +73,8 @@ export default function TrustSection() {
             </div>
           ))}
         </div>
-
-        {/* Prototype Transparency Disclosure Banner */}
-        <div className="mt-10 rounded-2xl border border-white/15 bg-white/10 p-4 sm:p-5 text-center max-w-4xl mx-auto">
-          <p className="text-xs font-semibold text-[#F5A623]">
-            Prototype Transparency Disclosure
-          </p>
-          <p className="mt-1 text-xs text-[#D4DAF2] leading-relaxed">
-            Assessment Intelligence currently operates on carefully curated synthetic student datasets and benchmark exam questions.
-            All AI outputs are probabilistic and require educator validation before instructional use.
-          </p>
-        </div>
       </div>
     </section>
   );
 }
+

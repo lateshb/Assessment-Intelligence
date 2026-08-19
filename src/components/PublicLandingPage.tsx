@@ -8,8 +8,6 @@ import DiagnosisOutputSection from "./landing/DiagnosisOutputSection";
 import TrustSection from "./landing/TrustSection";
 import DifferentiationSection from "./landing/DifferentiationSection";
 import WhoItsForSection from "./landing/WhoItsForSection";
-import InteractiveDemoCtaSection from "./landing/InteractiveDemoCtaSection";
-import HowItWorksGuideSection from "./landing/HowItWorksGuideSection";
 import FutureScaleSection from "./landing/FutureScaleSection";
 
 export default function PublicLandingPage() {
@@ -39,14 +37,9 @@ export default function PublicLandingPage() {
       {/* 8. Who It Is For */}
       <WhoItsForSection />
 
-      {/* 9. Interactive Demo Launch CTA */}
-      <InteractiveDemoCtaSection />
-
-      {/* 10. Quick Start Guide */}
-      <HowItWorksGuideSection />
-
-      {/* 11. Built Today vs What Is Next */}
+      {/* 9. Built Today vs What Is Next */}
       <FutureScaleSection />
     </main>
   );
 }
+

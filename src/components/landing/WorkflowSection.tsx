@@ -4,49 +4,49 @@ const workflowSteps = [
   {
     step: "01",
     title: "Assess",
-    tagline: "Question + Rubric + Responses",
+    tagline: "Questions & Responses",
     description:
-      "Enter or import exam questions, set specific multi-criterion rubrics, and upload student answer batches via copy-paste or CSV.",
+      "Enter your question, set your rubric criteria, and paste or upload student answers in seconds.",
     badgeColor: "bg-[#26306A] text-white",
   },
   {
     step: "02",
     title: "Diagnose",
-    tagline: "Response-Level AI Classification",
+    tagline: "Instant AI Analysis",
     description:
-      "A single batched LLM run classifies every individual response, extracting exact verbatim quotes and computing confidence scores.",
+      "AI reads every student answer, highlights exact phrases as evidence, and scores confidence for each diagnostic.",
     badgeColor: "bg-[#3A4A9F] text-white",
   },
   {
     step: "03",
     title: "Identify Gaps",
-    tagline: "Deterministic Class Gap Mapping",
+    tagline: "Class-Wide Learning Map",
     description:
-      "Server-side deterministic math aggregates class rubric mastery, pinpoints critical gaps, and groups students into misconception clusters.",
+      "Instantly summarizes class scores, highlights the biggest learning gaps, and groups students who made similar mistakes.",
     badgeColor: "bg-[#0E7C71] text-white",
   },
   {
     step: "04",
     title: "Recommend",
-    tagline: "One Targeted Remediation Plan",
+    tagline: "15-Minute Action Plan",
     description:
-      "AI proposes exactly one high-impact intervention (e.g. 15-min focused concept contrast) tailored to the specific learning gap.",
+      "Suggests a focused 15-minute review session tailored directly to the main misconception.",
     badgeColor: "bg-[#F5A623] text-[#141834]",
   },
   {
     step: "05",
     title: "Decide",
-    tagline: "Teacher Approval Gate",
+    tagline: "Teacher in Control",
     description:
-      "Teacher reviews the evidence and clicks Approve, Modify, or Reject. Nothing acts on students without the educator's explicit decision.",
+      "You review the findings and choose to Approve, Modify, or Reject. Nothing is taught without your say-so.",
     badgeColor: "bg-[#B45309] text-white",
   },
   {
     step: "06",
     title: "Revisit",
-    tagline: "Saved Assessments & Version History",
+    tagline: "History & Saved Work",
     description:
-      "Persist assessments to the cloud, track multiple re-analysis versions, manage Global Rubrics, and audit past pedagogical choices.",
+      "Save assessments securely, compare student batches over time, and reuse your best rubrics.",
     badgeColor: "bg-[#1E2656] text-white",
   },
 ];

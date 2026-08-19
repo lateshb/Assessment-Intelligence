@@ -5,21 +5,21 @@ const targetUsers = [
     title: "University & Higher Ed Faculty",
     role: "Professors & Instructors",
     description:
-      "Quickly diagnose conceptual stumbling blocks across large batches of open-ended midterm or quiz answers without spending days reading scripts manually.",
+      "Diagnose conceptual stumbling blocks across large batches of open-ended midterm answers without spending days grading scripts manually.",
     icon: "🎓",
   },
   {
-    title: "K-12 Subject Leads & Educators",
-    role: "Secondary & High School Teachers",
+    title: "K-12 & High School Teachers",
+    role: "Secondary & High School Educators",
     description:
-      "Identify exactly which rubric criteria students struggle with before term exams, enabling immediate course-correction during weekly classroom hours.",
+      "Spot exactly where students struggle before final exams, enabling immediate course-correction during regular class hours.",
     icon: "🏫",
   },
   {
     title: "Coaching & Test-Prep Teams",
-    role: "Academic Leads & Curriculum Specialists",
+    role: "Academic Leads & Instructors",
     description:
-      "Map recurring misconception clusters across mock tests and generate targeted mini-lessons for specific student cohorts at scale.",
+      "Group common student mistakes on practice tests and prepare targeted mini-lessons for struggling cohorts at scale.",
     icon: "📈",
   },
 ];
@@ -35,8 +35,8 @@ export default function WhoItsForSection() {
           Purpose-built for educators and academic teams
         </h2>
         <p className="mt-2 text-sm text-[#565C82] max-w-2xl mx-auto">
-          Assessment Intelligence is laser-focused on diagnostic analysis for teachers — not a student portal,
-          all-purpose LMS, or administrative database.
+          Assessment Intelligence is laser-focused on diagnostic analysis for teachers — helping you make
+          better teaching decisions every week.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export default function WhoItsForSection() {
 
       {/* Clear Scope Disclaimer Box */}
       <div className="mt-8 rounded-xl border border-[#D5DAEC] bg-[#F4F6FC] p-4 text-center text-xs text-[#6C7396]">
-        <strong className="text-[#26306A]">Scope Definition:</strong> Built exclusively as a faculty decision-support platform. Does not replace your learning management system (LMS), student gradebook, or institutional SIS.
+        <strong className="text-[#26306A]">Built for Teachers:</strong> Designed specifically as a faculty decision-support platform. It works seamlessly alongside your existing school LMS and gradebook.
       </div>
     </section>
   );

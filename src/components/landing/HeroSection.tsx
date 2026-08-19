@@ -33,21 +33,20 @@ export default function HeroSection({ onTryDemoClick }: HeroSectionProps) {
 
         {/* Supporting Copy */}
         <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-[#565C82] sm:text-lg">
-          AI analyzes student responses, identifies recurring misconceptions and learning gaps,
-          and recommends targeted interventions — while keeping the teacher firmly in control.
+          Spot recurring misconceptions, map learning gaps across your class, and get actionable 15-minute lesson plans — with the teacher always in full control.
         </p>
 
         {/* Workflow Progression Pill */}
         <div className="mx-auto mt-6 inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-[#E9ECF9] px-3.5 py-2 text-xs font-semibold text-[#26306A]">
-          <span className="text-[#3A4A9F]">Assess</span>
+          <span className="text-[#3A4A9F]">1. Assess</span>
           <span className="text-[#98A2C8]">→</span>
-          <span className="text-[#3A4A9F]">Diagnose</span>
+          <span className="text-[#3A4A9F]">2. Diagnose</span>
           <span className="text-[#98A2C8]">→</span>
-          <span className="text-[#3A4A9F]">Map Gaps</span>
+          <span className="text-[#3A4A9F]">3. Map Gaps</span>
           <span className="text-[#98A2C8]">→</span>
-          <span className="text-[#3A4A9F]">Recommend</span>
+          <span className="text-[#3A4A9F]">4. Recommend</span>
           <span className="text-[#98A2C8]">→</span>
-          <span className="text-[#0E7C71] font-bold">Teacher Decides</span>
+          <span className="text-[#0E7C71] font-bold">5. Teacher Decides</span>
         </div>
 
         {/* CTAs */}
@@ -55,7 +54,7 @@ export default function HeroSection({ onTryDemoClick }: HeroSectionProps) {
           <Link
             href="/login"
             onClick={onTryDemoClick}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#26306A] px-7 py-3.5 text-sm font-bold text-white shadow-md hover:bg-[#3A4A9F] focus:outline-hidden focus:ring-2 focus:ring-[#26306A] focus:ring-offset-2 transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#26306A] px-7 py-3.5 text-sm font-bold text-white shadow-md hover:bg-[#3A4A9F] focus:outline-hidden focus:ring-2 focus:ring-[#26306A] focus:ring-offset-2 transition-all cursor-pointer touch-manipulation"
             id="hero-try-demo-btn"
           >
             <span>⚡ Try the Demo</span>
@@ -64,7 +63,7 @@ export default function HeroSection({ onTryDemoClick }: HeroSectionProps) {
 
           <Link
             href="/login"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#D5DAEC] bg-white px-7 py-3.5 text-sm font-bold text-[#141834] shadow-xs hover:bg-[#F4F6FC] hover:border-[#3A4A9F] focus:outline-hidden focus:ring-2 focus:ring-[#3A4A9F] focus:ring-offset-2 transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#D5DAEC] bg-white px-7 py-3.5 text-sm font-bold text-[#141834] shadow-xs hover:bg-[#F4F6FC] hover:border-[#3A4A9F] focus:outline-hidden focus:ring-2 focus:ring-[#3A4A9F] focus:ring-offset-2 transition-all cursor-pointer touch-manipulation"
             id="hero-sign-in-btn"
           >
             Sign In with Google
@@ -74,13 +73,13 @@ export default function HeroSection({ onTryDemoClick }: HeroSectionProps) {
         {/* Micro Guarantee Statements */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-y-2 gap-x-6 text-xs text-[#6C7396]">
           <span className="flex items-center gap-1.5">
-            <span className="text-[#0E7C71]">✓</span> No automated grading without review
+            <span className="text-[#0E7C71] font-bold">✓</span> Always gives teachers final say
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="text-[#0E7C71]">✓</span> Verbatim response evidence cited
+            <span className="text-[#0E7C71] font-bold">✓</span> Quotes exact student text as proof
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="text-[#0E7C71]">✓</span> Probabilistic confidence visible
+            <span className="text-[#0E7C71] font-bold">✓</span> Shows AI confidence on every answer
           </span>
         </div>
       </div>

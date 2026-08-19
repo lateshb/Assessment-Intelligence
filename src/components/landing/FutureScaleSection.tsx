@@ -3,21 +3,21 @@
 import Link from "next/link";
 
 const todayCapabilities = [
-  "Multi-question diagnostic workspace",
-  "Batched Gemini LLM response classification",
-  "Deterministic server-side learning-gap math",
-  "Misconception clustering with verbatim quotes",
-  "AI-drafted 15-minute interventions",
-  "Approve / Modify / Reject teacher decision gate",
+  "Multi-question assessment workspace",
+  "Instant AI response diagnostic analysis",
+  "Visual class-wide learning gap mapping",
+  "Misconception clustering with verbatim student quotes",
+  "Targeted 15-minute lesson recommendations",
+  "Teacher approval gate (Approve / Modify / Reject)",
   "Global Rubrics library & frozen snapshots",
-  "Analysis history & versioning with staleness detection",
+  "Analysis history & version tracking",
 ];
 
 const nextCapabilities = [
-  "Direct assessment-pipeline and LMS data ingestion",
-  "Longitudinal outcome tracking tying interventions to score deltas",
-  "Adaptive student-specific remediation paths",
-  "Fine-tuned subject-specific misconception classifiers",
+  "Direct LMS & gradebook integrations (Canvas, Google Classroom)",
+  "Longitudinal learning growth tracking across semesters",
+  "Student-specific adaptive remediation pathways",
+  "Subject-tailored diagnostic models (STEM, Humanities, Business)",
 ];
 
 export default function FutureScaleSection() {
@@ -31,7 +31,7 @@ export default function FutureScaleSection() {
           What is built today vs. what is next
         </h2>
         <p className="mt-2 text-sm text-[#565C82] max-w-2xl mx-auto">
-          We maintain rigorous honesty about our architecture: what is production-ready today and our disciplined roadmap ahead.
+          We maintain clear honesty about our system: what is available in the platform today and our roadmap ahead.
         </p>
       </div>
 

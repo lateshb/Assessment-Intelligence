@@ -179,15 +179,16 @@ export default function AppHeader() {
             {/* Mobile hamburger button for public visitor */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 rounded-lg text-[#26306A] hover:bg-[#E9ECF9]"
-              aria-label="Toggle navigation menu"
+              className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl text-[#26306A] hover:bg-[#E9ECF9] focus:outline-hidden focus:ring-2 focus:ring-[#26306A] transition-colors cursor-pointer touch-manipulation"
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
               id="mobile-menu-toggle-btn"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
                 )}
               </svg>
             </button>
@@ -197,113 +198,119 @@ export default function AppHeader() {
 
       {/* Mobile Drawer / Dropdown */}
       {mobileMenuOpen && (
-        <div className="border-t border-[#D5DAEC] bg-white px-4 py-4 shadow-lg lg:hidden" id="mobile-menu-drawer">
+        <div className="border-t border-[#D5DAEC] bg-white px-5 py-5 shadow-2xl lg:hidden animate-in fade-in slide-in-from-top-2 duration-150" id="mobile-menu-drawer">
           {user ? (
-            <nav className="flex flex-col gap-2 text-sm font-medium text-[#26306A]">
+            <nav className="flex flex-col gap-1.5 text-sm font-semibold text-[#26306A]">
               <Link
                 href="/"
-                className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Workspace
+                <span>📝 Workspace</span>
               </Link>
               <Link
                 href="/saved-assessments"
-                className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Saved Assessments
+                <span>💾 Saved Assessments</span>
               </Link>
               <Link
                 href="/rubric-library"
-                className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Global Rubrics
+                <span>📚 Global Rubrics</span>
               </Link>
               <Link
                 href="/history"
-                className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Analysis History
+                <span>⏳ Analysis History</span>
               </Link>
               <Link
                 href="/how-to-use"
-                className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                User Guide
+                <span>📖 User Guide</span>
               </Link>
               <Link
                 href="/build-and-scale"
-                className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Build &amp; Scale
+                <span>🚀 Build &amp; Scale</span>
               </Link>
             </nav>
           ) : (
             <div className="space-y-4">
-              <nav className="flex flex-col gap-1.5 text-sm font-semibold text-[#26306A]">
+              <nav className="flex flex-col gap-1 text-sm font-semibold text-[#26306A]">
                 <a
                   href="#workflow"
-                  className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Workflow
+                  <span className="text-xs font-bold text-[#3A4A9F]">01</span>
+                  <span>Workflow</span>
                 </a>
                 <a
                   href="#capabilities"
-                  className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Capabilities
+                  <span className="text-xs font-bold text-[#3A4A9F]">02</span>
+                  <span>Capabilities</span>
                 </a>
                 <a
                   href="#diagnosis"
-                  className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Output &amp; Diagnosis
+                  <span className="text-xs font-bold text-[#3A4A9F]">03</span>
+                  <span>Diagnostic Output</span>
                 </a>
                 <a
                   href="#trust"
-                  className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Trust &amp; Ethics
+                  <span className="text-xs font-bold text-[#3A4A9F]">04</span>
+                  <span>Trust &amp; Ethics</span>
                 </a>
                 <Link
                   href="/how-to-use"
-                  className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  User Guide
+                  <span className="text-xs font-bold text-[#3A4A9F]">05</span>
+                  <span>User Guide</span>
                 </Link>
                 <Link
                   href="/build-and-scale"
-                  className="rounded-lg px-3 py-2 hover:bg-[#E9ECF9]"
+                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Build &amp; Scale
+                  <span className="text-xs font-bold text-[#3A4A9F]">06</span>
+                  <span>Build &amp; Scale Architecture</span>
                 </Link>
               </nav>
 
-              <div className="flex flex-col gap-2 pt-2 border-t border-[#EDEFF6]">
+              <div className="flex flex-col gap-2.5 pt-3 border-t border-[#EDEFF6]">
                 <Link
                   href="/login"
-                  className="w-full text-center rounded-xl border border-[#D5DAEC] bg-white py-2.5 text-sm font-bold text-[#141834]"
+                  className="w-full text-center rounded-xl bg-[#26306A] py-3 text-sm font-bold text-white shadow-md hover:bg-[#3A4A9F] transition-all cursor-pointer touch-manipulation"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Sign In
+                  ⚡ Try the Demo (50 Responses)
                 </Link>
                 <Link
                   href="/login"
-                  className="w-full text-center rounded-xl bg-[#26306A] py-2.5 text-sm font-bold text-white shadow-xs"
+                  className="w-full text-center rounded-xl border border-[#D5DAEC] bg-white py-2.5 text-sm font-bold text-[#141834] hover:bg-[#F4F6FC] transition-all cursor-pointer touch-manipulation"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  ⚡ Try the Demo
+                  Sign In with Google
                 </Link>
               </div>
             </div>

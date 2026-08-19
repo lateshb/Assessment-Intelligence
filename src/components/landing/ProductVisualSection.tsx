@@ -92,7 +92,7 @@ export default function ProductVisualSection() {
               {/* Category Split Chips */}
               <div className="rounded-xl border border-[#D5DAEC] bg-white p-4 shadow-xs">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#26306A] block mb-3">
-                  AI Diagnosis Split (50 Submissions)
+                  Class Overview (50 Student Submissions)
                 </span>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div className="rounded-lg bg-[#E6F7F5] border border-[#0E7C71]/30 p-2.5">
@@ -114,7 +114,7 @@ export default function ProductVisualSection() {
               <div className="rounded-xl border border-[#D5DAEC] bg-white p-4 shadow-xs">
                 <div className="flex items-center justify-between mb-2.5">
                   <span className="text-xs font-bold uppercase tracking-wider text-[#26306A]">
-                    Learning-Gap Map (% Criterion Mastery)
+                    Learning-Gap Map (% Class Mastery)
                   </span>
                   <span className="rounded bg-rose-100 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-rose-800">
                     1 Critical Gap Flagged
@@ -162,10 +162,10 @@ export default function ProductVisualSection() {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <span className="inline-block rounded-md bg-rose-100 px-2 py-0.5 text-[11px] font-bold text-rose-800">
-                    Dominant Misconception Cluster (5 Students)
+                    Common Misconception (5 Students)
                   </span>
                   <h3 className="mt-1 text-sm font-bold text-[#141834]">
-                    Confuses elasticity with absolute change in quantity
+                    Confuses elasticity with raw change in quantity
                   </h3>
                 </div>
                 <span className="rounded-full bg-[#E9ECF9] px-2 py-0.5 text-[11px] font-bold text-[#26306A]">
@@ -176,7 +176,7 @@ export default function ProductVisualSection() {
                 Students compute elasticity using raw units or currency instead of percentage changes.
               </p>
               <div className="mt-2.5 rounded-lg bg-rose-50/70 p-2 text-xs text-rose-900 border border-rose-100">
-                <span className="font-bold">Verbatim Evidence (R19):</span> &quot;PED = fall in demand divided by rise in price = 40 units / Rs 5 = 8.&quot;
+                <span className="font-bold">Student Quote (R19):</span> &quot;PED = fall in demand divided by rise in price = 40 units / Rs 5 = 8.&quot;
               </div>
             </div>
 
@@ -184,7 +184,7 @@ export default function ProductVisualSection() {
             <div className="lg:col-span-6 rounded-xl border-2 border-[#0E7C71]/40 bg-gradient-to-br from-white to-[#E6F7F5]/30 p-4 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[#0E7C71]">
-                  AI Recommended Intervention
+                  Recommended Mini-Lesson
                 </span>
                 <span className="rounded-full bg-[#0E7C71] px-2.5 py-0.5 text-[11px] font-bold text-white">
                   15 min session
