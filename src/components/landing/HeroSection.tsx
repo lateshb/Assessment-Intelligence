@@ -49,24 +49,15 @@ export default function HeroSection({ onTryDemoClick }: HeroSectionProps) {
           <span className="text-[#0E7C71] font-bold">5. Teacher Decides</span>
         </div>
 
-        {/* CTAs */}
-        <div className="mt-8 flex flex-col items-center justify-center gap-3.5 sm:flex-row sm:gap-4">
+        {/* CTA */}
+        <div className="mt-8 flex justify-center">
           <Link
             href="/login"
-            onClick={onTryDemoClick}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#26306A] px-7 py-3.5 text-sm font-bold text-white shadow-md hover:bg-[#3A4A9F] focus:outline-hidden focus:ring-2 focus:ring-[#26306A] focus:ring-offset-2 transition-all cursor-pointer touch-manipulation"
-            id="hero-try-demo-btn"
-          >
-            <span>⚡ Try the Demo</span>
-            <span className="text-xs opacity-75 font-normal">(50 Economics responses)</span>
-          </Link>
-
-          <Link
-            href="/login"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#D5DAEC] bg-white px-7 py-3.5 text-sm font-bold text-[#141834] shadow-xs hover:bg-[#F4F6FC] hover:border-[#3A4A9F] focus:outline-hidden focus:ring-2 focus:ring-[#3A4A9F] focus:ring-offset-2 transition-all cursor-pointer touch-manipulation"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#26306A] px-8 py-3.5 text-sm font-bold text-white shadow-md hover:bg-[#3A4A9F] focus:outline-hidden focus:ring-2 focus:ring-[#26306A] focus:ring-offset-2 transition-all cursor-pointer touch-manipulation"
             id="hero-sign-in-btn"
           >
-            Sign In with Google
+            <span>Sign In with Google</span>
+            <span aria-hidden="true">→</span>
           </Link>
         </div>
 

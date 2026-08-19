@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -11,35 +11,39 @@ export default function AppHeader() {
   const [user, setUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
+    let mounted = true;
+
     const getUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      setUser(user);
+      if (mounted) {
+        setUser(user);
+      }
     };
     getUser();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      if (mounted) {
+        setUser(session?.user ?? null);
+      }
     });
 
-    return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   // Close mobile menu on route changes
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
-
-  const isPublicRoute =
-    pathname === "/" && !user
-      ? true
-      : pathname === "/how-to-use" || pathname === "/build-and-scale" || pathname === "/login";
 
   return (
     <header className="sticky top-0 z-40 border-b border-[#D5DAEC] bg-white/95 backdrop-blur-xs">
@@ -109,15 +113,17 @@ export default function AppHeader() {
             </div>
             {/* Mobile menu button for logged-in user */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="sm:hidden p-1.5 rounded-lg text-[#26306A] hover:bg-[#E9ECF9]"
-              aria-label="Toggle navigation menu"
+              type="button"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              className="sm:hidden flex h-10 w-10 items-center justify-center rounded-xl text-[#26306A] hover:bg-[#E9ECF9] focus:outline-hidden focus:ring-2 focus:ring-[#26306A] transition-colors cursor-pointer touch-manipulation"
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
                 )}
               </svg>
             </button>
@@ -162,23 +168,17 @@ export default function AppHeader() {
             <div className="hidden sm:flex items-center gap-2">
               <Link
                 href="/login"
-                className="rounded-xl border border-[#D5DAEC] bg-white px-3.5 py-1.5 text-xs font-bold text-[#141834] hover:bg-[#F4F6FC] transition-all"
+                className="rounded-xl bg-[#26306A] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#3A4A9F] transition-all cursor-pointer touch-manipulation"
                 id="header-sign-in-btn"
               >
                 Sign In
-              </Link>
-              <Link
-                href="/login"
-                className="rounded-xl bg-[#26306A] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-[#3A4A9F] transition-all"
-                id="header-try-demo-btn"
-              >
-                ⚡ Try Demo
               </Link>
             </div>
 
             {/* Mobile hamburger button for public visitor */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              type="button"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
               className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl text-[#26306A] hover:bg-[#E9ECF9] focus:outline-hidden focus:ring-2 focus:ring-[#26306A] transition-colors cursor-pointer touch-manipulation"
               aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={mobileMenuOpen}
@@ -198,7 +198,7 @@ export default function AppHeader() {
 
       {/* Mobile Drawer / Dropdown */}
       {mobileMenuOpen && (
-        <div className="border-t border-[#D5DAEC] bg-white px-5 py-5 shadow-2xl lg:hidden animate-in fade-in slide-in-from-top-2 duration-150" id="mobile-menu-drawer">
+        <div className="border-t border-[#D5DAEC] bg-white px-5 py-5 shadow-2xl transition-all" id="mobile-menu-drawer">
           {user ? (
             <nav className="flex flex-col gap-1.5 text-sm font-semibold text-[#26306A]">
               <Link
@@ -287,14 +287,6 @@ export default function AppHeader() {
                   <span className="text-xs font-bold text-[#3A4A9F]">05</span>
                   <span>User Guide</span>
                 </Link>
-                <Link
-                  href="/build-and-scale"
-                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="text-xs font-bold text-[#3A4A9F]">06</span>
-                  <span>Build &amp; Scale Architecture</span>
-                </Link>
               </nav>
 
               <div className="flex flex-col gap-2.5 pt-3 border-t border-[#EDEFF6]">
@@ -302,13 +294,7 @@ export default function AppHeader() {
                   href="/login"
                   className="w-full text-center rounded-xl bg-[#26306A] py-3 text-sm font-bold text-white shadow-md hover:bg-[#3A4A9F] transition-all cursor-pointer touch-manipulation"
                   onClick={() => setMobileMenuOpen(false)}
-                >
-                  ⚡ Try the Demo (50 Responses)
-                </Link>
-                <Link
-                  href="/login"
-                  className="w-full text-center rounded-xl border border-[#D5DAEC] bg-white py-2.5 text-sm font-bold text-[#141834] hover:bg-[#F4F6FC] transition-all cursor-pointer touch-manipulation"
-                  onClick={() => setMobileMenuOpen(false)}
+                  id="mobile-sign-in-btn"
                 >
                   Sign In with Google
                 </Link>

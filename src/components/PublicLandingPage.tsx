@@ -1,5 +1,3 @@
-"use client";
-
 import HeroSection from "./landing/HeroSection";
 import ProductVisualSection from "./landing/ProductVisualSection";
 import WorkflowSection from "./landing/WorkflowSection";
@@ -8,7 +6,6 @@ import DiagnosisOutputSection from "./landing/DiagnosisOutputSection";
 import TrustSection from "./landing/TrustSection";
 import DifferentiationSection from "./landing/DifferentiationSection";
 import WhoItsForSection from "./landing/WhoItsForSection";
-import FutureScaleSection from "./landing/FutureScaleSection";
 
 export default function PublicLandingPage() {
   return (
@@ -36,9 +33,6 @@ export default function PublicLandingPage() {
 
       {/* 8. Who It Is For */}
       <WhoItsForSection />
-
-      {/* 9. Built Today vs What Is Next */}
-      <FutureScaleSection />
     </main>
   );
 }
