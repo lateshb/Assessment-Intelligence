@@ -92,27 +92,28 @@ scripts/
 4. **Confidence routing**: Low confidence → needs_review regardless of model category
 5. **Fallback**: API failure → cached demo results automatically
 
-## 2. What does NOT exist yet
+## 2. What exists today (Features)
 
-- [ ] Authentication (no sign-in, no user identity)
-- [ ] Database (no Supabase, no persistence beyond localStorage)
-- [x] Multi-question assessments (local state, no persistence yet)
-- [x] Rubric Library (local state, CRUD, Apply Rubric snapshot, /rubric-library page)
-- [x] Analysis History (local state — list, detail, Active/Trash, read-only)
-- [ ] Sharing (no multi-tenancy)
-- [x] Automated tests — Vitest + RTL, 170 tests across 9 suites
-- [ ] RLS policies (no database yet)
-- [ ] Save Draft (no persistence)
+- [x] Public Logged-Out Landing Page (10 sections: Hero, Product Visual, Workflow, Capabilities, Diagnosis Output, Trust, Comparison, Personas, Interactive Demo CTAs, How It Works guide)
+- [x] Dual-Mode Root Routing (Logged-out → PublicLandingPage; Logged-in → AppFlow / AssessmentWorkspace)
+- [x] Dynamic AppHeader (Responsive navigation, public anchor links, workspace links, mobile drawer)
+- [x] Authenticated User Menu (User identity display, profile initial/avatar, role badge, accessible sign out, loading state, error banner)
+- [x] Google OAuth Sign-in (Dynamic origin resolution, mobile touch handling, error banner)
+- [x] Supabase Auth + Database Integration (Saved Assessments, Global Rubrics, Analysis History, Teacher Decisions persistence with RLS)
+- [x] Multi-question assessments with per-question analysis and staleness detection
+- [x] Rubric Library CRUD & snapshotting
+- [x] Analysis History with rollback, trash management, and decision tracking
+- [x] Automated tests — Vitest + RTL, 197 tests across 16 test suites
 
-## 3. Technical debt
+## 3. Technical debt & Improvements
 
 | Item | Description | Priority |
 |---|---|---|
 | ~~Monolithic AppFlow~~ | ~~AppFlow.tsx decomposed into AssessmentWorkspace + QuestionCard + useAssessment~~ | ~~Done~~ |
-| localStorage-only decisions | Decision log in localStorage will be lost across devices | Medium (addressed by persistence task) |
+| ~~Header Dropdown Clipping~~ | ~~Fixed by isolating overflow-x-auto to navigation element~~ | ~~Done~~ |
+| ~~Mobile OAuth Redirect~~ | ~~Fixed by using dynamic window.location.origin instead of hardcoded hostname~~ | ~~Done~~ |
 | No error boundary | React errors crash the whole page | Medium |
 | aggregate.ts null guard | `aggregate()` crashes on null raw input instead of returning all needs_review | Low (fix in T-015) |
-| Inline styles via Tailwind classes | Some components have very long class strings | Low (cosmetic) |
 
 ## 4. Dependencies
 
@@ -123,6 +124,8 @@ scripts/
 | react-dom | 19.2.8 | DOM rendering |
 | tailwindcss | ^4 | Styling |
 | typescript | ^5 | Type checking |
+| @supabase/supabase-js | ^2 | Supabase client |
+| @supabase/ssr | ^0.5 | SSR auth helpers |
 | vitest | ^4.1.10 | Test runner |
 | @testing-library/react | ^16 | Component testing |
 | @testing-library/jest-dom | ^7 | DOM matchers |
@@ -130,12 +133,12 @@ scripts/
 | @vitejs/plugin-react | ^6 | Vite React plugin (for JSX in tests) |
 | jsdom | ^29 | DOM environment for tests |
 
-No Supabase client yet.
-
 ## 5. Environment
 
 | Variable | Purpose | Required |
 |---|---|---|
 | `GEMINI_API_KEY` | Google AI Studio key for model calls | Server-side only |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL | Client & Server |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous API key | Client & Server |
 
 Production deployment: Vercel (free tier), connected to GitHub repo `lateshb/Assessment-Intelligence`.
