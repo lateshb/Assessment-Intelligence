@@ -139,7 +139,7 @@ describe("UserMenu component", () => {
     });
   });
 
-  it("handles sign out successfully and redirects to login", async () => {
+  it("handles sign out successfully and redirects to home page", async () => {
     mockUser = {
       id: "user-123",
       email: "prof.oak@university.edu",
@@ -161,7 +161,7 @@ describe("UserMenu component", () => {
 
     await waitFor(() => {
       expect(mockSignOut).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith("/login");
+      expect(mockPush).toHaveBeenCalledWith("/");
       expect(mockRefresh).toHaveBeenCalledTimes(1);
     });
   });

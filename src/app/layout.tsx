@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AssessmentProvider } from "@/lib/AssessmentContext";
 import { RubricLibraryProvider } from "@/lib/use-rubric-library";
 import { HistoryProvider } from "@/lib/use-history";
+import { LoginModalProvider } from "@/lib/use-login-modal";
 import AppHeader from "@/components/AppHeader";
 import "./globals.css";
 
@@ -18,17 +19,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex min-h-screen flex-col bg-[#F4F6FC] text-[#1D2140] antialiased">
-        <AppHeader />
+        <LoginModalProvider>
+          <AppHeader />
 
-        <div className="flex-1">
-          <AssessmentProvider>
-            <HistoryProvider>
-              <RubricLibraryProvider>
-                {children}
-              </RubricLibraryProvider>
-            </HistoryProvider>
-          </AssessmentProvider>
-        </div>
+          <div className="flex-1">
+            <AssessmentProvider>
+              <HistoryProvider>
+                <RubricLibraryProvider>
+                  {children}
+                </RubricLibraryProvider>
+              </HistoryProvider>
+            </AssessmentProvider>
+          </div>
+        </LoginModalProvider>
 
         <footer className="mt-16 border-t border-[#D5DAEC] bg-white">
           <div className="mx-auto max-w-6xl px-4 py-8">

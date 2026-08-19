@@ -1,12 +1,14 @@
 "use client";
 
-import Link from "next/link";
+import { useLoginModal } from "@/lib/use-login-modal";
 
 interface HeroSectionProps {
   onTryDemoClick?: () => void;
 }
 
 export default function HeroSection({ onTryDemoClick }: HeroSectionProps) {
+  const { openLoginModal } = useLoginModal();
+
   return (
     <section className="relative overflow-hidden pt-10 pb-16 md:pt-16 md:pb-24">
       {/* Background Subtle Gradient Accents */}
@@ -51,14 +53,15 @@ export default function HeroSection({ onTryDemoClick }: HeroSectionProps) {
 
         {/* CTA */}
         <div className="mt-8 flex justify-center">
-          <Link
-            href="/login"
+          <button
+            type="button"
+            onClick={openLoginModal}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#26306A] px-8 py-3.5 text-sm font-bold text-white shadow-md hover:bg-[#3A4A9F] focus:outline-hidden focus:ring-2 focus:ring-[#26306A] focus:ring-offset-2 transition-all cursor-pointer touch-manipulation"
             id="hero-sign-in-btn"
           >
             <span>Sign In with Google</span>
             <span aria-hidden="true">→</span>
-          </Link>
+          </button>
         </div>
 
         {/* Micro Guarantee Statements */}

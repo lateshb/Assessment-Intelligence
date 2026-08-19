@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useLoginModal } from "@/lib/use-login-modal";
 import type { User } from "@supabase/supabase-js";
 import { UserMenu } from "./user-menu";
 
@@ -11,6 +12,7 @@ export default function AppHeader() {
   const [user, setUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { openLoginModal } = useLoginModal();
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export default function AppHeader() {
           </span>
         </Link>
 
-        {/* Authenticated Navigation (Desktop) */}
+        {/* Authenticated Navigation */}
         {user ? (
           <div className="flex items-center justify-end gap-1 text-xs sm:text-sm font-medium">
             <nav className="hidden sm:flex items-center gap-1 shrink-0">
@@ -129,178 +131,67 @@ export default function AppHeader() {
             </button>
           </div>
         ) : (
-          /* Public / Logged-out Navigation (Desktop) */
-          <div className="flex items-center gap-3">
-            <nav className="hidden lg:flex items-center gap-1 text-xs font-semibold text-[#26306A]">
-              <a
-                href="#workflow"
-                className="rounded-lg px-2.5 py-1.5 hover:bg-[#E9ECF9] transition-colors"
-              >
-                Workflow
-              </a>
-              <a
-                href="#capabilities"
-                className="rounded-lg px-2.5 py-1.5 hover:bg-[#E9ECF9] transition-colors"
-              >
-                Capabilities
-              </a>
-              <a
-                href="#diagnosis"
-                className="rounded-lg px-2.5 py-1.5 hover:bg-[#E9ECF9] transition-colors"
-              >
-                Output &amp; Diagnosis
-              </a>
-              <a
-                href="#trust"
-                className="rounded-lg px-2.5 py-1.5 hover:bg-[#E9ECF9] transition-colors"
-              >
-                Trust &amp; Ethics
-              </a>
-              <Link
-                href="/how-to-use"
-                className="rounded-lg px-2.5 py-1.5 hover:bg-[#E9ECF9] transition-colors"
-              >
-                User Guide
-              </Link>
-            </nav>
-
-            {/* Public Action Buttons */}
-            <div className="hidden sm:flex items-center gap-2">
-              <Link
-                href="/login"
-                className="rounded-xl bg-[#26306A] px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-[#3A4A9F] transition-all cursor-pointer touch-manipulation"
-                id="header-sign-in-btn"
-              >
-                Sign In
-              </Link>
-            </div>
-
-            {/* Mobile hamburger button for public visitor */}
+          /* Public / Logged-out Header (Desktop & Mobile) */
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="lg:hidden flex h-11 w-11 items-center justify-center rounded-xl text-[#26306A] hover:bg-[#E9ECF9] focus:outline-hidden focus:ring-2 focus:ring-[#26306A] transition-colors cursor-pointer touch-manipulation"
-              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-              aria-expanded={mobileMenuOpen}
-              id="mobile-menu-toggle-btn"
+              onClick={openLoginModal}
+              className="rounded-xl bg-[#26306A] px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-[#3A4A9F] transition-all cursor-pointer touch-manipulation"
+              id="header-sign-in-btn"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
+              Sign In
             </button>
           </div>
         )}
       </div>
 
-      {/* Mobile Drawer / Dropdown */}
-      {mobileMenuOpen && (
-        <div className="border-t border-[#D5DAEC] bg-white px-5 py-5 shadow-2xl transition-all" id="mobile-menu-drawer">
-          {user ? (
-            <nav className="flex flex-col gap-1.5 text-sm font-semibold text-[#26306A]">
-              <Link
-                href="/"
-                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>📝 Workspace</span>
-              </Link>
-              <Link
-                href="/saved-assessments"
-                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>💾 Saved Assessments</span>
-              </Link>
-              <Link
-                href="/rubric-library"
-                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>📚 Global Rubrics</span>
-              </Link>
-              <Link
-                href="/history"
-                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>⏳ Analysis History</span>
-              </Link>
-              <Link
-                href="/how-to-use"
-                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>📖 User Guide</span>
-              </Link>
-              <Link
-                href="/build-and-scale"
-                className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <span>🚀 Build &amp; Scale</span>
-              </Link>
-            </nav>
-          ) : (
-            <div className="space-y-4">
-              <nav className="flex flex-col gap-1 text-sm font-semibold text-[#26306A]">
-                <a
-                  href="#workflow"
-                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="text-xs font-bold text-[#3A4A9F]">01</span>
-                  <span>Workflow</span>
-                </a>
-                <a
-                  href="#capabilities"
-                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="text-xs font-bold text-[#3A4A9F]">02</span>
-                  <span>Capabilities</span>
-                </a>
-                <a
-                  href="#diagnosis"
-                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="text-xs font-bold text-[#3A4A9F]">03</span>
-                  <span>Diagnostic Output</span>
-                </a>
-                <a
-                  href="#trust"
-                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="text-xs font-bold text-[#3A4A9F]">04</span>
-                  <span>Trust &amp; Ethics</span>
-                </a>
-                <Link
-                  href="/how-to-use"
-                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <span className="text-xs font-bold text-[#3A4A9F]">05</span>
-                  <span>User Guide</span>
-                </Link>
-              </nav>
-
-              <div className="flex flex-col gap-2.5 pt-3 border-t border-[#EDEFF6]">
-                <Link
-                  href="/login"
-                  className="w-full text-center rounded-xl bg-[#26306A] py-3 text-sm font-bold text-white shadow-md hover:bg-[#3A4A9F] transition-all cursor-pointer touch-manipulation"
-                  onClick={() => setMobileMenuOpen(false)}
-                  id="mobile-sign-in-btn"
-                >
-                  Sign In with Google
-                </Link>
-              </div>
-            </div>
-          )}
+      {/* Mobile Drawer (Only for authenticated user) */}
+      {user && mobileMenuOpen && (
+        <div className="border-t border-[#D5DAEC] bg-white px-5 py-5 shadow-2xl transition-all sm:hidden" id="mobile-menu-drawer">
+          <nav className="flex flex-col gap-1.5 text-sm font-semibold text-[#26306A]">
+            <Link
+              href="/"
+              className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <span>📝 Workspace</span>
+            </Link>
+            <Link
+              href="/saved-assessments"
+              className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <span>💾 Saved Assessments</span>
+            </Link>
+            <Link
+              href="/rubric-library"
+              className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <span>📚 Global Rubrics</span>
+            </Link>
+            <Link
+              href="/history"
+              className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <span>⏳ Analysis History</span>
+            </Link>
+            <Link
+              href="/how-to-use"
+              className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <span>📖 User Guide</span>
+            </Link>
+            <Link
+              href="/build-and-scale"
+              className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 hover:bg-[#E9ECF9] transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <span>🚀 Build &amp; Scale</span>
+            </Link>
+          </nav>
         </div>
       )}
     </header>
