@@ -39,8 +39,8 @@ export default function RootLayout({
               </div>
             </div>
 
-            <div className="flex items-center justify-between sm:justify-end gap-1 overflow-x-auto no-scrollbar py-0.5 text-xs sm:text-sm font-medium">
-              <nav className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center justify-between sm:justify-end gap-1 py-0.5 text-xs sm:text-sm font-medium">
+              <nav className="flex items-center gap-1 shrink-0 overflow-x-auto no-scrollbar">
                 <Link
                   href="/"
                   className="rounded-lg px-2.5 py-1.5 text-[#26306A] hover:bg-[#E9ECF9] transition-colors whitespace-nowrap"
