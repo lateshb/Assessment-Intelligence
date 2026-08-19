@@ -44,7 +44,7 @@ export async function updateSession(request: NextRequest) {
 
   // Protected routes - redirect unauthenticated users to /login
   const publicPaths = ['/login', '/how-to-use', '/build-and-scale', '/auth/callback', '/auth/auth-code-error']
-  const isPublicPath = publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
+  const isPublicPath = request.nextUrl.pathname === '/' || publicPaths.some(path => request.nextUrl.pathname.startsWith(path))
   
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone()
