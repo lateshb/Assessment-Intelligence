@@ -9,6 +9,10 @@ import Results from "./Results";
 import Recommendation from "./Recommendation";
 import RubricPicker from "./RubricPicker";
 import RubricEditor from "./RubricEditor";
+import SaveAsGlobalRubricModal, {
+  canSaveAsGlobalRubric,
+  getRubricSaveDisabledReason,
+} from "./SaveAsGlobalRubricModal";
 import { SectionTitle } from "./ui";
 
 // ─── Status badge ──────────────────────────────────────────────────────────
@@ -291,6 +295,40 @@ function ApplyRubricButton({
   );
 }
 
+// ─── Save as Global Rubric button ──────────────────────────────────────────
+
+function SaveAsGlobalRubricButton({
+  question,
+}: {
+  question: QuestionState;
+}) {
+  const [showModal, setShowModal] = useState(false);
+  const isValid = canSaveAsGlobalRubric(question.rubric);
+  const disabledReason = getRubricSaveDisabledReason(question.rubric);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setShowModal(true)}
+        disabled={!isValid}
+        title={disabledReason || "Save current criteria as a reusable global rubric"}
+        className="rounded-lg border border-[#D5DAEC] bg-white px-2.5 py-1 text-xs font-semibold text-[#565C82] hover:text-[#26306A] hover:border-[#3A4A9F] hover:bg-[#EDEFF6] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-[#D5DAEC] disabled:hover:text-[#565C82]"
+        id={`save-global-rubric-${question.id}`}
+      >
+        ＋ Save as Global Rubric
+      </button>
+      {showModal && (
+        <SaveAsGlobalRubricModal
+          questionText={question.questionText}
+          criteria={question.rubric}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+    </>
+  );
+}
+
 // ─── Load Demo Question button ─────────────────────────────────────────────
 
 function LoadDemoQuestionButton({
@@ -521,6 +559,7 @@ export default function QuestionCard({
                   currentCriteria={question.rubric}
                   dispatch={dispatch}
                 />
+                <SaveAsGlobalRubricButton question={question} />
               </div>
             </div>
             <RubricEditor

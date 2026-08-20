@@ -55,7 +55,7 @@ type RubricLibraryContextType = {
   institutionRubrics: LibraryRubric[];
   loading: boolean;
   error: string | null;
-  dispatch: (action: RubricLibraryAction) => void;
+  dispatch: (action: RubricLibraryAction) => Promise<boolean>;
   reload: () => Promise<void>;
 };
 
@@ -126,10 +126,28 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
 
   // Async dispatch that persists to Supabase then updates local state
   const dispatch = useCallback(
-    async (action: RubricLibraryAction) => {
+    async (action: RubricLibraryAction): Promise<boolean> => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        // Unauthenticated or mock environment: handle local state updates
+        if (action.type === "CREATE_RUBRIC") {
+          const localRubric: LibraryRubric = {
+            id: `rubric-${Date.now()}`,
+            name: action.rubric.name,
+            course: action.rubric.course,
+            description: action.rubric.description || "",
+            criteria: action.rubric.criteria.map((c) => ({ ...c })),
+            visibility: action.rubric.visibility || "private",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          setRubrics((prev) => [localRubric, ...prev]);
+          setError(null);
+          return true;
+        }
+        return false;
+      }
 
       switch (action.type) {
         case "CREATE_RUBRIC": {
@@ -138,7 +156,10 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
             .select("institution_id")
             .eq("id", user.id)
             .single();
-          if (!profile) return;
+          if (!profile) {
+            setError("Profile or institution not found.");
+            return false;
+          }
 
           const { data, error: createError } = await supabase
             .from("rubric_library")
@@ -156,10 +177,11 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
 
           if (createError) {
             setError(createError.message);
-            return;
+            return false;
           }
           setRubrics((prev) => [toLibraryRubric(data), ...prev]);
-          break;
+          setError(null);
+          return true;
         }
 
         case "UPDATE_RUBRIC": {
@@ -179,12 +201,13 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
 
           if (updateError) {
             setError(updateError.message);
-            return;
+            return false;
           }
           setRubrics((prev) =>
             prev.map((r) => (r.id === action.id ? toLibraryRubric(data) : r))
           );
-          break;
+          setError(null);
+          return true;
         }
 
         case "DELETE_RUBRIC": {
@@ -195,23 +218,27 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
 
           if (deleteError) {
             setError(deleteError.message);
-            return;
+            return false;
           }
           setRubrics((prev) => prev.filter((r) => r.id !== action.id));
-          break;
+          setError(null);
+          return true;
         }
 
         case "DUPLICATE_RUBRIC": {
           const source = rubrics.find((r) => r.id === action.id)
             || institutionRubrics.find((r) => r.id === action.id);
-          if (!source) return;
+          if (!source) return false;
 
           const { data: profile } = await supabase
             .from("profiles")
             .select("institution_id")
             .eq("id", user.id)
             .single();
-          if (!profile) return;
+          if (!profile) {
+            setError("Profile or institution not found.");
+            return false;
+          }
 
           const { data, error: dupError } = await supabase
             .from("rubric_library")
@@ -229,12 +256,14 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
 
           if (dupError) {
             setError(dupError.message);
-            return;
+            return false;
           }
           setRubrics((prev) => [toLibraryRubric(data), ...prev]);
-          break;
+          setError(null);
+          return true;
         }
       }
+      return false;
     },
     [rubrics, institutionRubrics]
   );
