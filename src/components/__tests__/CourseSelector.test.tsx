@@ -6,7 +6,7 @@ import CourseSelector from "../CourseSelector";
 
 function StatefulCourseSelector({
   existingCourses = ["Biology", "Economics", "History", "Physics"],
-  initialValue = "Economics",
+  initialValue = "",
   onChangeSpy,
 }: {
   existingCourses?: string[];
@@ -41,14 +41,11 @@ describe("CourseSelector Component", () => {
       />
     );
 
-    // Trigger button shows selected value
     const trigger = screen.getByRole("button", { name: /select course/i });
     expect(trigger.textContent).toContain("Economics");
 
-    // Open dropdown
     await user.click(trigger);
 
-    // Options rendered in alphabetical order: Biology, Economics, Physics
     const options = screen.getAllByRole("option");
     expect(options).toHaveLength(3);
     expect(options[0].textContent).toContain("Biology");
@@ -60,13 +57,9 @@ describe("CourseSelector Component", () => {
   it("deduplicates duplicate course values passed in existingCourses", async () => {
     const user = userEvent.setup();
 
-    const dupCourses = Array.from(
-      new Set(["Economics", "Economics", "Biology", "Biology"])
-    ).sort();
-
     render(
       <CourseSelector
-        existingCourses={dupCourses}
+        existingCourses={["Economics", "Economics", "Biology", "Biology"]}
         value="Economics"
         onChange={vi.fn()}
       />
@@ -81,7 +74,28 @@ describe("CourseSelector Component", () => {
     expect(options[1].textContent).toContain("Economics");
   });
 
-  // 3. Selecting an existing course populates the field
+  // 3. Empty library behavior
+  it("renders empty state 'No courses yet' and '+ Create new course' when no courses exist", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <CourseSelector
+        existingCourses={[]}
+        value=""
+        onChange={vi.fn()}
+      />
+    );
+
+    const trigger = screen.getByRole("button", { name: /select course/i });
+    expect(trigger.textContent).toContain("Select course");
+
+    await user.click(trigger);
+
+    expect(screen.getByText("No courses yet")).toBeDefined();
+    expect(screen.getByRole("button", { name: /create new course/i })).toBeDefined();
+  });
+
+  // 4. Selecting an existing course populates the field
   it("calls onChange when an existing course option is clicked", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
@@ -105,7 +119,7 @@ describe("CourseSelector Component", () => {
     expect(onChange).toHaveBeenCalledWith("Biology");
   });
 
-  // 4. Create new course switches to text-entry mode
+  // 5. Create new course switches to text-entry mode
   it("switches to text-entry mode when 'Create new course' is clicked", async () => {
     const user = userEvent.setup();
 
@@ -123,64 +137,59 @@ describe("CourseSelector Component", () => {
     const createOption = screen.getByRole("button", { name: /create new course/i });
     await user.click(createOption);
 
-    // Text input is rendered with placeholder
-    const textInput = screen.getByPlaceholderText(/enter new course name/i);
+    const textInput = screen.getByPlaceholderText(/enter course name/i);
     expect(textInput).toBeDefined();
 
-    // Back to course list button is available
     const backBtn = screen.getByRole("button", { name: /back to course list/i });
     expect(backBtn).toBeDefined();
   });
 
-  // 5. New course can be entered
+  // 6. New course can be entered
   it("allows typing a new course name in create mode", async () => {
     const user = userEvent.setup();
     const onChangeSpy = vi.fn();
 
     render(
       <StatefulCourseSelector
-        existingCourses={[]}
+        existingCourses={sampleCourses}
         initialValue=""
         onChangeSpy={onChangeSpy}
       />
     );
 
-    // With empty existing courses, starts in create mode
-    const textInput = screen.getByPlaceholderText(/enter new course name/i) as HTMLInputElement;
+    await user.click(screen.getByRole("button", { name: /select course/i }));
+    await user.click(screen.getByRole("button", { name: /create new course/i }));
+
+    const textInput = screen.getByPlaceholderText(/enter course name/i) as HTMLInputElement;
     await user.type(textInput, "Computer Science");
 
     expect(textInput.value).toBe("Computer Science");
     expect(onChangeSpy).toHaveBeenLastCalledWith("Computer Science");
   });
 
-  // 6. Back to course list switches back to select mode
+  // 7. Back to course list switches back to select mode
   it("switches back to select mode when 'Back to course list' is clicked", async () => {
     const user = userEvent.setup();
-    const onChange = vi.fn();
 
     render(
       <CourseSelector
         existingCourses={sampleCourses}
         value="Economics"
-        onChange={onChange}
+        onChange={vi.fn()}
       />
     );
 
-    // Open dropdown and click create
     await user.click(screen.getByRole("button", { name: /select course/i }));
     await user.click(screen.getByRole("button", { name: /create new course/i }));
 
-    // Click back button
     const backBtn = screen.getByRole("button", { name: /back to course list/i });
     await user.click(backBtn);
 
-    // Back in select mode
     const trigger = screen.getByRole("button", { name: /select course/i });
     expect(trigger).toBeDefined();
-    expect(onChange).toHaveBeenCalledWith("Biology");
   });
 
-  // 7. Filtering works in search input
+  // 8. Filtering works in search input
   it("filters courses when typing in search input", async () => {
     const user = userEvent.setup();
 

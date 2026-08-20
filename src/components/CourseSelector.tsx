@@ -17,44 +17,28 @@ export default function CourseSelector({
   id = "global-rubric-course",
   error = false,
 }: CourseSelectorProps) {
-  // Ensure unique, trimmed, alphabetically sorted courses
+  // Always default mode to 'select'
+  const [mode, setMode] = useState<"select" | "create">("select");
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const newCourseInputRef = useRef<HTMLInputElement>(null);
+
+  // Ensure unique, trimmed, alphabetically sorted courses (including current value if set)
   const sortedCourses = useMemo(() => {
     const set = new Set<string>();
     existingCourses.forEach((c) => {
       if (c && c.trim()) set.add(c.trim());
     });
+    if (value && value.trim()) {
+      set.add(value.trim());
+    }
     return Array.from(set).sort((a, b) =>
       a.localeCompare(b, undefined, { sensitivity: "base" })
     );
-  }, [existingCourses]);
-
-  // Determine if we should start in 'select' or 'create' mode
-  const [mode, setMode] = useState<"select" | "create">(() => {
-    if (sortedCourses.length === 0) return "create";
-    // If value is passed and not in existing courses (and non-empty), start in create mode
-    if (value && !sortedCourses.includes(value)) return "create";
-    return "select";
-  });
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const newCourseInputRef = useRef<HTMLInputElement>(null);
-
-  // Sync mode if sortedCourses changes from empty to non-empty or vice versa
-  useEffect(() => {
-    if (sortedCourses.length === 0) {
-      setMode("create");
-    }
-  }, [sortedCourses.length]);
-
-  // Filter courses by search query
-  const filteredCourses = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return sortedCourses;
-    return sortedCourses.filter((c) => c.toLowerCase().includes(query));
-  }, [sortedCourses, searchQuery]);
+  }, [existingCourses, value]);
 
   // Close dropdown on click outside or Escape key
   useEffect(() => {
@@ -87,6 +71,13 @@ export default function CourseSelector({
     }
   }, [isOpen, mode]);
 
+  // Filter courses by search query
+  const filteredCourses = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return sortedCourses;
+    return sortedCourses.filter((c) => c.toLowerCase().includes(query));
+  }, [sortedCourses, searchQuery]);
+
   // Handle switching to Create mode
   const handleSwitchToCreate = () => {
     setMode("create");
@@ -101,8 +92,6 @@ export default function CourseSelector({
   const handleSwitchToSelect = () => {
     setMode("select");
     setSearchQuery("");
-    const fallbackCourse = sortedCourses[0] || "";
-    onChange(fallbackCourse);
   };
 
   if (mode === "create") {
@@ -115,8 +104,8 @@ export default function CourseSelector({
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="Enter new course name"
-            aria-label="Enter new course name"
+            placeholder="Enter course name"
+            aria-label="Enter course name"
             className={`w-full rounded-lg border ${
               error ? "border-[#E4572E]" : "border-[#D5DAEC]"
             } px-3 py-2 text-sm text-[#141834] placeholder:text-[#8993B8] focus:border-[#3A4A9F] focus:ring-2 focus:ring-[#3A4A9F]/20 focus:outline-none transition-all`}
@@ -151,7 +140,7 @@ export default function CourseSelector({
         } bg-white px-3 py-2 text-left text-sm font-medium text-[#141834] hover:border-[#3A4A9F] focus:border-[#3A4A9F] focus:ring-2 focus:ring-[#3A4A9F]/20 focus:outline-none transition-all`}
       >
         <span className={value ? "text-[#141834]" : "text-[#8993B8]"}>
-          {value || "Select course…"}
+          {value || "Select course"}
         </span>
         <span className="ml-2 text-xs font-bold text-[#565C82]">
           {isOpen ? "▲" : "▼"}
@@ -227,7 +216,9 @@ export default function CourseSelector({
               })
             ) : (
               <div className="px-3 py-2 text-xs text-[#8993B8]">
-                No matching courses found
+                {sortedCourses.length === 0
+                  ? "No courses yet"
+                  : "No matching courses found"}
               </div>
             )}
           </div>

@@ -63,7 +63,7 @@ export default function SaveAsGlobalRubricModal({
   }, [rubrics, institutionRubrics]);
 
   const [formName, setFormName] = useState(() => deriveRubricName(questionText));
-  const [formCourse, setFormCourse] = useState(() => existingCourses[0] || "");
+  const [formCourse, setFormCourse] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [formVisibility, setFormVisibility] = useState<RubricVisibility>("private");
   const [isSaving, setIsSaving] = useState(false);

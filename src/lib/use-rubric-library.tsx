@@ -161,14 +161,18 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
             return false;
           }
 
+          const nameToInsert = action.rubric.name.trim();
+          const courseToInsert = action.rubric.course.trim();
+          const descToInsert = action.rubric.description ? action.rubric.description.trim() : null;
+
           const { data, error: createError } = await supabase
             .from("rubric_library")
             .insert({
               owner_id: user.id,
               institution_id: profile.institution_id,
-              name: action.rubric.name,
-              course: action.rubric.course,
-              description: action.rubric.description || null,
+              name: nameToInsert,
+              course: courseToInsert,
+              description: descToInsert,
               criteria: action.rubric.criteria,
               visibility: action.rubric.visibility || 'private',
             })
@@ -185,16 +189,18 @@ export function RubricLibraryProvider({ children }: { children: ReactNode }) {
         }
 
         case "UPDATE_RUBRIC": {
+          const updatePayload: Record<string, unknown> = {
+            updated_at: new Date().toISOString(),
+          };
+          if (action.updates.name !== undefined) updatePayload.name = action.updates.name.trim();
+          if (action.updates.course !== undefined) updatePayload.course = action.updates.course.trim();
+          if (action.updates.description !== undefined) updatePayload.description = action.updates.description.trim();
+          if (action.updates.criteria !== undefined) updatePayload.criteria = action.updates.criteria;
+          if (action.updates.visibility !== undefined) updatePayload.visibility = action.updates.visibility;
+
           const { data, error: updateError } = await supabase
             .from("rubric_library")
-            .update({
-              name: action.updates.name,
-              course: action.updates.course,
-              description: action.updates.description,
-              criteria: action.updates.criteria,
-              visibility: action.updates.visibility,
-              updated_at: new Date().toISOString(),
-            })
+            .update(updatePayload)
             .eq("id", action.id)
             .select()
             .single();

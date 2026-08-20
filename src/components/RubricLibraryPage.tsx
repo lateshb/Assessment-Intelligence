@@ -5,6 +5,7 @@ import { useRubricLibrary, validateLibraryRubric } from "@/lib/use-rubric-librar
 import type { LibraryRubric, RubricVisibility } from "@/lib/rubric-library-types";
 import type { Rubric } from "@/lib/types";
 import RubricEditor from "@/components/RubricEditor";
+import CourseSelector from "@/components/CourseSelector";
 
 type Mode = "list" | "create" | "edit";
 type RubricTab = "my" | "institution";
@@ -32,10 +33,15 @@ export default function RubricLibraryPage() {
 
   const activeList = rubricTab === "my" ? rubrics : institutionRubrics;
 
-  const courses = useMemo(
-    () => [...new Set(activeList.map((r) => r.course))].sort(),
-    [activeList]
-  );
+  const allCourses = useMemo(() => {
+    const set = new Set<string>();
+    [...rubrics, ...institutionRubrics].forEach((r) => {
+      if (r.course && r.course.trim()) set.add(r.course.trim());
+    });
+    return Array.from(set).sort((a, b) =>
+      a.localeCompare(b, undefined, { sensitivity: "base" })
+    );
+  }, [rubrics, institutionRubrics]);
 
   const filtered = useMemo(() => {
     let list = activeList;
@@ -149,7 +155,10 @@ export default function RubricLibraryPage() {
 
         <div className="mt-6 space-y-4 rounded-2xl border border-[#D5DAEC] bg-white p-5 shadow-sm">
           <div>
-            <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#565C82]">
+            <label
+              htmlFor="rubric-name"
+              className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#565C82]"
+            >
               Rubric name *
             </label>
             <input
@@ -162,20 +171,22 @@ export default function RubricLibraryPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#565C82]">
+            <label
+              htmlFor="rubric-course"
+              className="mb-1 block text-xs font-bold uppercase tracking-wide text-[#565C82]"
+            >
               Course *
             </label>
-            <input
-              value={formCourse}
-              onChange={(e) => setFormCourse(e.target.value)}
-              placeholder="e.g. Economics"
-              className="w-full rounded-lg border border-[#D5DAEC] px-3 py-2 text-sm focus:border-[#3A4A9F] focus:outline-none"
+            <CourseSelector
               id="rubric-course"
-              list="course-suggestions"
+              existingCourses={allCourses}
+              value={formCourse}
+              onChange={(course) => {
+                setFormCourse(course);
+                if (error) setError(null);
+              }}
+              error={Boolean(error && error.includes("Course"))}
             />
-            <datalist id="course-suggestions">
-              {courses.map((c) => <option key={c} value={c} />)}
-            </datalist>
           </div>
 
           <div>
@@ -277,7 +288,7 @@ export default function RubricLibraryPage() {
           id="rubric-course-filter"
         >
           <option value="">All courses ({activeList.length})</option>
-          {courses.map((c) => (
+          {allCourses.map((c) => (
             <option key={c} value={c}>
               {c} ({activeList.filter((r) => r.course === c).length})
             </option>

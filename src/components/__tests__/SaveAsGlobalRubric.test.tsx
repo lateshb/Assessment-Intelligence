@@ -223,7 +223,9 @@ describe("Save as Global Rubric Workflow", () => {
     expect(nameInput.value).toBe("Custom Economics Rubric");
 
     // Course input when no existing courses are loaded
-    const courseInput = screen.getByPlaceholderText(/enter new course name/i) as HTMLInputElement;
+    await user.click(screen.getByRole("button", { name: /select course/i }));
+    await user.click(screen.getByRole("button", { name: /create new course/i }));
+    const courseInput = screen.getByPlaceholderText(/enter course name/i) as HTMLInputElement;
     await user.type(courseInput, "AP Economics");
     expect(courseInput.value).toBe("AP Economics");
 
@@ -269,7 +271,9 @@ describe("Save as Global Rubric Workflow", () => {
       </TestWrapper>
     );
 
-    const courseInput = screen.getByPlaceholderText(/enter new course name/i);
+    await user.click(screen.getByRole("button", { name: /select course/i }));
+    await user.click(screen.getByRole("button", { name: /create new course/i }));
+    const courseInput = screen.getByPlaceholderText(/enter course name/i);
     await user.type(courseInput, "Economics");
 
     const saveButton = screen.getByRole("button", { name: /save global rubric/i });
@@ -329,7 +333,9 @@ describe("Save as Global Rubric Workflow", () => {
     // Open modal
     await user.click(screen.getByRole("button", { name: /save as global rubric/i }));
 
-    const courseInput = screen.getByPlaceholderText(/enter new course name/i);
+    await user.click(screen.getByRole("button", { name: /select course/i }));
+    await user.click(screen.getByRole("button", { name: /create new course/i }));
+    const courseInput = screen.getByPlaceholderText(/enter course name/i);
     await user.type(courseInput, "Economics");
 
     // Click save in modal
