@@ -3,7 +3,6 @@ import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RubricLibraryProvider, useRubricLibrary } from "../use-rubric-library";
 import CourseSelector from "@/components/CourseSelector";
-import type { LibraryRubric } from "../rubric-library-types";
 
 // In-memory mock database for round-trip verification
 let mockDatabase: any[] = [];
@@ -172,9 +171,11 @@ function PersistenceHarness({
             rubric: {
               name: "Microeconomics Midterm Rubric",
               course: "Economics",
+              description: "",
+              visibility: "private",
               criteria: [
-                { name: "C1", maxMarks: 2 },
-                { name: "C2", maxMarks: 3 },
+                { name: "C1", description: "", maxMarks: 2 },
+                { name: "C2", description: "", maxMarks: 3 },
               ],
             },
           })
@@ -191,9 +192,11 @@ function PersistenceHarness({
             rubric: {
               name: "Quantum Mechanics Quiz",
               course: "  Quantum Computing  ",
+              description: "",
+              visibility: "private",
               criteria: [
-                { name: "C1", maxMarks: 2 },
-                { name: "C2", maxMarks: 3 },
+                { name: "C1", description: "", maxMarks: 2 },
+                { name: "C2", description: "", maxMarks: 3 },
               ],
             },
           })
@@ -220,7 +223,10 @@ describe("Supabase Course Persistence & Round-Trip Verification", () => {
         name: "Baseline Elasticity",
         course: "Economics",
         description: "Initial course",
-        criteria: [{ name: "C1", maxMarks: 2 }, { name: "C2", maxMarks: 2 }],
+        criteria: [
+          { name: "C1", description: "", maxMarks: 2 },
+          { name: "C2", description: "", maxMarks: 2 },
+        ],
         visibility: "private",
         created_at: "2026-01-01T00:00:00Z",
         updated_at: "2026-01-01T00:00:00Z",
@@ -425,7 +431,12 @@ describe("Supabase Course Persistence & Round-Trip Verification", () => {
         rubric: {
           name: "Unpersisted Rubric",
           course: "Economics",
-          criteria: [{ name: "C1", maxMarks: 1 }, { name: "C2", maxMarks: 1 }],
+          description: "",
+          visibility: "private",
+          criteria: [
+            { name: "C1", description: "", maxMarks: 1 },
+            { name: "C2", description: "", maxMarks: 1 },
+          ],
         },
       });
     });
