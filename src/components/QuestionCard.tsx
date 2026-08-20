@@ -59,6 +59,39 @@ function ActionMenu({
       },
     },
     {
+      key: "load-demo",
+      label: "Load demo question",
+      destructive: false,
+      disabled: false,
+      confirmMsg:
+        question.questionText.trim() ||
+        question.rubric.some((r) => r.name.trim()) ||
+        question.pasteText.trim() ||
+        question.analysis
+          ? "This will replace the current question's text, rubric, and responses with demo data. Continue?"
+          : undefined,
+      action: async () => {
+        const res = await fetch("/demo-data.json");
+        const demoData = await res.json();
+        let demoQ = null;
+        if (Array.isArray(demoData.questions)) {
+          demoQ = demoData.questions[questionIndex % demoData.questions.length];
+        } else if (demoData.question) {
+          demoQ = demoData;
+        }
+        if (demoQ) {
+          dispatch({
+            type: "LOAD_DEMO_QUESTION",
+            questionId: question.id,
+            question: demoQ.question,
+            rubric: demoQ.rubric,
+            responses: demoQ.responses,
+          });
+        }
+        setOpen(false);
+      },
+    },
+    {
       key: "reset",
       label: "Reset question",
       destructive: true,
@@ -258,7 +291,63 @@ function ApplyRubricButton({
   );
 }
 
-// ─── QuestionCard component ────────────────────────────────────────────────
+// ─── Load Demo Question button ─────────────────────────────────────────────
+
+function LoadDemoQuestionButton({
+  question,
+  questionIndex,
+  dispatch,
+}: {
+  question: QuestionState;
+  questionIndex: number;
+  dispatch: React.Dispatch<AssessmentAction>;
+}) {
+  const loadSingleDemo = async () => {
+    const hasData =
+      question.questionText.trim() !== "" ||
+      question.rubric.some((r) => r.name.trim() !== "") ||
+      question.pasteText.trim() !== "" ||
+      (question.csvRows && question.csvRows.length > 0) ||
+      question.analysis !== null;
+
+    if (
+      hasData &&
+      !window.confirm(
+        "This will replace the current question's text, rubric, and responses with demo data. Continue?"
+      )
+    ) {
+      return;
+    }
+
+    const res = await fetch("/demo-data.json");
+    const demoData = await res.json();
+    let demoQ = null;
+    if (Array.isArray(demoData.questions)) {
+      demoQ = demoData.questions[questionIndex % demoData.questions.length];
+    } else if (demoData.question) {
+      demoQ = demoData;
+    }
+    if (demoQ) {
+      dispatch({
+        type: "LOAD_DEMO_QUESTION",
+        questionId: question.id,
+        question: demoQ.question,
+        rubric: demoQ.rubric,
+        responses: demoQ.responses,
+      });
+    }
+  };
+
+  return (
+    <button
+      onClick={loadSingleDemo}
+      className="rounded-lg border border-[#D5DAEC] bg-white px-2.5 py-1 text-xs font-semibold text-[#565C82] hover:border-[#3A4A9F] hover:bg-[#E9ECF9] transition-all"
+      id={`load-demo-question-${question.id}`}
+    >
+      ⚡ Load Demo Question
+    </button>
+  );
+}
 
 export default function QuestionCard({
   question,
@@ -421,11 +510,18 @@ export default function QuestionCard({
               <span className="text-xs font-bold uppercase tracking-wide text-[#565C82]">
                 Rubric criteria ({question.rubric.length}) · {totalRubricMarks} marks
               </span>
-              <ApplyRubricButton
-                questionId={question.id}
-                currentCriteria={question.rubric}
-                dispatch={dispatch}
-              />
+              <div className="flex flex-wrap items-center gap-2">
+                <LoadDemoQuestionButton
+                  question={question}
+                  questionIndex={questionIndex}
+                  dispatch={dispatch}
+                />
+                <ApplyRubricButton
+                  questionId={question.id}
+                  currentCriteria={question.rubric}
+                  dispatch={dispatch}
+                />
+              </div>
             </div>
             <RubricEditor
               criteria={question.rubric}

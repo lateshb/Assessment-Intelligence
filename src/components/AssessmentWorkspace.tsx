@@ -69,20 +69,45 @@ export default function AssessmentWorkspace() {
   ).length;
   const totalCount = state.questions.length;
 
+  const [demoNotice, setDemoNotice] = useState<string | null>(null);
+
   const loadDemo = useCallback(async () => {
+    const hasData = state.questions.some(
+      (q) =>
+        q.questionText.trim() !== "" ||
+        q.rubric.some((r) => r.name.trim() !== "") ||
+        q.pasteText.trim() !== "" ||
+        (q.csvRows && q.csvRows.length > 0) ||
+        q.analysis !== null
+    );
+    if (
+      hasData &&
+      !window.confirm(
+        "This will replace your current assessment workspace. Unsaved changes will be lost. Continue?"
+      )
+    ) {
+      return;
+    }
+
     const res = await fetch("/demo-data.json");
-    const d = (await res.json()) as {
-      question: string;
-      rubric: Rubric[];
-      responses: StudentResponse[];
-    };
-    dispatch({
-      type: "LOAD_DEMO",
-      question: d.question,
-      rubric: d.rubric,
-      responses: d.responses,
-    });
-  }, [dispatch]);
+    const d = await res.json();
+    if (Array.isArray(d.questions)) {
+      dispatch({
+        type: "LOAD_DEMO_ASSESSMENT",
+        name: d.name || "Class 12 Economics — Diagnostic Assessment",
+        questions: d.questions,
+      });
+      setDemoNotice("Demo assessment loaded · 3 questions · 24 responses");
+    } else if (d.question) {
+      dispatch({
+        type: "LOAD_DEMO",
+        question: d.question,
+        rubric: d.rubric,
+        responses: d.responses,
+      });
+      setDemoNotice("Demo question loaded · 1 question");
+    }
+  }, [state.questions, dispatch]);
 
   const handleSaveDraft = useCallback(async () => {
     if (!userId) {
@@ -134,7 +159,7 @@ export default function AssessmentWorkspace() {
             id="load-demo-btn"
           >
             <span>⚡</span>
-            <span>Load demo data (50 responses)</span>
+            <span>Load Demo Assessment (3 questions · 24 responses)</span>
           </button>
           <a
             href="/how-to-use"
@@ -145,6 +170,16 @@ export default function AssessmentWorkspace() {
           </a>
         </div>
       </section>
+
+      {/* Demo notification banner */}
+      {demoNotice && (
+        <div className="mb-6 flex items-center justify-between rounded-xl border border-[#0E7C71] bg-[#E4F5F3] px-4 py-3 text-sm font-medium text-[#0E7C71]">
+          <span>✓ {demoNotice}</span>
+          <button onClick={() => setDemoNotice(null)} className="text-xs font-bold hover:underline">
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Demo mode notice */}
       {state.demoFlag && (

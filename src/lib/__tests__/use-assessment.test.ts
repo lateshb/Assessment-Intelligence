@@ -505,6 +505,46 @@ describe("reducer — LOAD_DEMO", () => {
     expect(next.questions[0].rubric).toEqual(rubric);
     expect(next.questions[0].pasteText).toBe("a\nb");
   });
+
+  it("loads multi-question demo assessment via LOAD_DEMO_ASSESSMENT", () => {
+    const state = createInitialState();
+    const next = reducer(state, {
+      type: "LOAD_DEMO_ASSESSMENT",
+      name: "Economics Diagnostic",
+      questions: [
+        {
+          question: "Q1",
+          rubric,
+          responses: Array(5).fill({ id: "R01", text: "ans" }),
+        },
+        {
+          question: "Q2",
+          rubric,
+          responses: Array(5).fill({ id: "R01", text: "ans" }),
+        },
+      ],
+    });
+    expect(next.name).toBe("Economics Diagnostic");
+    expect(next.questions).toHaveLength(2);
+    expect(next.questions[0].questionText).toBe("Q1");
+    expect(next.questions[1].questionText).toBe("Q2");
+    expect(next.questions[0].status).toBe("ready");
+    expect(next.questions[1].status).toBe("ready");
+  });
+
+  it("loads demo question into targeted question via LOAD_DEMO_QUESTION", () => {
+    const state = createInitialState();
+    const targetId = state.questions[0].id;
+    const next = reducer(state, {
+      type: "LOAD_DEMO_QUESTION",
+      questionId: targetId,
+      question: "Targeted Demo Q",
+      rubric,
+      responses: Array(5).fill({ id: "R01", text: "ans" }),
+    });
+    expect(next.questions[0].questionText).toBe("Targeted Demo Q");
+    expect(next.questions[0].status).toBe("ready");
+  });
 });
 
 // ─── Reducer: SET_NAME ─────────────────────────────────────────────────────

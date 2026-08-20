@@ -148,4 +148,16 @@ describe("Results component", () => {
     render(<Results analysis={analysis} />);
     expect(screen.getByText(/60% classification confidence/)).toBeInTheDocument();
   });
+
+  it("displays confidence legend in response detail modal", async () => {
+    const user = userEvent.setup();
+    render(<Results analysis={analysis} />);
+
+    const toggle = screen.getByText(/Response-level detail/);
+    await user.click(toggle);
+
+    expect(screen.getByText(/High ≥80%/)).toBeInTheDocument();
+    expect(screen.getByText(/Moderate 60–79%/)).toBeInTheDocument();
+    expect(screen.getByText(/Low <60%/)).toBeInTheDocument();
+  });
 });

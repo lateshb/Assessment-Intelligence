@@ -95,6 +95,8 @@ export type AssessmentAction =
   | { type: "FAIL_ANALYSIS"; questionId: string; error: string }
   | { type: "SET_ANALYZE_ALL"; inProgress: boolean }
   | { type: "LOAD_DEMO"; question: string; rubric: Rubric[]; responses: StudentResponse[] }
+  | { type: "LOAD_DEMO_ASSESSMENT"; name: string; questions: Array<{ question: string; rubric: Rubric[]; responses: StudentResponse[] }> }
+  | { type: "LOAD_DEMO_QUESTION"; questionId: string; question: string; rubric: Rubric[]; responses: StudentResponse[] }
   | { type: "SET_DEMO_FLAG"; flag: boolean }
   | { type: "START_SAVE" }
   | { type: "COMPLETE_SAVE"; assessmentId: string; questionIds: string[]; analysisIds?: (string | null)[] }

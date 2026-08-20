@@ -157,7 +157,7 @@ export default function Results({ analysis }: { analysis: Analysis }) {
         >
           <div className="flex max-h-[90vh] w-full max-w-5xl flex-col rounded-2xl bg-white shadow-2xl border border-[#D5DAEC] overflow-hidden">
             {/* Modal Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-[#D5DAEC] bg-[#FAFBFE] px-5 py-4">
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#D5DAEC] bg-[#FAFBFE] px-5 py-4">
               <div>
                 <h2 className="text-base font-bold text-[#26306A]">
                   Response-Level Diagnostic Detail
@@ -166,13 +166,23 @@ export default function Results({ analysis }: { analysis: Analysis }) {
                   {total} responses analysed · Draft marks require teacher confirmation
                 </p>
               </div>
-              <button
-                onClick={() => setTableOpen(false)}
-                className="rounded-lg border border-[#D5DAEC] px-3 py-1.5 text-xs font-bold text-[#565C82] hover:bg-[#EDEFF6] transition-colors"
-                aria-label="Close response detail"
-              >
-                ✕ Close
-              </button>
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="inline-flex items-center gap-1.5 rounded-lg bg-[#EDEFF6] px-2.5 py-1 text-xs text-[#565C82]">
+                  <span className="font-semibold text-[#141834]">Confidence:</span>
+                  <span className="font-semibold text-[#0E7C71]">High ≥80%</span>
+                  <span>·</span>
+                  <span className="font-semibold text-[#B45309]">Moderate 60–79%</span>
+                  <span>·</span>
+                  <span className="font-semibold text-[#B23A1B]">Low &lt;60%</span>
+                </div>
+                <button
+                  onClick={() => setTableOpen(false)}
+                  className="rounded-lg border border-[#D5DAEC] px-3 py-1.5 text-xs font-bold text-[#565C82] hover:bg-[#EDEFF6] transition-colors"
+                  aria-label="Close response detail"
+                >
+                  ✕ Close
+                </button>
+              </div>
             </div>
 
             {/* Scrollable Table Area */}
