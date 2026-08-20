@@ -271,6 +271,52 @@ export function reducer(
         csvRows: null,
         csvName: "",
         expanded: true,
+        analysis: null,
+        error: null,
+        analyzedInputHash: null,
+      }));
+    }
+
+    case "LOAD_DEMO_ASSESSMENT": {
+      const newQuestions: QuestionState[] = action.questions.map((item) => {
+        const rawQ: QuestionState = {
+          id: generateId(),
+          dbId: null,
+          questionText: item.question,
+          rubric: item.rubric.map((r) => ({ ...r })),
+          responseTab: "paste",
+          pasteText: item.responses.map((r) => r.text).join("\n"),
+          csvRows: null,
+          csvName: "",
+          status: "draft",
+          analysis: null,
+          error: null,
+          expanded: true,
+          analyzedInputHash: null,
+        };
+        return { ...rawQ, status: computeStatus(rawQ) };
+      });
+      return {
+        ...state,
+        id: null,
+        name: action.name,
+        questions: newQuestions,
+      };
+    }
+
+    case "LOAD_DEMO_QUESTION": {
+      return updateQuestion(state, action.questionId, (q) => ({
+        ...q,
+        questionText: action.question,
+        rubric: action.rubric.map((r) => ({ ...r })),
+        pasteText: action.responses.map((r) => r.text).join("\n"),
+        responseTab: "paste",
+        csvRows: null,
+        csvName: "",
+        analysis: null,
+        error: null,
+        expanded: true,
+        analyzedInputHash: null,
       }));
     }
 

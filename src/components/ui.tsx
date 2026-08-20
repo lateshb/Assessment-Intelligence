@@ -9,9 +9,9 @@ export function AIBadge() {
 export function ConfidenceBadge({ value }: { value: number }) {
   const pct = Math.round(value * 100);
   const tone =
-    value >= 0.8
+    pct >= 80
       ? "bg-[#E4F5F3] text-[#0E7C71]"
-      : value >= 0.6
+      : pct >= 60
         ? "bg-[#FDF3E1] text-[#B45309]"
         : "bg-[#FBE9E3] text-[#B23A1B]";
   return (

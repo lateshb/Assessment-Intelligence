@@ -129,11 +129,42 @@ describe("AssessmentWorkspace", () => {
   it("loads demo data into first question", async () => {
     const user = userEvent.setup();
     render(<AssessmentWorkspace />, { wrapper: Wrapper });
-    await user.click(screen.getByText(/Load demo data/));
+    await user.click(screen.getByText(/Load Demo Assessment/));
 
     // Wait for fetch and state update
     const textarea = await screen.findByDisplayValue("Explain price elasticity of demand.");
     expect(textarea).toBeInTheDocument();
+  });
+
+  it("loads multi-question demo assessment", async () => {
+    const user = userEvent.setup();
+    const originalFetch = global.fetch;
+    global.fetch = vi.fn().mockResolvedValue({
+      json: () =>
+        Promise.resolve({
+          name: "Class 12 Economics",
+          questions: [
+            {
+              question: "Q1 Price Elasticity",
+              rubric: [{ name: "Crit 1", description: "Desc", maxMarks: 2 }],
+              responses: [{ id: "R01", text: "Ans 1" }],
+            },
+            {
+              question: "Q2 Marginal Cost",
+              rubric: [{ name: "Crit 1", description: "Desc", maxMarks: 2 }],
+              responses: [{ id: "R01", text: "Ans 2" }],
+            },
+          ],
+        }),
+    } as any);
+
+    render(<AssessmentWorkspace />, { wrapper: Wrapper });
+    await user.click(screen.getByText(/Load Demo Assessment/));
+
+    expect(await screen.findByDisplayValue("Class 12 Economics")).toBeInTheDocument();
+    expect(screen.getByText("2 questions")).toBeInTheDocument();
+
+    global.fetch = originalFetch;
   });
 
   it("shows the hero section", () => {
